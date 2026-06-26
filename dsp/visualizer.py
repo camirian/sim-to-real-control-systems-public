@@ -76,7 +76,7 @@ def main():
     # 5. Generate Time-Domain plot
     plot_time_domain(t, clean_signal, noisy_signal, fir_filtered, iir_filtered, os.path.join(asset_dir, 'time_domain_comparison.png'))
     
-    print("Visualizations successfully generated and saved to /dsp/assets/")
+    print(f"Visualizations successfully generated and saved to {os.path.abspath(asset_dir)}/")
 
 if __name__ == "__main__":
     main()

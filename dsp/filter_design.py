@@ -14,8 +14,10 @@ def generate_ros2_mock_data(t, true_freq=1.0, noise_freqs=[20.0, 45.0], noise_le
     for freq, level in zip(noise_freqs, noise_levels):
         noisy_signal += level * np.sin(2 * np.pi * freq * t)
         
-    # Add random electromagnetic interference (white noise)
-    noisy_signal += np.random.normal(0, white_noise_level, size=len(t))
+    # Add random electromagnetic interference (white noise).
+    # Seeded for reproducible output across runs.
+    rng = np.random.default_rng(0)
+    noisy_signal += rng.normal(0, white_noise_level, size=len(t))
     
     return true_signal, noisy_signal
 

@@ -1,0 +1,6 @@
+# Dependencies for the standalone DSP examples (filter design, synthesis,
+# visualization, and tests). These run without ROS 2 or Isaac Sim.
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7
+pytest>=7.0
