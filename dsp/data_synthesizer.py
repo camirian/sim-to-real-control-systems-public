@@ -11,6 +11,10 @@ def generate_telemetry(duration=5.0, fs=200.0):
     Returns:
         tuple: (t, clean_signal, noisy_signal)
     """
+    # Seed for reproducible noise so the committed plots and quickstart output
+    # are deterministic across runs.
+    rng = np.random.default_rng(0)
+
     # Time array
     t = np.arange(0, duration, 1/fs)
     
@@ -23,7 +27,7 @@ def generate_telemetry(duration=5.0, fs=200.0):
     vibration_noise = 0.3 * np.sin(2 * np.pi * f_vibration * t)
     
     # Interference 2: Additive White Gaussian Noise (AWGN) from encoder quantization
-    awgn = np.random.normal(0, 0.1, len(t))
+    awgn = rng.normal(0, 0.1, len(t))
     
     # Combined noisy signal representing the raw ROS 2 `/joint_states` topic data
     noisy_signal = clean_signal + vibration_noise + awgn

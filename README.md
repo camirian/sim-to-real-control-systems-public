@@ -19,6 +19,35 @@ This repository is a portfolio-oriented export. It keeps runnable examples and e
 - FIR and IIR filter design for noisy ROS 2-style joint telemetry.
 - Engineering trade-offs around real-time filtering, latency, and phase response.
 
+## What Runs Where
+
+- **DSP examples (`dsp/`)** run standalone with a plain Python scientific
+  stack. No ROS 2 or Isaac Sim required. This is the part a stranger can run and
+  verify in minutes.
+- **ROS 2 workspace (`ros2-ws/`)** requires a ROS 2 Humble environment
+  (`colcon`, `rclcpp`/`rclpy`, `std_msgs`). It does not run in a plain shell.
+- **Isaac Sim scripts (`scripts/`) and scenes (`scenes/`)** require an NVIDIA
+  Isaac Sim Python environment and are not runnable outside it.
+
+See [QUICKSTART.md](QUICKSTART.md) for the full per-environment commands.
+
+## DSP Quickstart (standalone)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r dsp/requirements.txt
+
+cd dsp
+python3 filter_design.py     # writes bode_plot.png and filter_comparison.png
+python3 visualizer.py        # writes assets/{fir_bode,iir_bode,time_domain_comparison}.png
+pytest test_filters.py       # runs the filter unit tests
+```
+
+Synthesized telemetry is seeded, so the plots and metrics are reproducible
+across runs. For the design rationale and annotated Bode/time-domain plots, see
+[dsp/FILTER_DESIGN_WALKTHROUGH.md](dsp/FILTER_DESIGN_WALKTHROUGH.md).
+
 ## Repository Layout
 
 - `ros2-ws/`: ROS 2 workspace with Python and C++ packages.
