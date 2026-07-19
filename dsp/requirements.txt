@@ -1,5 +1,7 @@
 # Dependencies for the standalone DSP examples (filter design, synthesis,
 # visualization, and tests). These run without ROS 2 or Isaac Sim.
+# Preferred install path (REQ-S2R-001): pip install -e "dsp/[viz,test]"
+# This file is kept for tooling that expects a requirements.txt.
 numpy>=1.24
 scipy>=1.10
 matplotlib>=3.7
