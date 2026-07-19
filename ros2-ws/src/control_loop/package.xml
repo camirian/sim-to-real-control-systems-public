@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>control_loop</name>
+  <version>0.1.0</version>
+  <description>
+    Closed-loop nodes for the sim-to-real Franka demo (REQ-S2R-002..005):
+    seeded noise injector, causal DSP filter node, and joint-space waypoint
+    controller. All control logic lives in pure-Python modules under
+    control_loop/logic/ (unit-testable without ROS); the rclpy nodes are thin
+    wrappers around them.
+  </description>
+  <maintainer email="caaren.amirian.build@gmail.com">Caaren Amirian</maintainer>
+  <license>Apache-2.0</license>
+
+  <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
+
+  <!-- The pure-Python DSP library; installed via `pip install -e dsp/` (not a
+       rosdep key). See README for the environment split. -->
+  <exec_depend condition="$ROS_VERSION == 2">python3-numpy</exec_depend>
+  <exec_depend condition="$ROS_VERSION == 2">python3-scipy</exec_depend>
+
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
