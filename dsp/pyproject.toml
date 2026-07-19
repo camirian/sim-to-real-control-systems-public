@@ -1,0 +1,28 @@
+# REQ-S2R-001: dsp/ is a proper installable package (no sys.path hacks).
+# Install (editable) and test from a fresh venv:
+#
+#     pip install -e dsp/
+#     pytest dsp/
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "s2r-dsp"
+version = "0.1.0"
+description = "DSP library for the sim-to-real control loop: FIR/IIR low-pass design, causal (in-loop) and zero-phase (offline) filtering, and a seeded noisy joint-telemetry synthesizer."
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+]
+
+[project.optional-dependencies]
+viz = ["matplotlib>=3.7"]
+test = ["pytest>=7.0"]
+
+[tool.setuptools]
+# Explicit: dsp/ also holds standalone scripts (visualizer.py, filter_design.py)
+# and tests, which must not be packaged.
+packages = ["s2r_dsp"]

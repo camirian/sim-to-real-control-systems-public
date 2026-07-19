@@ -2,8 +2,12 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.signal as signal
-from data_synthesizer import generate_telemetry
-from filters import design_fir_lowpass, design_iir_lowpass, apply_filter_realtime
+from s2r_dsp import (
+    apply_filter_realtime,
+    design_fir_lowpass,
+    design_iir_lowpass,
+    generate_telemetry,
+)
 
 def plot_bode(b, a, fs, title, filename):
     """Generate and save a Bode plot (magnitude and phase) for a given filter."""

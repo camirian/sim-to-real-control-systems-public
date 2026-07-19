@@ -7,15 +7,19 @@ This repository contains examples for multiple environments. Run only the parts 
 The DSP examples run with a normal Python scientific stack. They are the only
 part of this repo that runs in a plain environment.
 
+The library code is the installable `s2r-dsp` package (`dsp/pyproject.toml`,
+REQ-S2R-001); the plotting scripts stay in `dsp/` as standalone tools.
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r dsp/requirements.txt
+pip install -e "dsp/[viz,test]"   # installs s2r_dsp + numpy/scipy (+ matplotlib, pytest)
+
+pytest dsp/                  # runs the filter + package-API unit tests
 
 cd dsp
 python3 filter_design.py     # writes bode_plot.png and filter_comparison.png
 python3 visualizer.py        # writes assets/{fir_bode,iir_bode,time_domain_comparison}.png
-pytest test_filters.py       # runs the filter unit tests
 ```
 
 Run the scripts from inside `dsp/` so the generated plots are written next to

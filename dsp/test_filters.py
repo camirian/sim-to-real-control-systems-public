@@ -1,27 +1,18 @@
-"""Tests for the standalone DSP filter examples.
+"""Tests for the s2r-dsp package (REQ-S2R-001).
 
 These run without ROS 2 or Isaac Sim:
 
-    pip install -r dsp/requirements.txt
-    pytest dsp/test_filters.py
-
-Run from the repository root or from inside ``dsp/``.
+    pip install -e dsp/
+    pytest dsp/
 """
-import os
-import sys
-
 import numpy as np
 
-# Allow the test to import the sibling modules whether pytest is invoked from
-# the repository root or from inside ``dsp/``.
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from data_synthesizer import generate_telemetry  # noqa: E402
-from filters import (  # noqa: E402
+from s2r_dsp import (
     apply_filter_offline,
     apply_filter_realtime,
     design_fir_lowpass,
     design_iir_lowpass,
+    generate_telemetry,
 )
 
 FS = 200.0
