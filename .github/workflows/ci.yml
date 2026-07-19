@@ -1,0 +1,68 @@
+# CI (REQ-S2R-200): DSP + control_loop logic + gauntlet tests on every PR.
+# No ROS/Isaac runtime anywhere in CI (AGENTS.md §2: Isaac never becomes a CI
+# dependency; control_loop logic modules are pure Python by design).
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  dsp:
+    name: dsp tests (REQ-S2R-001)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10" # matches ROS 2 Humble's Python
+      - name: Install s2r_dsp
+        run: pip install -e "dsp/[test]"
+      - name: Run DSP tests
+        run: python -m pytest dsp/ -q
+
+  control-loop-logic:
+    name: control_loop logic tests, no ROS (REQ-S2R-002..004)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install s2r_dsp
+        run: pip install -e "dsp/[test]"
+      # The control_loop package lands with the M2 branch; until it merges
+      # this job reports "not present yet" and exits green so CI can gate
+      # every PR from day one.
+      # PYTHONPATH instead of pip install: the ament setup.cfg is for colcon.
+      - name: Run control_loop logic tests
+        run: |
+          if [ -f ros2-ws/src/control_loop/package.xml ]; then
+            PYTHONPATH=ros2-ws/src/control_loop python -m pytest ros2-ws/src/control_loop/test -q
+          else
+            echo "ros2-ws/src/control_loop not present yet (activates once the M2 branch merges)"
+          fi
+      - name: py_compile gate on rclpy wrappers and launch files
+        run: |
+          if [ -f ros2-ws/src/control_loop/package.xml ]; then
+            python -m py_compile \
+              ros2-ws/src/control_loop/control_loop/*_node.py \
+              ros2-ws/src/control_loop/launch/*.launch.py \
+              ros2-ws/src/control_loop/setup.py
+          else
+            echo "nothing to compile yet"
+          fi
+
+  gauntlet:
+    name: gauntlet tests (REQ-S2R-100/101)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install s2r_dsp
+        run: pip install -e "dsp/[test]"
+      - name: Run gauntlet tests
+        run: python -m pytest gauntlet/ -q
