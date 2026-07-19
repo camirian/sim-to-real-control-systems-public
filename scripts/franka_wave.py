@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
-# File: franka_wave_final.py
+# File: franka_wave.py
 # How to run:
 # 1. cd to your Isaac Sim root directory (e.g., ~/isaac-sim)
-# 2. Run: ./python.sh /path/to/this/script/franka_wave_final.py
+# 2. Run: ./python.sh /path/to/this/script/franka_wave.py
 
 import numpy as np
 import math
-from omni.isaac.kit import SimulationApp
+
+# REQ-S2R-300: unified on the new `isaacsim` entry point (Isaac Sim 4.5.0),
+# matching simple_scene.py / add_prims.py. Previously `omni.isaac.kit`.
+# EDGEXPERT-VERIFY: confirm this script still launches and the arm waves
+# under Isaac Sim 4.5.0 after the SimulationApp import swap.
+from isaacsim import SimulationApp
 
 CONFIG = {"headless": False}
 simulation_app = SimulationApp(CONFIG)
 
+# These imports must stay AFTER SimulationApp() — the omni.* modules only
+# resolve once the app is initialized.
 from omni.isaac.core import World
 from omni.isaac.franka import Franka
 # THIS IS THE CORRECT IMPORT PATH for Isaac Sim 4.5.0
