@@ -66,7 +66,10 @@ def write_run_log(
         writer = csv.writer(fh)
         writer.writerow(header)
         for i in range(len(t)):
-            row = [repr(t[i]), repr(clean[i]), repr(float(measured[i]))]
+            # Wrap every cell in float() before repr(): numpy 2.0 renders
+            # repr(np.float64(0.0)) as 'np.float64(0.0)', which the gauntlet CSV
+            # parser correctly rejects as non-numeric. Plain Python floats round-trip.
+            row = [repr(float(t[i])), repr(float(clean[i])), repr(float(measured[i]))]
             if noisy_col is not None:
                 row.append(repr(float(noisy_col[i])))
             writer.writerow(row)
