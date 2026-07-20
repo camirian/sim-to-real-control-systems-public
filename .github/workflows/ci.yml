@@ -66,3 +66,31 @@ jobs:
         run: pip install -e "dsp/[test]"
       - name: Run gauntlet tests
         run: python -m pytest gauntlet/ -q
+
+  campaign:
+    name: campaign aggregation tests + smoke test (REQ-S2R-102)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install s2r_dsp
+        run: pip install -e "dsp/[test]"
+      - name: Run campaign tests
+        run: python -m pytest campaign/ -q
+      - name: py_compile gate on the ROS-touching campaign runner
+        # run_campaign.py's live-sim path spawns ros2 launch (EDGEXPERT-VERIFY);
+        # only its syntax is checked in CI — Isaac/ROS never run here.
+        run: python -m py_compile campaign/run_campaign.py
+      - name: Aggregation smoke test over synthetic packets (no ROS/Isaac)
+        # Exercises the exact non-ROS pipeline documented in
+        # docs/RUN_ON_EDGEXPERT.md: synthesize evidence -> aggregate -> table.
+        run: |
+          python -c "from campaign.synth import write_campaign; \
+            write_campaign('ci_evidence', n_filtered=20, n_unfiltered=20, \
+            generated_at='2026-07-19T00:00:00Z')"
+          python -m campaign.cli ci_evidence --out-dir ci_out \
+            --timestamp 2026-07-19T00:00:00Z
+          test -f ci_out/results_table.md
+          test -f ci_out/results.json
