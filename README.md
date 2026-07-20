@@ -146,7 +146,7 @@ M4 record & ship.
 
 ## Public demos
 
-- Isaac Sim robot motion: https://youtu.be/MKuvEEEHLwQ
+- Isaac Sim robot motion: https://youtu.be/E2jNcWM_f08
 - Isaac Sim to ROS 2 data stream: https://youtu.be/2jHL1TsLq30
 
 ## Related public reference
