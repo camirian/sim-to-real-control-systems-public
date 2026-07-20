@@ -48,24 +48,34 @@ flowchart LR
     GAUNT --> EVID["evidence/run-&lt;id&gt;.json\n+ markdown compliance report"]
 ```
 
-## Current status — M1 (Foundations) in progress
+## Current status — cloud milestones M1–M3 complete; M4 pending the EdgeXpert campaign
 
 Honest state of the repo today:
 
-- **Working now:** the `dsp/` library (FIR/IIR design, causal + zero-phase
-  apply, seeded telemetry synthesizer) with passing unit tests; standalone
-  Isaac Sim example scripts; the Franka USD scene with its OmniGraph ROS 2
-  joint-state publisher; legacy ROS 2 pub/sub example packages in `ros2-ws/`.
-- **M1 lanes in flight:** package `dsp/` as installable `s2r-dsp`
-  (REQ-S2R-001); unify `scripts/` on the new `isaacsim` import API and add a
-  headless Franka scene runner (REQ-S2R-300 partial); this README skeleton
-  (REQ-S2R-300 partial).
-- **Not built yet:** the `control_loop` ROS 2 package (noise injector, filter
-  node, waypoint controller, launch file — M2), the certification gauntlet and
-  evidence packets (M3), CI (M3), the results table and recorded demo (M3–M4).
-- **Not yet verified on the sim box:** headless runs of
-  `scenes/franka_ros2_bridge_scene.usd`; anything marked `EDGEXPERT-VERIFY`
-  in `scripts/` awaits a walkthrough on the local Isaac machine (EdgeXpert).
+- **M1–M3 complete (everything buildable/testable without a sim box):**
+  - `dsp/` is the installable `s2r-dsp` package (REQ-S2R-001): FIR/IIR design,
+    causal + zero-phase apply, seeded telemetry synthesizer, tests green.
+  - `ros2-ws/src/control_loop/` — noise injector, causal DSP filter, and
+    waypoint controller nodes + `closed_loop.launch.py` (REQ-S2R-002..005).
+    Each node is a pure-Python logic module (unit-tested anywhere) plus a thin
+    rclpy wrapper (`py_compile`-gated; runtime is `EDGEXPERT-VERIFY`).
+  - `gauntlet/` — seeded checks, immutable JSON evidence packets, and the
+    markdown compliance report (REQ-S2R-100/101).
+  - `campaign/` — the aggregator that turns a directory of evidence packets
+    into the filtered-vs-unfiltered "money table" (REQ-S2R-102).
+  - CI runs the DSP + control_loop-logic + gauntlet + campaign tests on every
+    PR with no ROS/Isaac dependency (REQ-S2R-200).
+- **M4 pending on the EdgeXpert (needs live Isaac + ROS 2):** the actual
+  20+20 seeded campaign that fills the money table with real numbers, and the
+  2–3 minute recorded demo. The harness is built so **one command** produces
+  the table once the loop runs — see
+  **[docs/RUN_ON_EDGEXPERT.md](docs/RUN_ON_EDGEXPERT.md)** for the complete
+  fresh-box-to-recorded-demo runbook and the consolidated `EDGEXPERT-VERIFY`
+  checklist.
+- **Known gap blocking loop closure:** `scenes/franka_ros2_bridge_scene.usd`
+  currently only **publishes** `/joint_states`; the OmniGraph
+  `ROS2SubscribeJointState` node for `/joint_command` must be added on the sim
+  box before the controller can drive the arm (RUN_ON_EDGEXPERT.md §3).
 
 ## Repository layout
 
@@ -74,10 +84,12 @@ Honest state of the repo today:
 | `dsp/` | Filter design, causal/zero-phase apply, seeded telemetry synthesizer, tests, plots | Anywhere (plain Python) |
 | `scripts/` | Isaac Sim runner scripts (Franka wave, scene setup, headless runner) | EdgeXpert / local Isaac Sim 4.5.0 box only |
 | `scenes/` | `franka_ros2_bridge_scene.usd` with OmniGraph ROS 2 joint-state publisher | EdgeXpert only |
-| `ros2-ws/` | ROS 2 Humble workspace: legacy pub/sub examples; `src/control_loop/` lands in M2 | ROS 2 Humble environment |
+| `ros2-ws/` | ROS 2 Humble workspace: `src/control_loop/` (the closed-loop nodes + launch) plus legacy pub/sub examples | ROS 2 Humble environment |
 | `notebooks/` | Exploratory DSP / kinematics notebooks | Anywhere (Jupyter) |
 | `media/` | Screenshots and supporting images | — |
-| `gauntlet/`, `evidence/` | Certification gauntlet + immutable run evidence (M3, not yet created) | Anywhere |
+| `gauntlet/` | Certification gauntlet: seeded checks, immutable JSON evidence packets, compliance report | Anywhere (plain Python) |
+| `campaign/` | Results aggregator: evidence packets → the filtered-vs-unfiltered money table (REQ-S2R-102) | Anywhere (plain Python) |
+| `docs/` | `RUN_ON_EDGEXPERT.md` — the sim-box runbook and consolidated `EDGEXPERT-VERIFY` checklist | — |
 | `MASTER_PLAN.md`, `AGENTS.md` | Plan of record; engineering loop and lane rules | — |
 
 ## How to run what exists today

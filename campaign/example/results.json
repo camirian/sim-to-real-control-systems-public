@@ -1,0 +1,611 @@
+{
+  "campaign_tool_version": "0.1.0",
+  "conditions": {
+    "filtered": {
+      "metrics": {
+        "filter_attenuation_db": {
+          "max": 34.6,
+          "mean": 33.60000000000001,
+          "median": 33.6,
+          "min": 32.6,
+          "n_finite": 20,
+          "n_present": 20
+        },
+        "overshoot_pct": {
+          "max": 11.5,
+          "mean": 10.3,
+          "median": 10.3,
+          "min": 9.100000000000001,
+          "n_finite": 20,
+          "n_present": 20
+        },
+        "settling_time_s": {
+          "max": 0.13999999999999999,
+          "mean": 0.12000000000000002,
+          "median": 0.12,
+          "min": 0.09999999999999999,
+          "n_finite": 20,
+          "n_present": 20
+        },
+        "tracking_rms_error": {
+          "max": 0.098,
+          "mean": 0.09000000000000002,
+          "median": 0.09,
+          "min": 0.08199999999999999,
+          "n_finite": 20,
+          "n_present": 20
+        }
+      },
+      "n": 20,
+      "pass_rate": 1.0,
+      "passed": 20
+    },
+    "unfiltered": {
+      "metrics": {
+        "filter_attenuation_db": {
+          "max": 0.09,
+          "mean": 0.05,
+          "median": 0.05,
+          "min": 0.010000000000000002,
+          "n_finite": 20,
+          "n_present": 20
+        },
+        "overshoot_pct": {
+          "max": 36.1,
+          "mean": 34.5,
+          "median": 34.5,
+          "min": 32.9,
+          "n_finite": 20,
+          "n_present": 20
+        },
+        "settling_time_s": {
+          "max": "inf",
+          "mean": "inf",
+          "median": "inf",
+          "min": "inf",
+          "n_finite": 0,
+          "n_present": 20
+        },
+        "tracking_rms_error": {
+          "max": 0.248,
+          "mean": 0.23600000000000007,
+          "median": 0.236,
+          "min": 0.22399999999999998,
+          "n_finite": 20,
+          "n_present": 20
+        }
+      },
+      "n": 20,
+      "pass_rate": 0.0,
+      "passed": 0
+    }
+  },
+  "deltas": {
+    "filter_attenuation_db": {
+      "abs_improvement": 33.55000000000001,
+      "filtered_mean": 33.60000000000001,
+      "improved": true,
+      "note": "",
+      "pct_improvement": 67100.00000000003,
+      "unfiltered_mean": 0.05
+    },
+    "overshoot_pct": {
+      "abs_improvement": 24.2,
+      "filtered_mean": 10.3,
+      "improved": true,
+      "note": "",
+      "pct_improvement": 70.14492753623188,
+      "unfiltered_mean": 34.5
+    },
+    "settling_time_s": {
+      "abs_improvement": null,
+      "filtered_mean": 0.12000000000000002,
+      "improved": true,
+      "note": "unfiltered never reaches the band (inf); filtered is finite",
+      "pct_improvement": null,
+      "unfiltered_mean": "inf"
+    },
+    "tracking_rms_error": {
+      "abs_improvement": 0.14600000000000005,
+      "filtered_mean": 0.09000000000000002,
+      "improved": true,
+      "note": "",
+      "pct_improvement": 61.86440677966102,
+      "unfiltered_mean": 0.23600000000000007
+    }
+  },
+  "generated_at": "2026-07-19T00:00:00Z",
+  "headline": [
+    "Overall pass rate: filtered 20/20 vs unfiltered 0/20.",
+    "Tracking RMS: filtered 0.09 rad vs unfiltered 0.236 rad (down 61.9% improvement).",
+    "Filter attenuation at the vibration band: filtered 33.6 dB vs unfiltered 0.05 dB.",
+    "Settling time: unfiltered never reaches the band (inf); filtered is finite."
+  ],
+  "packets_found": 40,
+  "packets_used": 40,
+  "runs": [
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 33.1,
+        "overshoot_pct": 9.700000000000001,
+        "settling_time_s": 0.11,
+        "tracking_rms_error": 0.086
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0001",
+      "seed": 1
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 33.6,
+        "overshoot_pct": 10.3,
+        "settling_time_s": 0.12,
+        "tracking_rms_error": 0.09
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0002",
+      "seed": 2
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 34.1,
+        "overshoot_pct": 10.9,
+        "settling_time_s": 0.13,
+        "tracking_rms_error": 0.094
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0003",
+      "seed": 3
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 34.6,
+        "overshoot_pct": 11.5,
+        "settling_time_s": 0.13999999999999999,
+        "tracking_rms_error": 0.098
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0004",
+      "seed": 4
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 32.6,
+        "overshoot_pct": 9.100000000000001,
+        "settling_time_s": 0.09999999999999999,
+        "tracking_rms_error": 0.08199999999999999
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0005",
+      "seed": 5
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 33.1,
+        "overshoot_pct": 9.700000000000001,
+        "settling_time_s": 0.11,
+        "tracking_rms_error": 0.086
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0006",
+      "seed": 6
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 33.6,
+        "overshoot_pct": 10.3,
+        "settling_time_s": 0.12,
+        "tracking_rms_error": 0.09
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0007",
+      "seed": 7
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 34.1,
+        "overshoot_pct": 10.9,
+        "settling_time_s": 0.13,
+        "tracking_rms_error": 0.094
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0008",
+      "seed": 8
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 34.6,
+        "overshoot_pct": 11.5,
+        "settling_time_s": 0.13999999999999999,
+        "tracking_rms_error": 0.098
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0009",
+      "seed": 9
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 32.6,
+        "overshoot_pct": 9.100000000000001,
+        "settling_time_s": 0.09999999999999999,
+        "tracking_rms_error": 0.08199999999999999
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0010",
+      "seed": 10
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 33.1,
+        "overshoot_pct": 9.700000000000001,
+        "settling_time_s": 0.11,
+        "tracking_rms_error": 0.086
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0011",
+      "seed": 11
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 33.6,
+        "overshoot_pct": 10.3,
+        "settling_time_s": 0.12,
+        "tracking_rms_error": 0.09
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0012",
+      "seed": 12
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 34.1,
+        "overshoot_pct": 10.9,
+        "settling_time_s": 0.13,
+        "tracking_rms_error": 0.094
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0013",
+      "seed": 13
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 34.6,
+        "overshoot_pct": 11.5,
+        "settling_time_s": 0.13999999999999999,
+        "tracking_rms_error": 0.098
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0014",
+      "seed": 14
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 32.6,
+        "overshoot_pct": 9.100000000000001,
+        "settling_time_s": 0.09999999999999999,
+        "tracking_rms_error": 0.08199999999999999
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0015",
+      "seed": 15
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 33.1,
+        "overshoot_pct": 9.700000000000001,
+        "settling_time_s": 0.11,
+        "tracking_rms_error": 0.086
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0016",
+      "seed": 16
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 33.6,
+        "overshoot_pct": 10.3,
+        "settling_time_s": 0.12,
+        "tracking_rms_error": 0.09
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0017",
+      "seed": 17
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 34.1,
+        "overshoot_pct": 10.9,
+        "settling_time_s": 0.13,
+        "tracking_rms_error": 0.094
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0018",
+      "seed": 18
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 34.6,
+        "overshoot_pct": 11.5,
+        "settling_time_s": 0.13999999999999999,
+        "tracking_rms_error": 0.098
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0019",
+      "seed": 19
+    },
+    {
+      "condition": "filtered",
+      "metrics": {
+        "filter_attenuation_db": 32.6,
+        "overshoot_pct": 9.100000000000001,
+        "settling_time_s": 0.09999999999999999,
+        "tracking_rms_error": 0.08199999999999999
+      },
+      "overall_passed": true,
+      "run_id": "filtered-0020",
+      "seed": 20
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.030000000000000002,
+        "overshoot_pct": 33.7,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.22999999999999998
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0001",
+      "seed": 1
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.05,
+        "overshoot_pct": 34.5,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.236
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0002",
+      "seed": 2
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.07,
+        "overshoot_pct": 35.3,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.242
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0003",
+      "seed": 3
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.09,
+        "overshoot_pct": 36.1,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.248
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0004",
+      "seed": 4
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.010000000000000002,
+        "overshoot_pct": 32.9,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.22399999999999998
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0005",
+      "seed": 5
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.030000000000000002,
+        "overshoot_pct": 33.7,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.22999999999999998
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0006",
+      "seed": 6
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.05,
+        "overshoot_pct": 34.5,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.236
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0007",
+      "seed": 7
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.07,
+        "overshoot_pct": 35.3,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.242
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0008",
+      "seed": 8
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.09,
+        "overshoot_pct": 36.1,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.248
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0009",
+      "seed": 9
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.010000000000000002,
+        "overshoot_pct": 32.9,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.22399999999999998
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0010",
+      "seed": 10
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.030000000000000002,
+        "overshoot_pct": 33.7,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.22999999999999998
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0011",
+      "seed": 11
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.05,
+        "overshoot_pct": 34.5,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.236
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0012",
+      "seed": 12
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.07,
+        "overshoot_pct": 35.3,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.242
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0013",
+      "seed": 13
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.09,
+        "overshoot_pct": 36.1,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.248
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0014",
+      "seed": 14
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.010000000000000002,
+        "overshoot_pct": 32.9,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.22399999999999998
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0015",
+      "seed": 15
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.030000000000000002,
+        "overshoot_pct": 33.7,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.22999999999999998
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0016",
+      "seed": 16
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.05,
+        "overshoot_pct": 34.5,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.236
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0017",
+      "seed": 17
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.07,
+        "overshoot_pct": 35.3,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.242
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0018",
+      "seed": 18
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.09,
+        "overshoot_pct": 36.1,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.248
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0019",
+      "seed": 19
+    },
+    {
+      "condition": "unfiltered",
+      "metrics": {
+        "filter_attenuation_db": 0.010000000000000002,
+        "overshoot_pct": 32.9,
+        "settling_time_s": "inf",
+        "tracking_rms_error": 0.22399999999999998
+      },
+      "overall_passed": false,
+      "run_id": "unfiltered-0020",
+      "seed": 20
+    }
+  ],
+  "scenario": "franka-joint-tracking-synthetic",
+  "schema_version": 1,
+  "warnings": []
+}
