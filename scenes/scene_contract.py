@@ -47,13 +47,44 @@ PUBLISHER_PATH = f"{GRAPH_PATH}/ros2_publish_joint_state"
 SUBSCRIBER_PATH = f"{GRAPH_PATH}/ros2_subscribe_joint_command"
 CONTROLLER_PATH = f"{GRAPH_PATH}/articulation_controller"
 READ_SIM_TIME_PATH = f"{GRAPH_PATH}/read_sim_time"
+READ_JOINT_STATE_PATH = f"{GRAPH_PATH}/read_joint_state"
 
-# --- Node type tokens (Isaac Sim 4.5.0) ------------------------------------ #
+# --- Node type tokens (Isaac Sim 6.0.1-rc.7) ------------------------------- #
+# Verified against the LIVE `6.0.1-rc.7+release.42383.32955d8d.gl` runtime by
+# instantiating each type and dumping its ports, not read off a doc page. That
+# build is a release candidate; these tokens were never checked against 6.0.1
+# GA, which is a distinct later release. All five tokens carried over from
+# 4.5.0 unchanged; the extension providing the ROS 2 ones was renamed
+# (isaacsim.ros2.bridge -> isaacsim.ros2.nodes) but the node:type strings were
+# not.
 TICK_TYPE = "omni.graph.action.OnPlaybackTick"
 PUBLISHER_TYPE = "isaacsim.ros2.bridge.ROS2PublishJointState"
 SUBSCRIBER_TYPE = "isaacsim.ros2.bridge.ROS2SubscribeJointState"
 CONTROLLER_TYPE = "isaacsim.core.nodes.IsaacArticulationController"
 READ_SIM_TIME_TYPE = "isaacsim.core.nodes.IsaacReadSimulationTime"
+# NOTE the extension segment: `isaacsim.sensors.physics`, NOT
+# `isaacsim.sensors.physics.nodes`. The `.nodes.` form does not resolve —
+# established by a failed instantiation against the live registry, which is
+# why this constant is worth a comment.
+READ_JOINT_STATE_TYPE = "isaacsim.sensors.physics.IsaacReadJointState"
+
+# Isaac Sim 6.0 breaking change: the ROS 2 publishers no longer resolve USD
+# prims internally. The joint-state publisher is fed by an upstream Isaac Read
+# Joint State node instead of reading `inputs:targetPrim`. Each name below is
+# an `outputs:<name>` on the reader wired to `inputs:<name>` on the publisher.
+READ_JOINT_STATE_TO_PUBLISHER = (
+    "jointNames",
+    "jointPositions",
+    "jointVelocities",
+    "jointEfforts",
+    "jointDofTypes",
+    # Not optional, and not obvious. Leaving this unwired makes the publisher
+    # fail at runtime with "stageMetersPerUnit must be a positive finite
+    # value" and emit NOTHING on /joint_states — a silent-looking scene that
+    # produces zero messages. Found by running it; it is in the contract so
+    # nobody has to find it twice.
+    "stageMetersPerUnit",
+)
 
 # --- The ROS 2 boundary the control_loop nodes bind to --------------------- #
 # Both are authored EXPLICITLY rather than left to the node defaults
@@ -174,10 +205,12 @@ def check_scene(scene_path) -> List[Violation]:
     tick_out = f"{TICK_PATH}.outputs:tick"
 
     # --- Feedback path: the arm's state reaches ROS 2 ---------------------- #
-    if pub is not None:
-        require_topic(pub, PUBLISHER_PATH, STATE_TOPIC)
-        require_connection(pub, PUBLISHER_PATH, "inputs:execIn", tick_out)
-        rel = pub.relationships.get("inputs:targetPrim")
+    reader = prim_of(READ_JOINT_STATE_PATH, READ_JOINT_STATE_TYPE)
+
+    # --- The 6.0 joint-state read path ------------------------------------- #
+    if reader is not None:
+        require_connection(reader, READ_JOINT_STATE_PATH, "inputs:execIn", tick_out)
+        rel = reader.relationships.get("inputs:prim")
         targets = (
             [str(t) for t in rel.targetPathList.GetAddedOrExplicitItems()]
             if rel is not None
@@ -186,9 +219,24 @@ def check_scene(scene_path) -> List[Violation]:
         if ROBOT_PRIM_PATH not in targets:
             out.append(
                 Violation(
-                    f"{PUBLISHER_PATH}.inputs:targetPrim",
+                    f"{READ_JOINT_STATE_PATH}.inputs:prim",
                     f"does not target {ROBOT_PRIM_PATH} (targets: {targets or 'none'})",
                 )
+            )
+
+    if pub is not None:
+        require_topic(pub, PUBLISHER_PATH, STATE_TOPIC)
+        require_connection(pub, PUBLISHER_PATH, "inputs:execIn", tick_out)
+        # 6.0: every joint-state field arrives from the reader. Wiring only
+        # jointPositions and leaving jointNames unconnected would publish
+        # positions with no names — the noise injector and controller both
+        # index by name, so that fails silently downstream rather than here.
+        for field in READ_JOINT_STATE_TO_PUBLISHER:
+            require_connection(
+                pub,
+                PUBLISHER_PATH,
+                f"inputs:{field}",
+                f"{READ_JOINT_STATE_PATH}.outputs:{field}",
             )
         # Without a simulation-time source the published header.stamp stays at
         # the node default 0.0 for every message. waypoint_controller derives

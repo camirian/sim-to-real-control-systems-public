@@ -78,6 +78,9 @@ from scenes.scene_contract import (  # noqa: E402
     CONTROLLER_PATH,
     CONTROLLER_TYPE,
     PUBLISHER_PATH,
+    READ_JOINT_STATE_PATH,
+    READ_JOINT_STATE_TO_PUBLISHER,
+    READ_JOINT_STATE_TYPE,
     READ_SIM_TIME_PATH,
     READ_SIM_TIME_TYPE,
     ROBOT_PRIM_PATH,
@@ -92,11 +95,11 @@ from scenes.scene_contract import (  # noqa: E402
 
 DEFAULT_SCENE = REPO_ROOT / "scenes" / SCENE_FILENAME
 
-# typeVersion is per node, not per graph — do not normalize these. Values are
-# from each node's 4.5.0 OGN reference page (see module docstring).
+# typeVersion is per node, not per graph — do not normalize these.
 SUBSCRIBER_TYPE_VERSION = 2
 CONTROLLER_TYPE_VERSION = 1
 READ_SIM_TIME_TYPE_VERSION = 1
+READ_JOINT_STATE_TYPE_VERSION = 1
 
 
 def _node(stage, path: str, node_type: str, type_version: int, pos):
@@ -208,7 +211,27 @@ def author_graph(scene_path=DEFAULT_SCENE) -> None:
     _port(clock, "inputs:resetOnStop", Sdf.ValueTypeNames.Bool, False)
     _port(clock, "outputs:simulationTime", Sdf.ValueTypeNames.Double)
 
-    # --- 4. Pin the publisher's side of the contract ----------------------- #
+    # --- 4. Isaac Read Joint State: the 6.0 joint-state source -------------- #
+    # In 6.0 the ROS 2 publishers no longer resolve USD prims internally, so
+    # the arm's state reaches ROS through this reader rather than through the
+    # publisher's (now deprecated) inputs:targetPrim.
+    reader = _node(stage, READ_JOINT_STATE_PATH, READ_JOINT_STATE_TYPE,
+                   READ_JOINT_STATE_TYPE_VERSION, (500.0, 31.0))
+    _port(reader, "inputs:execIn", Sdf.ValueTypeNames.UInt)
+    _port(reader, "outputs:execOut", Sdf.ValueTypeNames.UInt)
+    _port(reader, "outputs:jointNames", Sdf.ValueTypeNames.TokenArray)
+    _port(reader, "outputs:jointPositions", Sdf.ValueTypeNames.DoubleArray)
+    _port(reader, "outputs:jointVelocities", Sdf.ValueTypeNames.DoubleArray)
+    _port(reader, "outputs:jointEfforts", Sdf.ValueTypeNames.DoubleArray)
+    _port(reader, "outputs:jointDofTypes", Sdf.ValueTypeNames.UCharArray)
+    _port(reader, "outputs:sensorTime", Sdf.ValueTypeNames.Float)
+    _port(reader, "outputs:stageMetersPerUnit", Sdf.ValueTypeNames.Float)
+    reader.GetAttribute("inputs:execIn").SetConnections([Sdf.Path(tick_out)])
+    reader.CreateRelationship("inputs:prim", False).SetTargets(
+        [Sdf.Path(ROBOT_PRIM_PATH)]
+    )
+
+    # --- 5. Pin the publisher's side of the contract ----------------------- #
     pub = stage.GetPrimAtPath(PUBLISHER_PATH)
     if not pub or not pub.IsValid():
         raise RuntimeError(f"{PUBLISHER_PATH} not found; unexpected scene")
@@ -217,6 +240,23 @@ def author_graph(scene_path=DEFAULT_SCENE) -> None:
     pub.GetAttribute("inputs:timeStamp").SetConnections(
         [Sdf.Path(f"{READ_SIM_TIME_PATH}.outputs:simulationTime")]
     )
+    # Wire every joint-state field from the reader. jointNames matters as much
+    # as jointPositions: publishing positions without names would leave the
+    # noise injector and controller — both of which index by name — silently
+    # unable to find their joints.
+    _types = {
+        "jointNames": Sdf.ValueTypeNames.TokenArray,
+        "jointPositions": Sdf.ValueTypeNames.DoubleArray,
+        "jointVelocities": Sdf.ValueTypeNames.DoubleArray,
+        "jointEfforts": Sdf.ValueTypeNames.DoubleArray,
+        "jointDofTypes": Sdf.ValueTypeNames.UCharArray,
+        "stageMetersPerUnit": Sdf.ValueTypeNames.Float,
+    }
+    for field in READ_JOINT_STATE_TO_PUBLISHER:
+        _port(pub, f"inputs:{field}", _types[field])
+        pub.GetAttribute(f"inputs:{field}").SetConnections(
+            [Sdf.Path(f"{READ_JOINT_STATE_PATH}.outputs:{field}")]
+        )
 
     stage.GetRootLayer().Save()
 
