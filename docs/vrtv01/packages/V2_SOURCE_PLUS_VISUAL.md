@@ -3,7 +3,9 @@
 Read `00_COMMON.md` for binding rules, SHAs, and schemas. Run in a fresh session.
 
 ## Allowed inputs
-The frozen source set **and** four rendered PNGs together, from stage 1. Hash-verify every image before supplying it.
+The frozen source set **and** four rendered PNGs together, from an isolated stage-1
+directory. Hash-verify every image before supplying it. The repository, packages,
+Mermaid sources, answer key, and network are unavailable to the reviewer.
 
 ### Two distinct runs
 

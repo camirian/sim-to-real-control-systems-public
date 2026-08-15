@@ -55,7 +55,8 @@ experiment next* — it does not mean the effect is established.
 - the same provider;
 - the same model and version string;
 - materially identical model configuration (temperature/reasoning effort/sampling, tool
-  access, system prompt scaffolding, context limits).
+  access, system prompt scaffolding, context limits, filesystem permissions, and network
+  permissions).
 
 **Only the representation/input packet and the clean/seeded assignment may vary.**
 
@@ -66,6 +67,15 @@ difference and a representation difference are indistinguishable after the fact.
 
 `V3` **may and should** use a different independent strong model/provider. V3's job is
 independent adjudication, so provider diversity there is a feature, not a confound.
+
+The selected treatment model must also satisfy all of these properties before V0:
+
+- multimodal image understanding;
+- enough context for the complete frozen source set;
+- a reproducible, pinnable model identity;
+- the same provider/model/configuration available for all five treatment sessions;
+- no need for repository access: each session can run from its staged input directory
+  with repository and network access denied.
 
 Note one unavoidable asymmetry: V1 and V2 require a multimodal model, V0 does not. The
 rule resolves this by requiring the *same multimodal-capable model* for all five reviewer
@@ -81,6 +91,10 @@ No condition may start until this table is filled in and committed.
 | Reviewer model + exact version string | `TO BE RECORDED BEFORE V0-CLEAN` |
 | Reviewer configuration (temperature / effort / tools / limits) | `TO BE RECORDED BEFORE V0-CLEAN` |
 | Multimodal image input confirmed | `TO BE RECORDED BEFORE V0-CLEAN` |
+| Frozen-source context capacity confirmed | `TO BE RECORDED BEFORE V0-CLEAN` |
+| Repository/filesystem access denied | `TO BE RECORDED BEFORE V0-CLEAN` |
+| Network access denied | `TO BE RECORDED BEFORE V0-CLEAN` |
+| Five-session pin availability confirmed | `TO BE RECORDED BEFORE V0-CLEAN` |
 | V3 provider | `TO BE RECORDED BEFORE V3` |
 | V3 model + exact version string | `TO BE RECORDED BEFORE V3` |
 | Selection rationale | `TO BE RECORDED BEFORE V0-CLEAN` |
@@ -107,3 +121,57 @@ so that rendering seeded controls can never re-render or rewrite a clean artifac
 
 Before the first condition: verify `sha256sum -c VIEW_HASHES.txt` and
 `sha256sum -c SEEDED_HASHES.txt` both pass, and record that they did.
+
+## 6. Required fail-closed staging and launch boundary
+
+The repository is an operator workspace, not a reviewer sandbox. A reviewer must never
+be launched from the repository, a repository worktree, or a directory whose mounted
+filesystem includes the repository. Reviewer conditions must run from a separate,
+permission-restricted staging root outside the repository, with no `.git`, remote,
+symlink, parent traversal path to the repository, answer key, package, preregistration,
+or Mermaid source. Disable network and mount only the run's input directory plus a
+separate output location.
+
+Use the committed `docs/vrtv01/stage_runs.py` helper. It copies the frozen source from
+`SOURCE_BASELINE_SHA` using `git archive`, verifies image hashes before copying, rejects
+non-empty destinations and symlinks, rejects normalized V3 findings that retain
+reviewer/condition/view identity, and writes `STAGING_MANIFEST.json`. It never launches
+a reviewer.
+
+Initial staging, from a path outside the repository:
+
+```text
+python3 docs/vrtv01/stage_runs.py \
+  --repo /path/to/sim-to-real-control-systems-public \
+  --stage-root /path/outside/repo/vrtv01-runs \
+  --run V0-CLEAN --run V1-CLEAN --run V1-SEEDED \
+  --run V2-CLEAN --run V2-SEEDED
+```
+
+V1 stage 1 must be run from `V1-CLEAN/stage-1` or `V1-SEEDED/stage-1` only. Save and
+close its output outside the staging tree, then reveal source only by running:
+
+```text
+python3 docs/vrtv01/stage_runs.py \
+  --repo /path/to/sim-to-real-control-systems-public \
+  --stage-root /path/outside/repo/vrtv01-runs \
+  --advance-v1 V1-CLEAN --stage1-output /path/to/closed-stage1-output.json
+```
+
+The same command applies to `V1-SEEDED`. Do not reuse a stage-1 session after a
+violation; record the run void and start a fresh session. Stage 2 receives only the
+newly created `stage-2` source directory and its saved stage-1 output.
+
+V3 must be staged only after normalization and its output must be a condition-neutral
+JSON file:
+
+```text
+python3 docs/vrtv01/stage_runs.py \
+  --repo /path/to/sim-to-real-control-systems-public \
+  --stage-root /path/outside/repo/vrtv01-runs \
+  --stage-v3 --normalized-findings /path/to/normalized_findings.json
+```
+
+The operator must inspect the manifest and launch each fresh session in a restricted
+environment with repository and network access denied. A working directory alone is
+not an isolation boundary.

@@ -3,8 +3,9 @@
 Read `00_COMMON.md`. Run in a fresh session, by an operator who did **not** author the views and did **not** run V0/V1/V2.
 
 ## Allowed inputs
-- The normalized, blinded finding set (`normalized_findings.json`, schema below).
-- The frozen source set, in full.
+- The normalized, blinded finding set (`normalized_findings.json`, schema below), staged
+  by `stage_runs.py` after its fail-closed leak checks.
+- The frozen source set, in full, staged from `SOURCE_BASELINE_SHA`.
 
 ## Forbidden information
 - Which condition produced any finding.
@@ -46,6 +47,11 @@ Prefer deterministic evidence over judgment. Cite the exact path and field for e
 4. Deduplicate **only exact semantic duplicates**. Preserve disagreements and near-misses; near-duplicates across conditions are signal, not noise.
 5. Shuffle with a recorded seed. Emit `normalized_findings.json`.
 6. After V3 returns, rejoin verdicts to conditions via the mapping and apply the §3.2 pre-disclosure and §3.3 seeded exclusions.
+
+Before staging, inspect every normalized finding field for condition leakage. The
+`finding_id`, claim, severity, and requested source check must not contain condition
+names, clean/seeded labels, view identifiers, packet labels, or reviewer metadata.
+Reject the file and redo normalization if any candidate field reveals its origin.
 
 ## Normalized finding schema
 

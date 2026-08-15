@@ -36,12 +36,20 @@ V0 must run on the same multimodal-capable model as V1/V2, not a text-only model
 
 1. **One fresh session per condition.** V0, V1, V2 and V3 must not share a session, a context window, or a conversation history.
 2. **No cross-condition disclosure.** No reviewer may be told what another condition found, how many findings exist, or that other conditions exist.
-3. **No access to this directory.** Reviewers receive only their own package body and their own allowed inputs. `docs/VISUAL_ROUND_TRIP_EXPERIMENT_01.md`, this file, and the other packages are forbidden inputs for V0/V1/V2.
+3. **Fail-closed filesystem isolation.** Reviewers run outside the repository from a
+   dedicated staging directory created by `stage_runs.py`; no `.git`, remote, symlink,
+   parent path to the repository, answer key, preregistration, other package, Mermaid
+   source, or network access is available. A working directory alone is not sufficient.
+   `docs/VISUAL_ROUND_TRIP_EXPERIMENT_01.md`, this file, and the other packages are
+   forbidden inputs for V0/V1/V2.
 4. **Two-stage protocol for V0/V1/V2.** Stage 1 output must be saved before stage 2 material is supplied.
 5. **Record for every condition:** model + provider + version, session start/end timestamps, wall-clock per stage, total tokens or cost if the provider reports it, and the exact input file list.
 6. **Preserve failures.** Do not delete, retry, or clean up a poor reviewer run. A weak run is data.
 7. **The builder of the views may not adjudicate.** V3 must be run by a session that did not produce the views or any V0/V1/V2 output.
 8. **This session that authored the preregistration is contaminated** and may not serve as any reviewer condition.
+
+The exact input file list and SHA-256 values are recorded in the staging manifest. Any
+extra file, symlink, repository visibility, or network access voids the run.
 
 ## Frozen source set (V0, V2, and stage 2 of all conditions)
 

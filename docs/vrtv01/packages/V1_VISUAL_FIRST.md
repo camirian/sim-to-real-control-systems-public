@@ -4,7 +4,7 @@ Read `00_COMMON.md` for binding rules, SHAs, and schemas. Run in a fresh session
 
 ## Allowed inputs
 
-**Stage 1 — images only:**
+**Stage 1 — images only, from an isolated `stage-1` directory:**
 ```
 docs/vrtv01/views/view_a_system_topology.png
 docs/vrtv01/views/view_b_evidence_provenance.png
@@ -26,7 +26,7 @@ Verify seeded PNGs against `docs/vrtv01/SEEDED_HASHES.txt`. The reviewer is neve
 
 Both runs use the same provider, model/version and configuration as V0-CLEAN and V2 — see the binding model-control rule in `docs/vrtv01/EXECUTION_CONTROL.md`.
 
-**Stage 2 — the frozen source set.**
+**Stage 2 — the frozen source set, from a newly created isolated `stage-2` directory.**
 
 ## Forbidden information
 - **Mermaid source text, in any form.** V1 receives rendered images only. Supplying `.mmd` content invalidates the condition.
@@ -62,6 +62,12 @@ Here is the complete frozen source set. For each hypothesis you produced in stag
 
 ## Critical ordering requirement
 **Stage 1 output must be written to disk and closed before any source file is supplied.** If source reaches the reviewer before stage 1 is saved, the run is void — discard it and start a new session. Record the void.
+
+The source is physically unavailable during stage 1. Create the stage-1 directory with
+`docs/vrtv01/stage_runs.py`, save the output outside the staging tree, and use the
+helper's `--advance-v1` operation to create stage 2. Do not launch from the repository
+or rely on an instruction not to read it; the reviewer environment must deny repository
+and network access.
 
 ## Record
 As V0, plus: which packet (clean or seeded), and the sha256 of each image actually supplied.
