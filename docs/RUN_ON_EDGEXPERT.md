@@ -86,18 +86,38 @@ ticking with `render=False`, clean `close()`) all gate this step — see
 
 ---
 
-## 3. THE KNOWN GAP — the scene has no `/joint_command` subscriber (blocking)
+## 3. THE KNOWN GAP — CLOSED scene-side (no longer a manual step)
 
-**The loop cannot close until this is fixed on the sim box.** The committed
-`franka_ros2_bridge_scene.usd` only **PUBLISHES** `/joint_states`. The
+> **Status update.** This gap is fixed in the committed scene. The manual
+> procedure below is kept as background on *what* was added and why; you do not
+> need to perform it. Verify instead with
+> `python -m scenes.scene_contract` (offline, no Isaac) and then the runtime
+> check at the end of this section.
+>
+> The scene now carries, in `/World/ActionGraph`:
+>
+> | Node | Type (Isaac 4.5.0) |
+> |---|---|
+> | `ros2_subscribe_joint_command` | `isaacsim.ros2.bridge.ROS2SubscribeJointState` on `/joint_command` |
+> | `articulation_controller` | `isaacsim.core.nodes.IsaacArticulationController`, `robotPath=/Franka` |
+> | `read_sim_time` | `isaacsim.core.nodes.IsaacReadSimulationTime` → the publisher's `timeStamp` |
+>
+> These were authored as data by `scripts/author_joint_command_graph.py` using
+> `usd-core`, so the change is a reviewable script rather than an opaque binary
+> re-save. **What is still unverified:** that Isaac loads this graph, that the
+> bridge instantiates the nodes, and that the arm moves. Those remain
+> `EDGEXPERT-VERIFY` — a static contract check cannot reach them.
+
+**Background — the original gap.** The committed
+`franka_ros2_bridge_scene.usd` only **PUBLISHED** `/joint_states`. The
 `waypoint_controller` node publishes position commands on `/joint_command`, but
-**nothing in the scene subscribes to them**, so the arm never moves in response
+**nothing in the scene subscribed to them**, so the arm never moved in response
 to the controller.
 
-You must add an OmniGraph **`ROS2SubscribeJointState`** node wired into an
+The fix adds an OmniGraph **`ROS2SubscribeJointState`** node wired into an
 **Articulation Controller** for the Franka, listening on `/joint_command`
-(`sensor_msgs/JointState` positions). The exact assumption is documented at the
-controller's publisher:
+(`sensor_msgs/JointState` positions). The original assumption was documented at
+the controller's publisher:
 
 - `ros2-ws/src/control_loop/control_loop/waypoint_controller_node.py:77–82`
   — *"The current franka_ros2_bridge_scene.usd only PUBLISHES joint states; the
@@ -154,15 +174,15 @@ Launch args: `seed, awgn_sigma, vibration_amplitude, vibration_freq_hz`
 `kp, tolerance_rad, max_step_rad, waypoint_timeout_s` (controller). Full list:
 `ros2-ws/src/control_loop/README.md`.
 
-**Filtered vs. unfiltered.** A filtered run uses `filter_kind:=iir`. An
-unfiltered run must bypass the filter. Two options — pick one and record it:
-- add a `passthrough` `filter_kind` to `dsp_filter_node.py` (copies input to
-  output), then run `filter_kind:=passthrough`; **or**
-- point the controller's `input_topic` at `/joint_states_noisy` and don't start
-  the filter node.
-The campaign runner (`campaign/run_campaign.py`) assumes the `passthrough`
-kind; if you take the second option, pass the controller override via
-`--` extra args. This is an `EDGEXPERT-VERIFY` item.
+**Filtered vs. unfiltered.** A filtered run uses `filter_kind:=iir`; an
+unfiltered run uses `filter_kind:=passthrough`, which the filter node now
+implements as the identity design (`b=[1], a=[1]`). Topology is identical
+between the two conditions — the filter node still subscribes and republishes —
+so the only difference between a filtered and an unfiltered run is the filter
+response. This is what `campaign/run_campaign.py` already emits, and the two
+sides are pinned together by a test
+(`test_campaign_unfiltered_token_is_an_accepted_filter_kind`). No longer an
+`EDGEXPERT-VERIFY` item: it is covered by the plain-Python suite.
 
 ---
 
@@ -277,12 +297,27 @@ reading, an exit code) — that record is what turns "authored in the cloud" int
 - [ ] `scripts/run_franka_headless.py:103` — `close()` exits code 0 headless
       (no hang).
 
-### B. THE GAP — add the `/joint_command` subscriber (blocking; see §3)
+### B. THE GAP — subscriber added; confirm it at runtime (see §3)
 
-- [ ] `waypoint_controller_node.py:77–82` — add an OmniGraph
-      `ROS2SubscribeJointState` on `/joint_command` feeding an articulation
-      controller; the scene currently only publishes. Loop cannot close without
-      this. (`ros2-ws/src/control_loop/README.md` carries the same note.)
+- [x] The `ROS2SubscribeJointState` + articulation controller + sim-clock nodes
+      are authored into the committed scene and verified statically by
+      `python -m scenes.scene_contract` (offline, no Isaac). Authoring done, but
+      the runtime items below are what actually close the loop.
+- [ ] Isaac loads the graph without errors and instantiates all five nodes
+      (check the console for OmniGraph node-type resolution failures — a typo'd
+      `node:type` shows up here, not in the static check).
+- [ ] `ros2 topic info -v /joint_command` reports **1 subscriber** (the scene).
+- [ ] `ros2 topic pub --once /joint_command sensor_msgs/msg/JointState
+      '{name: [panda_joint1], position: [0.1]}'` moves **that joint only** —
+      this is the check that catches a joint-name/order mismatch, which no
+      amount of USD validation can surface.
+- [ ] `ros2 topic echo /joint_states --field header.stamp` — record whether the
+      stamp advances. Settles the open question in docs/M4_BASELINE.md §3 (D4)
+      about whether an unwired publisher stamped every message 0.0.
+- [ ] `ros2 topic hz /joint_states` — **record the number.** Settles D6
+      (docs/M4_BASELINE.md §5); the filter's `sample_rate_hz` default of 200 Hz
+      is unverified against a scene whose graph ticks per frame at 60 fps. Do
+      not run the campaign before this is resolved.
 - [ ] `waypoint_controller_node.py:92` — joint ordering/names from the
       publisher match `DEFAULT_JOINT_NAMES` (7 `panda_jointN`); extras/fingers
       ignored.
