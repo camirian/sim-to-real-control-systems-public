@@ -36,6 +36,14 @@ to some providers, so the key is omitted entirely. `run_condition.py` records
 | G4 | the repository is visible from the staging root (any `.git` in the path) |
 | G5 | the output directory is inside the staging tree |
 | G6 | an input has an unexpected extension (anything outside `.md/.txt/.json/.yaml/.yml/.png`) |
+| G7 | the serialized payload leaks the string `seeded`, any image filename, or a `tools` key |
+
+**G7 is the blinding guard and it protects a non-obvious invariant.** Seeded artifacts are
+distinguishable by *filename* (`..._seeded.png`). Image filenames are not transmitted today
+— but that is an implementation detail of `build_openai_payload`, not a guarantee. A future
+edit that labels images with their filenames would silently unblind every seeded run, and
+the experiment would appear to work while measuring nothing. G7 asserts it at the payload
+level, after base64 image bytes are scrubbed, so the check is on metadata only.
 
 It also refuses symlinked inputs and empty stage directories, and warns loudly when
 `returned_model != requested_model` so the operator can void the run per

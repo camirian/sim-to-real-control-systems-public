@@ -23,6 +23,7 @@ import base64
 import hashlib
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -146,6 +147,22 @@ def main() -> int:
                 for p in files]
     prompt = args.prompt_file.read_text()
     payload = build_openai_payload(model, args.effort, prompt, files, stage_dir)
+
+    # G7 -- blinding guard. Seeded artifacts are distinguishable by FILENAME
+    # ("..._seeded.png"). Image filenames are not transmitted today, but that is
+    # an implementation detail of build_openai_payload; a future edit adding
+    # filename labels would silently unblind every seeded run and the experiment
+    # would look fine while measuring nothing. Assert it at the payload level.
+    scrubbed = re.sub(r"data:image/png;base64,[A-Za-z0-9+/=]+", "<IMG>",
+                      json.dumps(payload))
+    if "seeded" in scrubbed.lower():
+        die("payload leaks the string 'seeded'; this would unblind the run")
+    for f in files:
+        if f.suffix.lower() in IMAGE_EXT and f.name in scrubbed:
+            die(f"payload leaks image filename {f.name}; images must be sent "
+                "without identifying metadata")
+    if "tools" in payload:
+        die("tools key present in payload; zero tools must mean the key is omitted")
 
     started = datetime.now(timezone.utc).isoformat()
     try:
