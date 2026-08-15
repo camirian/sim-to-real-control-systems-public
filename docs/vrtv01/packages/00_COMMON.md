@@ -1,0 +1,54 @@
+# VRTV-01 execution packages — common header
+
+**Preregistration SHA (this file's commit's parent chain):** `0369dab5b83cedcc92847088ba939de092c295c0`
+**Frozen source baseline (`main`):** `f03c748ae0b0e6b30de572e9cb7ef49b2c88fe29`
+**View hash manifest:** `docs/vrtv01/VIEW_HASHES.txt`
+**Execution record:** issue #17
+
+## Rules binding every package
+
+1. **One fresh session per condition.** V0, V1, V2 and V3 must not share a session, a context window, or a conversation history.
+2. **No cross-condition disclosure.** No reviewer may be told what another condition found, how many findings exist, or that other conditions exist.
+3. **No access to this directory.** Reviewers receive only their own package body and their own allowed inputs. `docs/VISUAL_ROUND_TRIP_EXPERIMENT_01.md`, this file, and the other packages are forbidden inputs for V0/V1/V2.
+4. **Two-stage protocol for V0/V1/V2.** Stage 1 output must be saved before stage 2 material is supplied.
+5. **Record for every condition:** model + provider + version, session start/end timestamps, wall-clock per stage, total tokens or cost if the provider reports it, and the exact input file list.
+6. **Preserve failures.** Do not delete, retry, or clean up a poor reviewer run. A weak run is data.
+7. **The builder of the views may not adjudicate.** V3 must be run by a session that did not produce the views or any V0/V1/V2 output.
+8. **This session that authored the preregistration is contaminated** and may not serve as any reviewer condition.
+
+## Frozen source set (V0, V2, and stage 2 of all conditions)
+
+```
+README.md
+RESULTS.md
+MASTER_PLAN.md
+docs/M4_RUNTIME_VALIDATION.md
+docs/REPRODUCE_CAMPAIGN.md
+campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json
+campaign/results/m4-franka-filtered-vs-unfiltered-v1/
+```
+
+## Candidate finding schema (stage 1 output, all of V0/V1/V2)
+
+```json
+{
+  "local_id": "string, unique within this condition only",
+  "claim": "one sentence, falsifiable, no hedging",
+  "rationale": "why the reviewer believes it",
+  "severity_if_true": "CRITICAL | MAJOR | MINOR | NOTE",
+  "requested_source_check": "exact file path and field/line that would confirm or refute",
+  "reviewer_confidence": "HIGH | MEDIUM | LOW",
+  "derived_from": "SOURCE | VIEW_A | VIEW_B | VIEW_C | VIEW_D | COMBINED"
+}
+```
+
+## Stage 2 output schema (all of V0/V1/V2)
+
+```json
+{
+  "local_id": "matching stage 1",
+  "self_verdict": "CONFIRMED | REJECTED | UNRESOLVED",
+  "evidence_path": "exact file and field consulted",
+  "notes": "string"
+}
+```
