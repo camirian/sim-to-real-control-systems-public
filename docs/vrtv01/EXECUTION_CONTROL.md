@@ -86,28 +86,67 @@ runs, including V0. Do not run V0 on a text-only model.
 
 No condition may start until this record is complete and committed.
 
-**Decision (recorded 2026-08-15).**
+**Decision recorded 2026-08-15. Model ID resolved against the authenticated OpenAI
+Models endpoint on 2026-08-15T22:43Z. Synthetic preflight BLOCKED on provider quota —
+see "Preflight status" below. This record is therefore COMPLETE for model identity and
+INCOMPLETE for runtime capability confirmation.**
 
-| Field | Value |
-|---|---|
-| Treatment provider | **OpenAI** |
-| Treatment family | **GPT-5.6 Sol** |
-| Treatment model ID | **PENDING — must be resolved by `harness/pin_model_id.py`** |
-| Treatment API | plain OpenAI API client — **not** Codex, ChatGPT, or any agent harness |
-| Reasoning effort | **high** |
-| Registered tools | **NONE** (the `tools` key is never sent, so no tool capability is advertised) |
-| Reviewer web/GitHub/network/tool access | **NONE** (§5b Class 1 denied) |
-| Model transport | OpenAI API endpoint only (§5b Class 2) |
-| Multimodal image input | verified by synthetic preflight before V0 |
-| Frozen-source context capacity | verified before V0 |
-| Repository/filesystem access denied | enforced by `stage_runs.py` + `harness/run_condition.py` |
-| Five-session pin availability | same pinned ID for all five treatment runs |
-| V3 provider | **Anthropic** |
-| V3 model ID | **`claude-opus-4-8`** — to be confirmed visible via the Models endpoint |
-| V3 API | plain Anthropic Messages API |
-| V3 effort | pinned explicitly at the highest supported setting |
-| V3 registered tools | **NONE** |
-| V3 transport | Anthropic API endpoint only |
+| Field | Value | Established how |
+|---|---|---|
+| Treatment provider | **OpenAI** | decision |
+| Treatment family | **GPT-5.6 Sol** | decision |
+| **Exact treatment model ID** | **`gpt-5.6-sol`** | **authenticated Models endpoint** |
+| Pin basis | **`explicit-id-no-snapshot-published`** | authenticated — no `gpt-5.6-sol-<snapshot>` ID is published to this account |
+| `gpt-5.6*` visible to this account | `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra` (118 models total) | authenticated |
+| Forbidden aliases rejected | `gpt-5.6`, `gpt-5.6-latest`, `gpt-5` | enforced in `harness/pin_model_id.py` |
+| API | **OpenAI Responses API**, plain client — not Codex, ChatGPT, or any agent harness | harness contract |
+| Reasoning effort | **high** | harness parameter |
+| `store` | **false** | harness parameter |
+| Registered tools | **NONE** | harness contract |
+| Tools key sent | **false** — the key is omitted entirely, since `tools: []` still advertises capability | harness contract, asserted by preflight |
+| Reviewer-accessible web | **DENIED** | §5b Class 1 |
+| Reviewer-accessible GitHub | **DENIED** | §5b Class 1 |
+| Reviewer-accessible arbitrary network | **DENIED** | §5b Class 1 |
+| Model transport | **OpenAI API transport only** | §5b Class 2 |
+| Multimodal image input | **UNCONFIRMED — preflight could not run (quota)** | must be confirmed before V0 |
+| Frozen-source context capacity | **UNCONFIRMED — not measured against the selected model** | must be confirmed before V0 |
+| Five-session pin availability | **NOT GUARANTEED BY THE API.** `gpt-5.6-sol` is an unversioned ID with no published snapshot, so the provider offers no contractual stability. Mitigation is detection, not prevention: every run records identity fields and any change voids the affected run. | honest limitation |
+| Selected by | pre-execution operator under frozen VRTV-01 control | — |
+| Selection timing | 2026-08-15, **before** any reviewer condition executed | — |
+| Selection rationale | strong multimodal frontier reviewer; same model for all five treatment sessions; avoids a weak-local-model floor effect that would produce an uninformative null; representation is the intended independent variable | — |
+| V3 provider | **Anthropic** | decision |
+| V3 model | **`claude-opus-4-8`** | decision |
+| V3 API visibility | **UNVERIFIED / TO BE CONFIRMED BEFORE V3** — no `ANTHROPIC_API_KEY` available at selection time | honest limitation |
+| V3 API | plain Anthropic Messages API | decision |
+| V3 registered tools | **NONE** | decision |
+| V3 transport | Anthropic API only | decision |
+
+Absence of Anthropic credentials does **not** block V0. V3 runs only after all five
+treatment conditions and normalization, so its visibility check is due before V3, not now.
+
+### Preflight status — BLOCKED on provider quota
+
+`harness/synthetic_preflight.py` was run on 2026-08-15T22:43Z against `gpt-5.6-sol` and
+returned:
+
+```
+HTTP 429  type=insufficient_quota  code=credit_balance_exhausted
+"You have no credits remaining. Add credits to continue using the API"
+```
+
+No VRTV artifact was exposed: the request carried only the harness's self-generated 2×2
+synthetic PNG and a fixed synthetic sentence. `vrtv_artifacts_exposed: false`.
+
+Consequences, recorded rather than worked around:
+
+- **multimodal image ingestion is unconfirmed** for the selected model;
+- **JSON output conformance is unconfirmed**;
+- **returned model identity and `system_fingerprint` are unobserved**, so the drift
+  baseline every treatment run is compared against does not yet exist;
+- **context capacity for the frozen source set is unmeasured**.
+
+The preflight must PASS before V0. Billing was deliberately not modified — no credits
+purchased, no payment method added, no auto-recharge enabled.
 
 ### Model ID resolution rule
 
