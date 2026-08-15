@@ -27,7 +27,7 @@ the `.usd` without Isaac running. Everything looks correct.
 **Show:** the publisher error `stageMetersPerUnit must be a positive finite
 value`; `/joint_states` message count = 0.
 
-**Say:** First run on the real Isaac Sim 6.0.1 host: the graph loads, the
+**Say:** First run on the real Isaac Sim 6.0.1-rc.7 host: the graph loads, the
 contract still passes, and **zero messages are published**. The joint-state
 publisher requires `stageMetersPerUnit` wired from the reader; without it, it
 errors out and emits nothing.

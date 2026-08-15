@@ -1,6 +1,11 @@
-"""Execute the preregistered filtered-vs-unfiltered campaign on Isaac Sim 6.0.1.
+"""Execute the preregistered filtered-vs-unfiltered campaign on an Isaac Sim host.
 
-REQ-S2R-102, Issue #9. Runs ONLY on an Isaac Sim 6.0.1 host, through its
+The committed campaign evidence was produced by this script on exactly one
+build: `6.0.1-rc.7+release.42383.32955d8d.gl`, a release candidate. Isaac Sim
+6.0.1 GA is a distinct later release; running this script on GA is a new
+reproduction attempt, not a replay of the recorded campaign.
+
+REQ-S2R-102, Issue #9. Runs ONLY on an Isaac Sim 6.x host, through its
 bundled Python, with the internal ROS 2 libraries sourced:
 
     source ~/isaacsim-6.0.1/setup_ros_env.sh

@@ -36,6 +36,8 @@ passthrough identity filter with a flat 0 dB response.
 | s2r_dsp | 0.1.0 |
 | scipy | 1.17.0 |
 
+**This build is a release candidate.** Every run below was executed on `6.0.1-rc.7+release.42383.32955d8d.gl` and on no other build. Isaac Sim 6.0.1 GA is a distinct, later release: it was not used, not measured, and has not been shown equivalent by this project. The results in this document are evidence about the tested RC build only.
+
 Sampling: 200.0 Hz publication (physics dt 0.0025 s, graph ticks once per 2 physics steps), Nyquist 100.0 Hz.
 
 Disturbance: 0.3 rad vibration at 25.0 Hz plus AWGN sigma 0.1 rad, injected on the joint-state feedback path, pre-filter, drawn from `numpy.random.default_rng(seed)`.
@@ -239,5 +241,12 @@ The last command re-hashes every evidence file, re-grades every run from
 its raw telemetry, and regenerates this document. Regenerating it must
 produce no diff.
 
-Reproducing the campaign itself additionally requires an Isaac Sim 6.0.1
-host; see `docs/M4_RUNTIME_VALIDATION.md`.
+Everything above is verifiable with no Isaac Sim of any version.
+
+Reproducing the campaign itself additionally requires an Isaac Sim host.
+The validated configuration is the exact build these runs were executed
+on, `6.0.1-rc.7+release.42383.32955d8d.gl`; running the harness on any other build --
+including the general-availability release of the same version number --
+is a new runtime-compatibility attempt, not a replay of this campaign,
+and this project makes no claim that it would behave the same. See
+`docs/M4_RUNTIME_VALIDATION.md` and `docs/REPRODUCE_CAMPAIGN.md`.

@@ -259,6 +259,17 @@ def render(manifest, results, raw, graded, by_cond, paired, secondary) -> str:
     for k, v in r["environment"].items():
         A(f"| {k} | {v} |")
     A("")
+    # The frozen manifest records the build that actually ran. If it is a
+    # release candidate, say so here rather than letting a reader round the
+    # version up to the general-availability release of the same number.
+    if "-rc." in r["isaac_build"]:
+        base = r["isaac_build"].split("-rc.")[0]
+        A(f"**This build is a release candidate.** Every run below was executed "
+          f"on `{r['isaac_build']}` and on no other build. Isaac Sim {base} GA "
+          f"is a distinct, later release: it was not used, not measured, and "
+          f"has not been shown equivalent by this project. The results in this "
+          f"document are evidence about the tested RC build only.")
+        A("")
     s, d, f = m["sampling"], m["disturbance"], m["filter"]
     A(f"Sampling: {s['sample_rate_hz']} Hz publication "
       f"(physics dt {s['physics_dt_s']:.6g} s, graph ticks once per "
@@ -515,8 +526,15 @@ def render(manifest, results, raw, graded, by_cond, paired, secondary) -> str:
     A("its raw telemetry, and regenerates this document. Regenerating it must")
     A("produce no diff.")
     A("")
-    A("Reproducing the campaign itself additionally requires an Isaac Sim 6.0.1")
-    A("host; see `docs/M4_RUNTIME_VALIDATION.md`.")
+    A("Everything above is verifiable with no Isaac Sim of any version.")
+    A("")
+    A(f"Reproducing the campaign itself additionally requires an Isaac Sim host.")
+    A(f"The validated configuration is the exact build these runs were executed")
+    A(f"on, `{r['isaac_build']}`; running the harness on any other build --")
+    A(f"including the general-availability release of the same version number --")
+    A(f"is a new runtime-compatibility attempt, not a replay of this campaign,")
+    A(f"and this project makes no claim that it would behave the same. See")
+    A("`docs/M4_RUNTIME_VALIDATION.md` and `docs/REPRODUCE_CAMPAIGN.md`.")
     return "\n".join(L) + "\n"
 
 

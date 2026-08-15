@@ -5,11 +5,25 @@ different requirements. Keeping them apart is deliberate.
 
 | | Needs | Time |
 |---|---|---|
-| **A. Verify the committed evidence** | a clone and Python. No GPU, no ROS, no Isaac. | seconds |
-| **B. Re-run the campaign** | an Isaac Sim 6.0.1 host with a GPU | ~45 min |
+| **A. Verify the committed evidence** | a clone and Python. No GPU, no ROS, no Isaac at all. | seconds |
+| **B. Re-run the campaign** | an Isaac Sim 6.x host with a GPU; for the *validated* configuration specifically, `6.0.1-rc.7+release.42383.32955d8d.gl` | ~45 min |
 
 Most review is **A**. The claim "these numbers came from this evidence" should
 be checkable without the machine that produced it, and it is.
+
+> **Which build the original campaign ran on, and what that means for you.**
+> Every run in the committed evidence was executed on Isaac Sim
+> **`6.0.1-rc.7+release.42383.32955d8d.gl`** — a *release candidate*. To
+> reproduce the exact validated configuration, that is the build to install.
+>
+> NVIDIA's Isaac Sim **6.0.1 GA is a distinct, later release**, and this project
+> has **not** shown it equivalent to the RC. Running this harness on GA is a
+> **new runtime-compatibility and reproduction attempt** — a fresh experiment
+> whose outcome is unknown. It is *not* evidence that the original campaign ran
+> on GA, and nothing here asserts GA would produce the same behaviour.
+>
+> Path **A** is unaffected by any of this: verifying the committed evidence
+> requires no Isaac Sim of any version.
 
 ---
 
@@ -66,13 +80,18 @@ quietly.
 
 ---
 
-## B. Re-run the campaign (needs Isaac Sim 6.0.1)
+## B. Re-run the campaign (needs an Isaac Sim host)
 
 ### B0. Prerequisites
 
-- Isaac Sim **6.0.1** installed to a user-writable directory. No `sudo`, no
-  `apt`, no Docker group membership, and no system ROS 2 installation are
-  required or used — the ROS 2 Jazzy libraries come from inside Isaac.
+- Isaac Sim installed to a user-writable directory. For the **exact validated
+  configuration**, that means the tested build
+  **`6.0.1-rc.7+release.42383.32955d8d.gl`** — the release candidate every
+  committed run was executed on. Any other build, **including 6.0.1 GA**, makes
+  this a new runtime-compatibility attempt rather than a replay of the recorded
+  campaign; this project has not established that GA behaves identically. No
+  `sudo`, no `apt`, no Docker group membership, and no system ROS 2 installation
+  are required or used — the ROS 2 Jazzy libraries come from inside Isaac.
 - A CUDA-capable NVIDIA GPU. The reference runs used an NVIDIA GB10 (DGX Spark
   class), aarch64.
 

@@ -52,8 +52,16 @@ flowchart LR
 
 Honest state of the repo today:
 
+> **Which simulator build the empirical claims are about.** All runtime
+> validation and all 40 campaign runs were executed on exactly one build:
+> Isaac Sim **`6.0.1-rc.7+release.42383.32955d8d.gl`**. That is a *release
+> candidate*. NVIDIA's Isaac Sim 6.0.1 **GA is a distinct, later release, and
+> this project has not evaluated it** — no run here was made on GA, and nothing
+> here shows GA behaves the same. Every empirical result below is evidence
+> about the tested RC build and should be read that way.
+
 - **M4 campaign RUN (40/40 valid).** The preregistered filtered-vs-unfiltered
-  campaign executed on a real Isaac Sim 6.0.1 host: 20 seeds × 2 conditions,
+  campaign executed on a real Isaac Sim 6.0.1-rc.7 host: 20 seeds × 2 conditions,
   40 scheduled, **40 valid, 0 invalid, 0 failed**, every evidence file
   hash-verified. Filtered feedback beat unfiltered on every metric —
   tracking RMS 0.177 vs 0.406 rad (paired mean difference −0.229 rad, 95% CI
@@ -63,7 +71,8 @@ Honest state of the repo today:
   regenerated from raw evidence by `scripts/build_results.py`; nothing is
   hand-entered. **Simulation only — no hardware, transfer, safety or
   certification claim.**
-- **M4 runtime validated on Isaac Sim 6.0.1** (`M4_RUNTIME_GATE_PASS`). Running
+- **M4 runtime validated on Isaac Sim 6.0.1-rc.7** (`M4_RUNTIME_GATE_PASS`,
+  on `6.0.1-rc.7+release.42383.32955d8d.gl`; GA not evaluated). Running
   it exposed three defects a static check could not: a publisher that emitted
   ZERO messages without `stageMetersPerUnit` wired, a default graph sampling at
   30.02 Hz that would have aliased the 25 Hz disturbance onto the 5 Hz cutoff,
@@ -96,13 +105,14 @@ Honest state of the repo today:
   `scripts/author_joint_command_graph.py` (no Isaac Sim needed) and verified in
   CI by `scenes/scene_contract.py`. **This is the scene-side contract only** —
   that Isaac loads the graph and the arm actually moves is still unverified.
-- **Loop confirmed in the runtime (was unverified above).** Isaac 6.0.1 loads
+- **Loop confirmed in the runtime (was unverified above).** Isaac 6.0.1-rc.7 loads
   the graph, `/joint_states` publishes at a measured 200 Hz, `/joint_command` is
   provably consumed, and the loop closes through the project's own
   `WaypointTracker`. The scene-side-only caveat above is now retired.
 - **Historical note.** `docs/M4_BASELINE.md` records the earlier state, when the
   campaign was blocked on an Isaac Sim 4.5.0 pin. That blocker is resolved: the
-  work moved to Isaac Sim 6.0.1.
+  work moved to the Isaac Sim 6.0.1 release candidate identified above. The 6.0.1
+  GA release postdates that move and was not adopted or tested here.
 
 ## Repository layout
 
