@@ -91,8 +91,8 @@ for sha in $commits; do
   # Parse Co-authored-by trailers (case-insensitive), tolerate malformed lines.
   while IFS= read -r line; do
     [[ -z "$line" ]] && continue
-    trailer_val="$(sed -E 's/^[Cc][Oo]-[Aa]uthored-[Bb][Yy]:[[:space:]]*//' <<<"$line")"
-    if [[ "$trailer_val" =~ ^(.+)\<([^\>]+)\>$ ]]; then
+    trailer_val="$(sed -E 's/^[Cc][Oo]-[Aa]uthored-[Bb][Yy]:[[:space:]]*//; s/\r$//' <<<"$line")"
+    if [[ "$trailer_val" =~ ^(.+)\<([^\>]+)\>[[:space:]]*$ ]]; then
       co_name="$(sed -E 's/[[:space:]]+$//' <<<"${BASH_REMATCH[1]}")"
       co_email="${BASH_REMATCH[2]}"
     else

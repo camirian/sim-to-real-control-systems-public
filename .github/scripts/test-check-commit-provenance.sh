@@ -123,6 +123,21 @@ cat > "$GITHUB_EVENT_PATH" <<EOF
 EOF
 check "merge commit range -> PASS (only new commits, all owner)" 0
 
+# --- 12. CRLF-terminated trailer (Windows line endings) -> parsed, not misclassified as malformed ---
+git checkout -q main_tmp
+printf 'crlf-test\r\n' > f.txt; git add f.txt
+GIT_AUTHOR_NAME="Caaren Amirian" GIT_AUTHOR_EMAIL="$OWNER" GIT_COMMITTER_NAME="Caaren Amirian" GIT_COMMITTER_EMAIL="$OWNER" \
+  git commit -q -m "$(printf 'feat: crlf trailer\r\n\r\nCo-authored-by: Jane Human <jane@example.com>\r\n')"
+crlf_head="$(git rev-parse HEAD)"
+echo "{\"before\":\"$merge_head\",\"after\":\"$crlf_head\"}" > "$GITHUB_EVENT_PATH"
+export GITHUB_EVENT_NAME=push
+crlf_summary="$(mktemp)"
+ALLOWED_COAUTHOR_EMAILS="jane@example.com" GITHUB_STEP_SUMMARY="$crlf_summary" bash "$GUARD" >/tmp/crlf.$$ 2>&1 && r=0 || r=$?
+grep -q "jane@example.com" "$crlf_summary" && ! grep -qi "malformed" "$crlf_summary" && [[ "$r" == 0 ]] \
+  && { echo "PASS: CRLF-terminated trailer parsed correctly -> PASS"; pass=$((pass+1)); } \
+  || { echo "FAIL: CRLF trailer case"; cat "$crlf_summary" /tmp/crlf.$$; fail=$((fail+1)); }
+rm -f /tmp/crlf.$$ "$crlf_summary"
+
 echo
 echo "Summary: $pass passed, $fail failed"
 [[ "$fail" -eq 0 ]]
