@@ -4,7 +4,7 @@ Pure Python — no ROS, no Isaac.
 
 Why this module exists. The DSP path was designed against an *assumed*
 `sample_rate_hz = 200.0`. When the loop was first run on a real Isaac Sim
-6.0.1 host the stream arrived at **30 Hz**, which would have made a 5 Hz
+6.0.1-rc.7 host the stream arrived at **30 Hz**, which would have made a 5 Hz
 cutoff behave as 0.75 Hz and — far worse — put the 25 Hz injected vibration
 *above* the 15 Hz Nyquist, where it aliases to 5 Hz and lands exactly on the
 cutoff. A campaign run in that state produces a filtered-vs-unfiltered
@@ -17,8 +17,11 @@ This module records the measured value and gives the campaign a hard guard, so
 the failure can never recur silently.
 
 Provenance of `MEASURED_JOINT_STATE_RATE_HZ`: `scripts/validate_isaac6_runtime.py`
-on Isaac Sim 6.0.1 / DGX Spark / GB10, 1811 messages over 30 s, mean inter-sample
-interval 4.988 ms, stdev 0.176 ms. See docs/M4_RUNTIME_VALIDATION.md.
+on Isaac Sim `6.0.1-rc.7+release.42383.32955d8d.gl` / DGX Spark / GB10, 1811
+messages over 30 s, mean inter-sample interval 4.988 ms, stdev 0.176 ms. That
+build is a release candidate, so this measurement is scoped to it; Isaac Sim
+6.0.1 GA is a distinct later release and was never measured here.
+See docs/M4_RUNTIME_VALIDATION.md.
 """
 
 from __future__ import annotations

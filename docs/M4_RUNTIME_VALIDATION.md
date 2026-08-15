@@ -1,12 +1,28 @@
-# M4 runtime validation — Isaac Sim 6.0.1 on GB10
+# M4 runtime validation — Isaac Sim 6.0.1-rc.7 (release candidate) on GB10
 
 The project control boundary, observed rather than assumed. Every number below
 came from `scripts/validate_isaac6_runtime.py` running against the committed
 project scene on a live simulator.
 
-**Verdict: `M4_RUNTIME_GATE_PASS`.** D6 is measured and resolved; the
-experimental contract is preserved by fixing the sampling boundary rather than
-retuning the filter (§6).
+> ## Which runtime this validates — read before citing any number here
+>
+> Validation was performed on exactly one build:
+> **`6.0.1-rc.7+release.42383.32955d8d.gl`**.
+>
+> - That build is a **release candidate**, not a general-availability release.
+> - NVIDIA's **Isaac Sim 6.0.1 GA is a distinct, later release**. It is not the
+>   same artifact as the RC tested here.
+> - **6.0.1 GA was not runtime-validated by this work.** No number, token,
+>   rate, or gate verdict in this document was observed on GA.
+> - Every runtime conclusion below is therefore **scoped to the exact tested RC
+>   build** and should be read as evidence about that build only.
+>
+> Where this document says "6.0.1-rc.7" in short form, it means the full build
+> identity above. It never means GA.
+
+**Verdict: `M4_RUNTIME_GATE_PASS`, on `6.0.1-rc.7+release.42383.32955d8d.gl`.**
+D6 is measured and resolved; the experimental contract is preserved by fixing
+the sampling boundary rather than retuning the filter (§6).
 
 ## 1. Runtime configuration
 
@@ -27,7 +43,9 @@ retuning the filter (§6).
 
 **No system ROS 2 installation exists on this machine.** The bridge working
 does not imply otherwise: no `apt`, no `sudo`, no Docker group change, no
-system package was modified. Isaac Sim lives entirely in `~/isaacsim-6.0.1`.
+system package was modified. Isaac Sim lives entirely in `~/isaacsim-6.0.1`
+(the install directory name is just a path chosen at unpack time — the build
+actually installed there is the RC identified above, not GA).
 
 Commands:
 
@@ -39,7 +57,7 @@ cd ~/isaacsim-6.0.1
     --repo  <repo> --observe-s 30
 ```
 
-## 2. Graph migration to 6.0.1
+## 2. Graph migration to Isaac Sim 6.0.1-rc.7
 
 Node type tokens were established by instantiating each one against the live
 registry, not read off a doc page. All five 4.5.0 tokens survived unchanged.
@@ -219,7 +237,8 @@ measured rate misses the target by more than 2 %.
 - The compatibility check reported `GPU 0: VRAM [cannot be identified]` on this
   unified-memory GB10, so the 10 GB VRAM minimum was never actually evaluated.
 - The scene still references the Isaac **4.5** Franka asset URL. It resolves
-  and loads under 6.0.1, but the 6.0 asset root differs; this is unreconciled.
+  and loads under 6.0.1-rc.7, but the 6.0 asset root differs; this is
+  unreconciled.
 - One benign repeated warning: a DOF-type mismatch between USD and the physics
   tensor on the 9th DOF (gripper mimic joint). It does not affect the 7 arm
   joints.

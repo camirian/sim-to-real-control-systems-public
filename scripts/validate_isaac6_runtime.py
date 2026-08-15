@@ -1,6 +1,12 @@
-"""Runtime validation of the project control boundary under Isaac Sim 6.0.1.
+"""Runtime validation of the project control boundary under Isaac Sim 6.x.
 
-Runs ONLY on an Isaac Sim 6.0.1 host, launched through its bundled Python with
+The validation recorded in docs/M4_RUNTIME_VALIDATION.md was produced by this
+script on exactly one build: `6.0.1-rc.7+release.42383.32955d8d.gl`, a release
+candidate. Isaac Sim 6.0.1 GA is a distinct later release and has not been run
+through this script; doing so would be a new compatibility check, not a replay
+of the recorded validation.
+
+Runs ONLY on an Isaac Sim 6.x host, launched through its bundled Python with
 the internal ROS 2 libraries sourced:
 
     source ./setup_ros_env.sh

@@ -49,9 +49,11 @@ CONTROLLER_PATH = f"{GRAPH_PATH}/articulation_controller"
 READ_SIM_TIME_PATH = f"{GRAPH_PATH}/read_sim_time"
 READ_JOINT_STATE_PATH = f"{GRAPH_PATH}/read_joint_state"
 
-# --- Node type tokens (Isaac Sim 6.0.1) ------------------------------------ #
-# Verified against the LIVE 6.0.1 runtime by instantiating each type and
-# dumping its ports, not read off a doc page. All five tokens carried over from
+# --- Node type tokens (Isaac Sim 6.0.1-rc.7) ------------------------------- #
+# Verified against the LIVE `6.0.1-rc.7+release.42383.32955d8d.gl` runtime by
+# instantiating each type and dumping its ports, not read off a doc page. That
+# build is a release candidate; these tokens were never checked against 6.0.1
+# GA, which is a distinct later release. All five tokens carried over from
 # 4.5.0 unchanged; the extension providing the ROS 2 ones was renamed
 # (isaacsim.ros2.bridge -> isaacsim.ros2.nodes) but the node:type strings were
 # not.
