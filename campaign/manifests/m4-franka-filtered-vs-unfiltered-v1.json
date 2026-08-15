@@ -1,0 +1,443 @@
+{
+  "analysis": {
+    "bootstrap_resamples": 10000,
+    "bootstrap_seed": 20260814,
+    "metrics": [
+      "tracking_rms_error",
+      "settling_time_s",
+      "overshoot_pct",
+      "filter_attenuation_db"
+    ],
+    "paired_analysis": "per-seed filtered-minus-unfiltered differences",
+    "primary_metric": "tracking_rms_error",
+    "secondary_diagnostics": [
+      "peak_tracking_error_rad",
+      "true_tracking_rms_error_rad",
+      "limit_clamp_cycles",
+      "measured_sample_rate_hz",
+      "controller_cycles",
+      "tracker_status",
+      "waypoints_reached"
+    ],
+    "significance_policy": "no null-hypothesis significance claim is made from n=20; intervals and raw distributions are reported instead",
+    "uncertainty": "deterministic BCa-free percentile bootstrap, 10000 resamples, seeded with bootstrap_seed"
+  },
+  "campaign_id": "m4-franka-filtered-vs-unfiltered",
+  "campaign_version": 1,
+  "controller": {
+    "implementation": "control_loop.logic.waypoint_tracker.WaypointTracker",
+    "joint_limits": "control_loop.logic.franka_limits.limits_for(ARM_JOINT_NAMES)",
+    "joint_names": [
+      "panda_joint1",
+      "panda_joint2",
+      "panda_joint3",
+      "panda_joint4",
+      "panda_joint5",
+      "panda_joint6",
+      "panda_joint7"
+    ],
+    "kp": 0.8,
+    "max_step_rad": 0.05,
+    "tolerance_rad": 0.02,
+    "waypoint_timeout_s": 10.0,
+    "waypoints_flat": [
+      0.2,
+      -0.6,
+      0.0,
+      -2.2,
+      0.0,
+      1.8,
+      0.6,
+      -0.2,
+      -0.4,
+      0.2,
+      -2.0,
+      0.2,
+      1.6,
+      0.9
+    ]
+  },
+  "design": {
+    "arm_order_policy": "even seed: filtered first; odd seed: unfiltered first (balanced, frozen pre-run)",
+    "conditions": [
+      "filtered",
+      "unfiltered"
+    ],
+    "excluded_runs_are_reported": true,
+    "exclusion_rules": [
+      "reset_failed: start pose not reached within reset_max_steps",
+      "rate_out_of_tolerance: measured per-run sample rate differs from 200.0 Hz by more than rate_tolerance_frac",
+      "insufficient_samples: fewer than samples_per_run rows collected before step_cap_per_run",
+      "harness_error: an exception during the run"
+    ],
+    "execution_plan": [
+      {
+        "condition": "filtered",
+        "position": 0,
+        "run_id": "filtered-0000",
+        "seed": 0
+      },
+      {
+        "condition": "unfiltered",
+        "position": 1,
+        "run_id": "unfiltered-0000",
+        "seed": 0
+      },
+      {
+        "condition": "unfiltered",
+        "position": 2,
+        "run_id": "unfiltered-0001",
+        "seed": 1
+      },
+      {
+        "condition": "filtered",
+        "position": 3,
+        "run_id": "filtered-0001",
+        "seed": 1
+      },
+      {
+        "condition": "filtered",
+        "position": 4,
+        "run_id": "filtered-0002",
+        "seed": 2
+      },
+      {
+        "condition": "unfiltered",
+        "position": 5,
+        "run_id": "unfiltered-0002",
+        "seed": 2
+      },
+      {
+        "condition": "unfiltered",
+        "position": 6,
+        "run_id": "unfiltered-0003",
+        "seed": 3
+      },
+      {
+        "condition": "filtered",
+        "position": 7,
+        "run_id": "filtered-0003",
+        "seed": 3
+      },
+      {
+        "condition": "filtered",
+        "position": 8,
+        "run_id": "filtered-0004",
+        "seed": 4
+      },
+      {
+        "condition": "unfiltered",
+        "position": 9,
+        "run_id": "unfiltered-0004",
+        "seed": 4
+      },
+      {
+        "condition": "unfiltered",
+        "position": 10,
+        "run_id": "unfiltered-0005",
+        "seed": 5
+      },
+      {
+        "condition": "filtered",
+        "position": 11,
+        "run_id": "filtered-0005",
+        "seed": 5
+      },
+      {
+        "condition": "filtered",
+        "position": 12,
+        "run_id": "filtered-0006",
+        "seed": 6
+      },
+      {
+        "condition": "unfiltered",
+        "position": 13,
+        "run_id": "unfiltered-0006",
+        "seed": 6
+      },
+      {
+        "condition": "unfiltered",
+        "position": 14,
+        "run_id": "unfiltered-0007",
+        "seed": 7
+      },
+      {
+        "condition": "filtered",
+        "position": 15,
+        "run_id": "filtered-0007",
+        "seed": 7
+      },
+      {
+        "condition": "filtered",
+        "position": 16,
+        "run_id": "filtered-0008",
+        "seed": 8
+      },
+      {
+        "condition": "unfiltered",
+        "position": 17,
+        "run_id": "unfiltered-0008",
+        "seed": 8
+      },
+      {
+        "condition": "unfiltered",
+        "position": 18,
+        "run_id": "unfiltered-0009",
+        "seed": 9
+      },
+      {
+        "condition": "filtered",
+        "position": 19,
+        "run_id": "filtered-0009",
+        "seed": 9
+      },
+      {
+        "condition": "filtered",
+        "position": 20,
+        "run_id": "filtered-0010",
+        "seed": 10
+      },
+      {
+        "condition": "unfiltered",
+        "position": 21,
+        "run_id": "unfiltered-0010",
+        "seed": 10
+      },
+      {
+        "condition": "unfiltered",
+        "position": 22,
+        "run_id": "unfiltered-0011",
+        "seed": 11
+      },
+      {
+        "condition": "filtered",
+        "position": 23,
+        "run_id": "filtered-0011",
+        "seed": 11
+      },
+      {
+        "condition": "filtered",
+        "position": 24,
+        "run_id": "filtered-0012",
+        "seed": 12
+      },
+      {
+        "condition": "unfiltered",
+        "position": 25,
+        "run_id": "unfiltered-0012",
+        "seed": 12
+      },
+      {
+        "condition": "unfiltered",
+        "position": 26,
+        "run_id": "unfiltered-0013",
+        "seed": 13
+      },
+      {
+        "condition": "filtered",
+        "position": 27,
+        "run_id": "filtered-0013",
+        "seed": 13
+      },
+      {
+        "condition": "filtered",
+        "position": 28,
+        "run_id": "filtered-0014",
+        "seed": 14
+      },
+      {
+        "condition": "unfiltered",
+        "position": 29,
+        "run_id": "unfiltered-0014",
+        "seed": 14
+      },
+      {
+        "condition": "unfiltered",
+        "position": 30,
+        "run_id": "unfiltered-0015",
+        "seed": 15
+      },
+      {
+        "condition": "filtered",
+        "position": 31,
+        "run_id": "filtered-0015",
+        "seed": 15
+      },
+      {
+        "condition": "filtered",
+        "position": 32,
+        "run_id": "filtered-0016",
+        "seed": 16
+      },
+      {
+        "condition": "unfiltered",
+        "position": 33,
+        "run_id": "unfiltered-0016",
+        "seed": 16
+      },
+      {
+        "condition": "unfiltered",
+        "position": 34,
+        "run_id": "unfiltered-0017",
+        "seed": 17
+      },
+      {
+        "condition": "filtered",
+        "position": 35,
+        "run_id": "filtered-0017",
+        "seed": 17
+      },
+      {
+        "condition": "filtered",
+        "position": 36,
+        "run_id": "filtered-0018",
+        "seed": 18
+      },
+      {
+        "condition": "unfiltered",
+        "position": 37,
+        "run_id": "unfiltered-0018",
+        "seed": 18
+      },
+      {
+        "condition": "unfiltered",
+        "position": 38,
+        "run_id": "unfiltered-0019",
+        "seed": 19
+      },
+      {
+        "condition": "filtered",
+        "position": 39,
+        "run_id": "filtered-0019",
+        "seed": 19
+      }
+    ],
+    "no_replacement_rule": "a failed or invalid run stays in the denominator; it is never replaced by another seed and never silently dropped",
+    "pairing": "same seed in both conditions -> identical disturbance realization -> paired differences are meaningful",
+    "runs_per_condition": 20,
+    "scheduled_runs": 40,
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ]
+  },
+  "disturbance": {
+    "awgn_sigma_rad": 0.1,
+    "injection_point": "joint-state feedback path, pre-filter",
+    "model": "control_loop.logic.noise_model.JointStateNoiseModel",
+    "rng": "numpy.random.default_rng(seed)",
+    "vibration_amplitude_rad": 0.3,
+    "vibration_freq_hz": 25.0,
+    "vibration_phase_rad": 0.0
+  },
+  "evidence": {
+    "gauntlet_run_log": "logs/<run_id>/{run_meta.json,telemetry.csv}",
+    "graded_packet": "evidence/run-<run_id>.json",
+    "immutability": "committed packets are records, never edited; a correction is a new run id (AGENTS.md §2)",
+    "integrity": "sha256 per file, recorded in raw_evidence.json and in the campaign integrity index",
+    "raw_packet": "logs/<run_id>/raw_evidence.json",
+    "telemetry_columns": [
+      "t",
+      "reference",
+      "measured",
+      "noisy"
+    ]
+  },
+  "filter": {
+    "cutoff_hz": 5.0,
+    "filtered_kind": "iir",
+    "filtered_order": 4,
+    "implementation": "control_loop.logic.filter_stage.FilterStage",
+    "path": "causal only (s2r_dsp.apply_filter_realtime); the zero-phase offline path is never in the loop",
+    "sample_rate_hz": 200.0,
+    "unfiltered_kind": "passthrough",
+    "unfiltered_response": "identity b=[1], a=[1] (flat 0 dB)"
+  },
+  "manifest_sha256": "1d227e437317bac11df209d39ac264d7b4ffe9d5f9b5d4bf8c805f266b238052",
+  "non_claims": [
+    "simulation only; no physical hardware was involved",
+    "one Franka joint-space scenario; no generalization is claimed",
+    "no sim-to-real transfer is demonstrated or claimed",
+    "no robot safety claim",
+    "no certification or compliance claim",
+    "no production-readiness claim"
+  ],
+  "provenance": {
+    "repo_commit": "65bf383c624e082152596130ef75fb8fa1fd157f",
+    "runtime_validation_parent_commit": "19db28544a5b0ed6ad3640af01b4e158dd50cccb",
+    "scene_file": "scenes/franka_ros2_bridge_scene.usd",
+    "scene_graph_fingerprint": "50a61f7795111e125e3f2fa9c3b3c166f8cba826d111889c977f5f3692defdf3"
+  },
+  "run_contract": {
+    "reference_segment_s": 5.0,
+    "reference_signal": "exogenous, time-parameterized: waypoint k is the reference for elapsed simulated time in [k*T/K, (k+1)*T/K), with T=run_duration_sim_s and K=len(waypoints). Identical in both arms and for every seed; independent of controller progress.",
+    "representative_joint": "panda_joint1",
+    "reset_between_runs": [
+      "articulation commanded back to start_pose_rad and verified within reset_tolerance_rad before the run begins",
+      "WaypointTracker reconstructed per run",
+      "FilterStage reconstructed per run (zero delay-line state)",
+      "JointStateNoiseModel reconstructed per run from the run seed",
+      "joint-state sample buffer cleared per run",
+      "telemetry accumulators reconstructed per run"
+    ],
+    "reset_max_steps": 6000,
+    "reset_tolerance_rad": 0.02,
+    "run_duration_sim_s": 10.0,
+    "samples_per_run": 2000,
+    "start_pose_rad": [
+      0.0,
+      -0.785,
+      0.0,
+      -2.356,
+      0.0,
+      1.571,
+      0.785
+    ],
+    "step_cap_per_run": 20000
+  },
+  "runtime": {
+    "environment": {
+      "gauntlet": "0.1.0",
+      "numpy": "2.3.1",
+      "python": "3.12.13",
+      "s2r_dsp": "0.1.0",
+      "scipy": "1.17.0"
+    },
+    "gpu_class": "NVIDIA GB10 (DGX Spark class)",
+    "isaac_build": "6.0.1-rc.7+release.42383.32955d8d.gl",
+    "platform": "aarch64",
+    "rclpy_source": "omniverse-built",
+    "rmw_implementation": "rmw_fastrtps_cpp",
+    "ros_distro": "jazzy",
+    "ros_library_source": "isaac-internal (exts/isaacsim.ros2.core/jazzy/lib)"
+  },
+  "sampling": {
+    "graph_tick_per_physics_steps": 2,
+    "nyquist_hz": 100.0,
+    "physics_dt_s": 0.0025,
+    "rate_evidence": "per-run inter-sample simulated-time deltas",
+    "rate_tolerance_frac": 0.02,
+    "rendering_dt_s": 0.0025,
+    "sample_rate_hz": 200.0
+  },
+  "scenario": "franka-joint-tracking",
+  "schema_version": 1
+}
