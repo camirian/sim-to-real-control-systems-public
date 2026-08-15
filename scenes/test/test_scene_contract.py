@@ -60,7 +60,9 @@ class TestCommittedSceneSatisfiesTheContract:
         violations = sc.check_scene(SCENE)
         assert violations == [], "\n".join(str(v) for v in violations)
 
-    def test_all_five_graph_nodes_present(self):
+    def test_all_six_graph_nodes_present(self):
+        # Six under Isaac Sim 6.0.1: the joint-state reader joined the graph
+        # when 6.0 stopped letting ROS 2 publishers resolve USD prims directly.
         types = {line.split()[-1] for line in sc.describe_graph(SCENE)}
         assert types == {
             sc.TICK_TYPE,
@@ -68,6 +70,7 @@ class TestCommittedSceneSatisfiesTheContract:
             sc.SUBSCRIBER_TYPE,
             sc.CONTROLLER_TYPE,
             sc.READ_SIM_TIME_TYPE,
+            sc.READ_JOINT_STATE_TYPE,
         }
 
     def test_fingerprint_is_stable_across_reads(self):
