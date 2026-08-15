@@ -1,0 +1,94 @@
+"""Freeze the campaign manifest. Run ONCE, before the first empirical run.
+
+    python scripts/freeze_campaign_manifest.py
+
+Writes ``campaign/manifests/<campaign_id>-v<version>.json``, hashed over its own
+body. Refuses to overwrite an existing manifest: a frozen design is a record,
+not a file you regenerate when something turns out inconvenient. To change the
+design, bump ``CAMPAIGN_VERSION`` — which makes the change a new experiment
+rather than an edit to a running one.
+
+No Isaac and no ROS: the manifest is pure preregistration, so it can be frozen,
+hashed, and reviewed on any machine before the simulator is ever touched.
+"""
+
+from __future__ import annotations
+
+import argparse
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO))
+sys.path.insert(0, str(REPO / "dsp"))
+sys.path.insert(0, str(REPO / "ros2-ws" / "src" / "control_loop"))
+
+from campaign.manifest import (  # noqa: E402
+    CAMPAIGN_ID,
+    CAMPAIGN_VERSION,
+    build_manifest,
+    write_manifest,
+)
+from gauntlet.evidence import environment_versions  # noqa: E402
+from scenes.scene_contract import graph_fingerprint  # noqa: E402
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--repo-commit", required=True,
+                    help="commit of the harness code the campaign will run")
+    ap.add_argument("--runtime-parent", required=True,
+                    help="head of the runtime-validation branch this stacks on")
+    ap.add_argument("--isaac-build", required=True)
+    # The environment that must be recorded is the one that PRODUCES the
+    # numbers — the simulation host's bundled interpreter — not whichever
+    # machine happens to be freezing the manifest. Pass it explicitly rather
+    # than letting the local versions masquerade as the runtime's.
+    ap.add_argument("--runtime-env", default=None,
+                    help='JSON of the SIM HOST interpreter/library versions, '
+                         'e.g. \'{"python":"3.12.13","numpy":"2.3.1"}\'. '
+                         "Defaults to this machine's versions.")
+    ap.add_argument("--out-dir", default=str(REPO / "campaign" / "manifests"))
+    ap.add_argument("--force", action="store_true",
+                    help="allow overwrite (only for pre-freeze dry runs)")
+    args = ap.parse_args()
+
+    scene = REPO / "scenes" / "franka_ros2_bridge_scene.usd"
+    fingerprint = graph_fingerprint(scene)
+
+    if args.runtime_env:
+        import json as _json
+        env = {str(k): str(v) for k, v in _json.loads(args.runtime_env).items()}
+    else:
+        env = environment_versions()
+
+    manifest = build_manifest(
+        repo_commit=args.repo_commit,
+        runtime_parent_commit=args.runtime_parent,
+        scene_graph_fingerprint=fingerprint,
+        isaac_build=args.isaac_build,
+        environment=env,
+    )
+
+    out = Path(args.out_dir) / f"{CAMPAIGN_ID}-v{CAMPAIGN_VERSION}.json"
+    if out.exists() and not args.force:
+        print(f"REFUSING to overwrite frozen manifest {out}\n"
+              f"A frozen design is a record. Bump CAMPAIGN_VERSION instead.",
+              file=sys.stderr)
+        return 2
+
+    write_manifest(manifest, out)
+    print(f"scene graph fingerprint : {fingerprint}")
+    print(f"manifest sha256         : {manifest['manifest_sha256']}")
+    print(f"scheduled runs          : {manifest['design']['scheduled_runs']}")
+    print(f"seeds                   : {manifest['design']['seeds']}")
+    try:
+        shown = out.relative_to(REPO)
+    except ValueError:
+        shown = out  # out-of-tree scratch dir (pilot dry runs)
+    print(f"written                 : {shown}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

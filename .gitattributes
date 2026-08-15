@@ -1,0 +1,14 @@
+# Committed campaign evidence is verified by sha256 over its exact bytes
+# (campaign/raw_evidence.py records a digest per file; the offline verification
+# test re-hashes them). Any end-of-line normalization on checkout would rewrite
+# those bytes and break every recorded digest on that clone — the evidence would
+# read as tampered when nothing was tampered with.
+#
+# `-text` disables EOL conversion entirely, so these files round-trip byte for
+# byte on every platform. Do not remove this without re-hashing the evidence.
+campaign/results/** -text
+
+# The scene is a USD crate (binary). Its identity in run manifests is the graph
+# fingerprint from scenes.scene_contract, not this file's hash — crate re-saves
+# are not byte-reproducible — but it must still never be line-ending mangled.
+*.usd binary

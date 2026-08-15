@@ -48,9 +48,38 @@ flowchart LR
     GAUNT --> EVID["evidence/run-&lt;id&gt;.json\n+ markdown compliance report"]
 ```
 
-## Current status — cloud milestones M1–M3 complete; M4 pending the EdgeXpert campaign
+## Current status — M1–M3 complete; M4 runtime validated and the 40-run campaign executed
 
 Honest state of the repo today:
+
+> **Which simulator build the empirical claims are about.** All runtime
+> validation and all 40 campaign runs were executed on exactly one build:
+> Isaac Sim **`6.0.1-rc.7+release.42383.32955d8d.gl`**. That is a *release
+> candidate*. NVIDIA's Isaac Sim 6.0.1 **GA is a distinct, later release, and
+> this project has not evaluated it** — no run here was made on GA, and nothing
+> here shows GA behaves the same. Every empirical result below is evidence
+> about the tested RC build and should be read that way.
+
+- **M4 campaign RUN (40/40 valid).** The preregistered filtered-vs-unfiltered
+  campaign executed on a real Isaac Sim 6.0.1-rc.7 host: 20 seeds × 2 conditions,
+  40 scheduled, **40 valid, 0 invalid, 0 failed**, every evidence file
+  hash-verified. Filtered feedback beat unfiltered on every metric —
+  tracking RMS 0.177 vs 0.406 rad (paired mean difference −0.229 rad, 95% CI
+  [−0.248, −0.212], filtered better in 20/20 seeds) and 48.1 dB of attenuation
+  at the 25 Hz disturbance band versus 0.0 dB. Numbers, uncertainty, failure
+  analysis and non-claims: **[RESULTS.md](RESULTS.md)**. Every figure is
+  regenerated from raw evidence by `scripts/build_results.py`; nothing is
+  hand-entered. **Simulation only — no hardware, transfer, safety or
+  certification claim.**
+- **M4 runtime validated on Isaac Sim 6.0.1-rc.7** (`M4_RUNTIME_GATE_PASS`,
+  on `6.0.1-rc.7+release.42383.32955d8d.gl`; GA not evaluated). Running
+  it exposed three defects a static check could not: a publisher that emitted
+  ZERO messages without `stageMetersPerUnit` wired, a default graph sampling at
+  30.02 Hz that would have aliased the 25 Hz disturbance onto the 5 Hz cutoff,
+  and an endogenous reference signal caught by a pilot run before the design was
+  frozen. See **[docs/M4_RUNTIME_VALIDATION.md](docs/M4_RUNTIME_VALIDATION.md)**.
+- **Verifying the evidence needs no GPU, ROS or Isaac** — only a clone and
+  Python. See **[docs/REPRODUCE_CAMPAIGN.md](docs/REPRODUCE_CAMPAIGN.md)**.
 
 - **M1–M3 complete (everything buildable/testable without a sim box):**
   - `dsp/` is the installable `s2r-dsp` package (REQ-S2R-001): FIR/IIR design,
@@ -65,13 +94,9 @@ Honest state of the repo today:
     into the filtered-vs-unfiltered "money table" (REQ-S2R-102).
   - CI runs the DSP + control_loop-logic + gauntlet + campaign tests on every
     PR with no ROS/Isaac dependency (REQ-S2R-200).
-- **M4 pending on the EdgeXpert (needs live Isaac + ROS 2):** the actual
-  20+20 seeded campaign that fills the money table with real numbers, and the
-  2–3 minute recorded demo. The harness is built so **one command** produces
-  the table once the loop runs — see
-  **[docs/RUN_ON_EDGEXPERT.md](docs/RUN_ON_EDGEXPERT.md)** for the complete
-  fresh-box-to-recorded-demo runbook and the consolidated `EDGEXPERT-VERIFY`
-  checklist.
+- **Remaining M4 work:** the recorded demo. The script and shot list are in
+  **[docs/DEMO_OUTLINE.md](docs/DEMO_OUTLINE.md)**; no video is published from
+  this repository.
 - **Loop closed scene-side (was the blocking gap):**
   `scenes/franka_ros2_bridge_scene.usd` published `/joint_states` but nothing
   subscribed to `/joint_command`, so the controller could not drive the arm.
@@ -80,11 +105,14 @@ Honest state of the repo today:
   `scripts/author_joint_command_graph.py` (no Isaac Sim needed) and verified in
   CI by `scenes/scene_contract.py`. **This is the scene-side contract only** —
   that Isaac loads the graph and the arm actually moves is still unverified.
-- **Campaign not run.** No Isaac Sim 4.5.0 host is available to this project
-  right now, so the 20+20 seeded campaign has not been executed and no real
-  evidence packets exist. What blocks it, what was measured instead, and the
-  one open filter-sample-rate question are recorded in
-  **[docs/M4_BASELINE.md](docs/M4_BASELINE.md)**.
+- **Loop confirmed in the runtime (was unverified above).** Isaac 6.0.1-rc.7 loads
+  the graph, `/joint_states` publishes at a measured 200 Hz, `/joint_command` is
+  provably consumed, and the loop closes through the project's own
+  `WaypointTracker`. The scene-side-only caveat above is now retired.
+- **Historical note.** `docs/M4_BASELINE.md` records the earlier state, when the
+  campaign was blocked on an Isaac Sim 4.5.0 pin. That blocker is resolved: the
+  work moved to the Isaac Sim 6.0.1 release candidate identified above. The 6.0.1
+  GA release postdates that move and was not adopted or tested here.
 
 ## Repository layout
 

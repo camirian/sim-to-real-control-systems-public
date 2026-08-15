@@ -1,0 +1,190 @@
+{
+  "campaign_id": "m4-franka-filtered-vs-unfiltered",
+  "campaign_version": 1,
+  "condition": "filtered",
+  "controller": {
+    "completion_reason": "sample_target_reached",
+    "cycles": 2000,
+    "filter_kind": "iir",
+    "implementation": "control_loop.logic.waypoint_tracker.WaypointTracker",
+    "limit_clamp_cycles": 4,
+    "limit_clamped_any": true,
+    "status_transitions": [
+      {
+        "active_waypoint": 0,
+        "status": "tracking",
+        "t": 241.31
+      },
+      {
+        "active_waypoint": null,
+        "status": "done",
+        "t": 247.145
+      }
+    ],
+    "steps_used": 3998,
+    "tracker_status": "done",
+    "waypoint_results": [
+      {
+        "elapsed_s": 2.3700000000000045,
+        "final_error_rad": 0.019676636689440086,
+        "index": 0,
+        "reached": true
+      },
+      {
+        "elapsed_s": 3.4650000000000034,
+        "final_error_rad": 0.01720168611650788,
+        "index": 1,
+        "reached": true
+      }
+    ],
+    "waypoints": [
+      [
+        0.2,
+        -0.6,
+        0.0,
+        -2.2,
+        0.0,
+        1.8,
+        0.6
+      ],
+      [
+        -0.2,
+        -0.4,
+        0.2,
+        -2.0,
+        0.2,
+        1.6,
+        0.9
+      ]
+    ]
+  },
+  "execution_position": 23,
+  "failure_reason": null,
+  "files": {
+    "run_meta.json": "e0ef92ac1fad87155c4af274a0d5ab297087c4aa1458bbd9c41b873f4334c8ce",
+    "telemetry.csv": "fcde890db7d699108c31663580444c98d10702be472d521ca35e6dbd9b7ac7fd",
+    "truth.csv": "177726e5fe6afecf391530cff3130cd4756973b01fbf9698c4105c9e76badbd7"
+  },
+  "manifest_sha256": "1d227e437317bac11df209d39ac264d7b4ffe9d5f9b5d4bf8c805f266b238052",
+  "rate": {
+    "dt_max_s": 0.005000000000023874,
+    "dt_mean_s": 0.005000000000000003,
+    "dt_min_s": 0.0049999999999954525,
+    "dt_stdev_s": 1.0424287814033849e-14,
+    "measured_hz": 199.9999999999999,
+    "monotonic": true,
+    "n_samples": 2000,
+    "span_s": 9.995000000000005,
+    "target_hz": 200.0,
+    "tolerance_frac": 0.02,
+    "within_tolerance": true
+  },
+  "reset": {
+    "achieved": true,
+    "final_error_rad": 0.0,
+    "final_pose_rad": [
+      0.0,
+      -0.785,
+      0.0,
+      -2.356,
+      0.0,
+      1.571,
+      0.785
+    ],
+    "max_steps": 6000,
+    "steps_used": 126,
+    "target_pose_rad": [
+      0.0,
+      -0.785,
+      0.0,
+      -2.356,
+      0.0,
+      1.571,
+      0.785
+    ],
+    "tolerance_rad": 0.02
+  },
+  "run_id": "filtered-0011",
+  "runtime": {
+    "isaac_build": "6.0.1-rc.7+release.42383.32955d8d.gl",
+    "physics_dt_s": 0.0025,
+    "platform": "aarch64",
+    "representative_joint": "panda_joint1",
+    "rmw": "rmw_fastrtps_cpp",
+    "ros_distro": "jazzy"
+  },
+  "scenario": "franka-joint-tracking",
+  "schema_version": 1,
+  "seed": 11,
+  "signals_summary": {
+    "command_max_rad": 0.20740161087055667,
+    "command_min_rad": -0.20943659790277333,
+    "n_rows": 2000,
+    "noisy_rms_error_rad": 0.29280739099132447,
+    "peak_tracking_error_rad": 0.39935454590405073,
+    "reference_span_rad": 0.4,
+    "tracking_rms_error_rad": 0.17658976413798663,
+    "true_peak_tracking_error_rad": 0.3997,
+    "true_tracking_rms_error_rad": 0.1840853510874779
+  },
+  "start_state": {
+    "actual_start_pose_rad": [
+      0.0,
+      -0.785,
+      0.0,
+      -2.356,
+      0.0,
+      1.571,
+      0.785
+    ],
+    "declared_start_pose_rad": [
+      0.0,
+      -0.785,
+      0.0,
+      -2.356,
+      0.0,
+      1.571,
+      0.785
+    ],
+    "joint_limits": [
+      [
+        -2.897300087848498,
+        2.897300087848498
+      ],
+      [
+        -1.762799988219413,
+        1.762799988219413
+      ],
+      [
+        -2.897300087848498,
+        2.897300087848498
+      ],
+      [
+        -3.0717999898504136,
+        -0.06979999575475569
+      ],
+      [
+        -2.897300087848498,
+        2.897300087848498
+      ],
+      [
+        -0.01749999978815516,
+        3.752499969733032
+      ],
+      [
+        -2.897300087848498,
+        2.897300087848498
+      ]
+    ],
+    "joint_names": [
+      "panda_joint1",
+      "panda_joint2",
+      "panda_joint3",
+      "panda_joint4",
+      "panda_joint5",
+      "panda_joint6",
+      "panda_joint7"
+    ]
+  },
+  "status": "valid"
+}

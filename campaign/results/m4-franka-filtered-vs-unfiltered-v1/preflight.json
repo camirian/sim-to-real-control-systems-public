@@ -1,0 +1,31 @@
+{
+  "preflight": {
+    "joint_names": [
+      "panda_joint1",
+      "panda_joint2",
+      "panda_joint3",
+      "panda_joint4",
+      "panda_joint5",
+      "panda_joint6",
+      "panda_joint7",
+      "panda_finger_joint1",
+      "panda_finger_joint2"
+    ],
+    "physx": {
+      "gpu_dynamics": false,
+      "physx_scene_prim": "/physicsScene",
+      "simulation_device": "cpu"
+    },
+    "rate": {
+      "dt_max_s": 0.00500000100000042,
+      "dt_mean_s": 0.005,
+      "dt_min_s": 0.004999998999999811,
+      "dt_stdev_s": 2.0851440281768624e-10,
+      "measured_hz": 200.0,
+      "monotonic": true,
+      "n_samples": 600,
+      "span_s": 2.995
+    },
+    "within_tolerance": true
+  }
+}
