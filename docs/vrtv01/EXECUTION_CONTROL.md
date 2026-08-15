@@ -11,7 +11,7 @@ These are routinely conflated. They are not interchangeable and must be recorded
 |---|---|---|
 | `SOURCE_BASELINE_SHA` | `f03c748ae0b0e6b30de572e9cb7ef49b2c88fe29` | `main` at the time VRTV-01 opened. The frozen source set every condition reasons from. |
 | `PREREGISTRATION_SHA` | `0369dab5b83cedcc92847088ba939de092c295c0` | The commit that froze the experimental design in `docs/VISUAL_ROUND_TRIP_EXPERIMENT_01.md`. **This is the preregistration. It is not superseded by later commits on this branch.** |
-| `CURRENT_EXECUTION_PACKAGE_HEAD` | see issue #17 | The PR head carrying execution artifacts (packages, seeded controls, this file). Advances as control-plane work lands. **Never cite this as the preregistration SHA.** |
+| `CURRENT_EXECUTION_PACKAGE_HEAD` | `bb821bb55d730cfdf0340743826cedcc914e7103` | The live PR head carrying the execution artifacts and fail-closed staging control. Re-verify this value against PR #16 before execution. **Never cite this as the preregistration SHA.** |
 
 Adding execution artifacts does **not** move `PREREGISTRATION_SHA`. If the *design* ever
 changes, that is VRTV-02 with its own preregistration — not a new head on this branch.

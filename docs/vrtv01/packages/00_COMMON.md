@@ -6,7 +6,7 @@
 |---|---|
 | `SOURCE_BASELINE_SHA` | `f03c748ae0b0e6b30de572e9cb7ef49b2c88fe29` |
 | `PREREGISTRATION_SHA` | `0369dab5b83cedcc92847088ba939de092c295c0` |
-| `CURRENT_EXECUTION_PACKAGE_HEAD` | recorded in issue #17; advances with control-plane commits |
+| `CURRENT_EXECUTION_PACKAGE_HEAD` | `bb821bb55d730cfdf0340743826cedcc914e7103` at this review; re-verify PR #16 before execution |
 
 **`PREREGISTRATION_SHA` is `0369dab`.** Later commits on this branch add execution
 artifacts and do not move it. Never cite the PR head as the preregistration SHA.
