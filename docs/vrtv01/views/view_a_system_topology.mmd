@@ -1,0 +1,11 @@
+flowchart LR
+    ISAAC["Isaac Sim\nFranka articulation"] -->|clean joint state| NOISE["Seeded disturbance\n25 Hz + AWGN"]
+    NOISE -->|disturbed feedback| CONDITION{"Frozen condition"}
+    CONDITION -->|filtered arm| FILTER["4th-order Butterworth IIR\n5 Hz cutoff\ncausal path"]
+    CONDITION -->|unfiltered arm| PASS["Identity / passthrough\n0 dB"]
+    FILTER --> CTRL["WaypointTracker\nexogenous time reference"]
+    PASS --> CTRL
+    CTRL -->|joint commands| ISAAC
+    ISAAC --> LOG["Raw telemetry\n200 Hz target"]
+    CTRL --> LOG
+    LOG --> GAUNT["Gauntlet + evidence packet"]

@@ -1,0 +1,10 @@
+flowchart TB
+    PRE["Pre-campaign validation"] --> RATE["30.02 Hz sampling defect found\n25 Hz would alias near 5 Hz"]
+    PRE --> PUB["stageMetersPerUnit defect found\nstatic contract passed but publisher emitted zero"]
+    PRE --> REF["Pilot endogenous-reference defect found\narms could be scored against different references"]
+    RATE --> FIX["Fix before manifest freeze"]
+    PUB --> FIX
+    REF --> FIX
+    FIX --> FREEZE["Freeze manifest + design"]
+    FREEZE --> CAMPAIGN["40-run campaign"]
+    CAMPAIGN --> VALID["40 valid / 0 failed / 0 missing"]

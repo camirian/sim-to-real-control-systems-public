@@ -1,0 +1,11 @@
+flowchart LR
+    EVID["What the 40-run campaign directly supports"] --> C1["In this tested simulated Franka scenario,
+filtered feedback had lower tracking RMS"]
+    EVID --> C2["The configured causal filter attenuated the injected 25 Hz disturbance"]
+    EVID --> C3["The committed campaign evidence is reproducible/inspectable without Isaac"]
+
+    EVID -. does not establish .-> N1["physical hardware performance"]
+    EVID -. does not establish .-> N2["sim-to-real transfer"]
+    EVID -. does not establish .-> N3["robot safety or certification"]
+    EVID -. does not establish .-> N4["Isaac Sim 6.0.1 GA equivalence"]
+    EVID -. does not establish .-> N5["generalization to other robots/scenarios"]
