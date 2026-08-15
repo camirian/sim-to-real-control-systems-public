@@ -86,67 +86,138 @@ runs, including V0. Do not run V0 on a text-only model.
 
 No condition may start until this record is complete and committed.
 
-**Decision recorded 2026-08-15. Model ID resolved against the authenticated OpenAI
-Models endpoint on 2026-08-15T22:43Z. Synthetic preflight BLOCKED on provider quota —
-see "Preflight status" below. This record is therefore COMPLETE for model identity and
-INCOMPLETE for runtime capability confirmation.**
+**Decision recorded 2026-08-15. Model resolved and synthetic preflight PASSED against
+the live authenticated endpoint on 2026-08-15T23:03Z.**
 
 | Field | Value | Established how |
 |---|---|---|
 | Treatment provider | **OpenAI** | decision |
 | Treatment family | **GPT-5.6 Sol** | decision |
-| **Exact treatment model ID** | **`gpt-5.6-sol`** | **authenticated Models endpoint** |
-| Pin basis | **`explicit-id-no-snapshot-published`** | authenticated — no `gpt-5.6-sol-<snapshot>` ID is published to this account |
-| `gpt-5.6*` visible to this account | `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra` (118 models total) | authenticated |
-| Forbidden aliases rejected | `gpt-5.6`, `gpt-5.6-latest`, `gpt-5` | enforced in `harness/pin_model_id.py` |
-| API | **OpenAI Responses API**, plain client — not Codex, ChatGPT, or any agent harness | harness contract |
-| Reasoning effort | **high** | harness parameter |
-| `store` | **false** | harness parameter |
+| **Exact treatment model ID** | **`gpt-5.6-sol`** | authenticated Models endpoint, re-derived twice |
+| Pin basis | **`explicit-id-no-snapshot-published`** | authenticated — no `gpt-5.6-sol-<snapshot>` published |
+| `gpt-5.6*` visible | `gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra` | authenticated |
+| API | **OpenAI Responses API**, plain client | harness contract |
+| Reasoning effort | **high** | request parameter, accepted |
+| `store` | **false** | request parameter |
 | Registered tools | **NONE** | harness contract |
-| Tools key sent | **false** — the key is omitted entirely, since `tools: []` still advertises capability | harness contract, asserted by preflight |
-| Reviewer-accessible web | **DENIED** | §5b Class 1 |
-| Reviewer-accessible GitHub | **DENIED** | §5b Class 1 |
-| Reviewer-accessible arbitrary network | **DENIED** | §5b Class 1 |
-| Model transport | **OpenAI API transport only** | §5b Class 2 |
-| Multimodal image input | **UNCONFIRMED — preflight could not run (quota)** | must be confirmed before V0 |
-| Frozen-source context capacity | **UNCONFIRMED — not measured against the selected model** | must be confirmed before V0 |
-| Five-session pin availability | **NOT GUARANTEED BY THE API.** `gpt-5.6-sol` is an unversioned ID with no published snapshot, so the provider offers no contractual stability. Mitigation is detection, not prevention: every run records identity fields and any change voids the affected run. | honest limitation |
+| Tools key sent | **false** | asserted in preflight and by guard G7 |
+| Reviewer web / GitHub / arbitrary network | **DENIED** | §5b Class 1 |
+| Model transport | **OpenAI API only** | §5b Class 2 |
+| **Multimodal image input** | **CONFIRMED** — model read a 1600×600 synthetic image and returned the printed word, printed number and block colour correctly | preflight ground-truth checks, 4/4 pass |
+| **Returned model identity** | **`gpt-5.6-sol`** — matches requested | preflight |
+| Context window | 1,050,000; **max input 922,000**; max output 128,000 | provider docs |
+| Long-context tier | >272,000 input tokens → 2× input, 1.5× output on the full request | provider docs |
+| **Frozen-source context capacity** | **FAILS — see "Context capacity blocker"** | measured |
+| Five-session pin availability | **NOT GUARANTEED BY THE API** — unversioned ID; detected, not prevented | honest limitation |
 | Selected by | pre-execution operator under frozen VRTV-01 control | — |
-| Selection timing | 2026-08-15, **before** any reviewer condition executed | — |
-| Selection rationale | strong multimodal frontier reviewer; same model for all five treatment sessions; avoids a weak-local-model floor effect that would produce an uninformative null; representation is the intended independent variable | — |
-| V3 provider | **Anthropic** | decision |
-| V3 model | **`claude-opus-4-8`** | decision |
-| V3 API visibility | **UNVERIFIED / TO BE CONFIRMED BEFORE V3** — no `ANTHROPIC_API_KEY` available at selection time | honest limitation |
-| V3 API | plain Anthropic Messages API | decision |
-| V3 registered tools | **NONE** | decision |
-| V3 transport | Anthropic API only | decision |
+| Selection timing | 2026-08-15, before any reviewer condition executed | — |
+| V3 provider / model | Anthropic / `claude-opus-4-8` | decision |
+| V3 API visibility | **UNVERIFIED — confirm before V3** (no Anthropic credential) | honest limitation |
 
-Absence of Anthropic credentials does **not** block V0. V3 runs only after all five
-treatment conditions and normalization, so its visibility check is due before V3, not now.
+### Pre-V0 identity baseline
 
-### Preflight status — BLOCKED on provider quota
+The preflight **does** establish the first provider-observed identity baseline, before V0.
+This closes the previously recorded gap where V0 would have had to establish its own.
 
-`harness/synthetic_preflight.py` was run on 2026-08-15T22:43Z against `gpt-5.6-sol` and
-returned:
+Baseline observed 2026-08-15T23:03Z:
 
 ```
-HTTP 429  type=insufficient_quota  code=credit_balance_exhausted
-"You have no credits remaining. Add credits to continue using the API"
+returned_model        gpt-5.6-sol
+service_tier          default
+response_id           resp_0e074e97f389d947016a80f03bf330819a9b7382ca8edbf998
+provider_request_id   req_8d38ab63343d41e9a4875a3ac3ef44bb
 ```
 
-No VRTV artifact was exposed: the request carried only the harness's self-generated 2×2
-synthetic PNG and a fixed synthetic sentence. `vrtv_artifacts_exposed: false`.
+**Identity fields AVAILABLE and stable-checkable across runs:** `returned_model`,
+`service_tier`. These must match the baseline on every treatment run.
 
-Consequences, recorded rather than worked around:
+**Identity fields AVAILABLE but NOT stable-checkable** (unique per request, recorded for
+provenance only, never compared): `response_id`, `provider_request_id`.
 
-- **multimodal image ingestion is unconfirmed** for the selected model;
-- **JSON output conformance is unconfirmed**;
-- **returned model identity and `system_fingerprint` are unobserved**, so the drift
-  baseline every treatment run is compared against does not yet exist;
-- **context capacity for the frozen source set is unmeasured**.
+**Identity fields UNAVAILABLE:** **`system_fingerprint` is `null`** on this endpoint. Do
+not treat its absence as drift, and do not write a drift check against it. The available
+drift signal is narrower than originally assumed: `returned_model` plus `service_tier`.
 
-The preflight must PASS before V0. Billing was deliberately not modified — no credits
-purchased, no payment method added, no auto-recharge enabled.
+Observed usage on the preflight: 1,242 input tokens, 30 output tokens, 0 reasoning tokens
+for the trivial task. Note reasoning-token count varies sharply with task difficulty — an
+earlier trivial call returned 743 — so output-token budgets for real review must not be
+extrapolated from the preflight.
+
+### Context capacity blocker — BLOCKS EXECUTION
+
+Measured with `tiktoken` `o200k_base` against the actual staged inputs:
+
+| Category | Files | Tokens | Share |
+|---|---:|---:|---:|
+| `telemetry.csv` (raw 200 Hz) | 40 | 2,079,029 | 57.4% |
+| `truth.csv` (raw) | 40 | 1,433,605 | 39.6% |
+| `raw_evidence.json` | 40 | 58,988 | 1.6% |
+| `evidence/*.json` | 40 | 18,932 | 0.5% |
+| other JSON | 4 | 16,834 | 0.5% |
+| markdown docs | 5 | 13,134 | 0.4% |
+| `run_meta.json` | 40 | 1,300 | 0.0% |
+| **TOTAL frozen source** | **209** | **3,621,822** | |
+| *excluding raw telemetry/truth CSV* | 169 | *109,188* | |
+
+**The frozen source set is 3,621,822 tokens against a 922,000 max input — 3.93× over.
+V0-CLEAN, V2-CLEAN and V2-SEEDED stage-1, and stage-2 of every condition, cannot be
+submitted as staged.** 97.0% of the load is per-sample raw telemetry: 40 runs × 2,002 rows
+× two CSVs.
+
+This is **not** a staging defect. `stage_runs.py` faithfully implements §2 of the frozen
+preregistration, which names *"committed M4 evidence under
+`campaign/results/m4-franka-filtered-vs-unfiltered-v1/`"* — and that directory contains the
+raw per-sample CSVs.
+
+**Resolving it requires an owner decision, because every option touches the frozen
+preregistration and none may be taken unilaterally:**
+
+1. **Narrow the frozen source set** to documents, manifests, run metadata and evidence
+   JSON, excluding raw per-sample CSVs (109,188 tokens — fits comfortably, standard
+   pricing). This is a preregistration change and therefore **VRTV-02**, not a VRTV-01 edit.
+2. **Summarise or downsample** the telemetry before staging. This inserts a derived
+   representation into what is supposed to be the authoritative source — which would
+   quietly make the baseline condition a *representation* condition and defeat the
+   experiment's purpose.
+3. **Keep the source set and change the protocol** to allow source-on-demand retrieval.
+   That is a different experiment; it also reintroduces a reviewer tool, violating §5b
+   Class 1.
+
+Option 1 is the least damaging and the most honest, but it is still a design change and it
+belongs to VRTV-02 under the freeze rule. **No option is taken here.**
+
+### Cost estimate — measured tokens, official pricing
+
+Pricing (developers.openai.com/api/docs/pricing): input **$5.00**/M, cached input
+**$0.50**/M, output **$30.00**/M. Long context (>272K input): input **$10.00**/M, output
+**$45.00**/M applied to the full request.
+
+Image tokens estimated at ~10,000 for the four-view packet, scaled from the measured
+preflight anchor (1600×600 ≈ 1,190 tokens). Estimate only — the views were deliberately
+**not** sent to the model for measurement.
+
+Under Option 1 (source = 109,188 tokens, all requests below the long-context threshold):
+
+| Run | stage-1 in | stage-2 in | cost @8k out | cost @25k out |
+|---|---:|---:|---:|---:|
+| V0-CLEAN | 109,588 | 113,588 | $1.60 | $2.62 |
+| V1-CLEAN | 10,400 | 113,588 | $1.10 | $2.12 |
+| V1-SEEDED | 10,400 | 113,588 | $1.10 | $2.12 |
+| V2-CLEAN | 119,588 | 113,588 | $1.65 | $2.67 |
+| V2-SEEDED | 119,588 | 113,588 | $1.65 | $2.67 |
+| **TOTAL** | | | **$7.09** | **$12.19** |
+
+**Conservative upper bound: ~$15**, allowing for reasoning-token variance at effort `high`,
+one voided run requiring a rerun, and image-token estimation error.
+
+As staged (Option 0), a single V0 request would carry 3,621,822 input tokens — impossible
+against the 922,000 cap, and ~$36.22 of input alone per request if it were possible.
+
+**A $5 balance is not sufficient** even under the cheapest viable option. V3 is billed
+separately by Anthropic and is not included above.
+
+**Current API balance: NOT AVAILABLE.** The project key lacks the `api.usage.read` scope,
+and `/dashboard/billing/*` requires a browser session key. Not inferred.
 
 ### Model ID resolution rule
 

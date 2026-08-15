@@ -26,33 +26,56 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 SYNTHETIC_PROMPT = (
-    "You are given one small synthetic test image and one short synthetic "
-    "sentence. This is a connectivity check unrelated to any real task.\n\n"
+    "You are given one synthetic test image and one short synthetic sentence. "
+    "This is a connectivity and capability check unrelated to any real task.\n\n"
     "Sentence: 'The preflight sentence contains exactly seven words.'\n\n"
     "Reply with ONLY a JSON object with keys: "
-    "image_top_left_color (string), image_width_px (integer), "
+    "printed_word (string, the large word printed in the image), "
+    "printed_number (integer, the large number printed in the image), "
+    "top_left_block_color (string, one of: red, green, blue), "
     "sentence_word_count (integer)."
 )
 
+# Ground truth for the generated image. The preflight FAILS if the model does
+# not reproduce these -- an image the model cannot read is not "ingested".
+TRUTH = {"printed_word": "PREFLIGHT", "printed_number": 47,
+         "top_left_block_color": "red", "sentence_word_count": 7}
 
 def synthetic_png(path: Path) -> None:
-    """Write a 2x2 PNG: red/green over blue/white. No external deps."""
-    px = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 255)]
-    raw = b""
-    for row in (0, 1):
-        raw += b"\x00"
-        for col in (0, 1):
-            raw += bytes(px[row * 2 + col])
+    """Write a synthetic test image that is REPRESENTATIVE of the real stimulus.
 
-    def chunk(tag: bytes, data: bytes) -> bytes:
-        c = tag + data
-        return struct.pack(">I", len(data)) + c + struct.pack(">I", zlib.crc32(c))
+    The real views are wide (~3168x560) diagrams whose information is carried by
+    printed text. A 2x2 pixel swatch does not test that capability at all: it
+    gets resampled and the model cannot read it, which produces a false PASS.
 
-    png = (b"\x89PNG\r\n\x1a\n"
-           + chunk(b"IHDR", struct.pack(">IIBBBBB", 2, 2, 8, 2, 0, 0, 0))
-           + chunk(b"IDAT", zlib.compress(raw))
-           + chunk(b"IEND", b""))
-    path.write_bytes(png)
+    This draws a wide canvas with a large printed word, a large printed number,
+    and three labelled colour blocks. Entirely synthetic -- no VRTV content.
+    """
+    from PIL import Image, ImageDraw, ImageFont
+
+    W, H = 1600, 600
+    img = Image.new("RGB", (W, H), "white")
+    d = ImageDraw.Draw(img)
+
+    # Three colour blocks; the leftmost/top-left one is red.
+    for i, colour in enumerate(("red", "green", "blue")):
+        x0 = 40 + i * 180
+        d.rectangle([x0, 40, x0 + 150, 190], fill=colour, outline="black", width=3)
+
+    def font(size: int):
+        for candidate in (
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "/usr/share/fonts/TTF/DejaVuSans.ttf",
+        ):
+            if Path(candidate).exists():
+                return ImageFont.truetype(candidate, size)
+        return ImageFont.load_default()
+
+    d.text((60, 260), "PREFLIGHT", fill="black", font=font(140))
+    d.text((60, 430), "47", fill="black", font=font(120))
+    d.rectangle([5, 5, W - 5, H - 5], outline="black", width=4)
+    img.save(path, "PNG")
 
 
 def main() -> int:
@@ -126,6 +149,19 @@ def main() -> int:
     except Exception:
         pass
 
+    checks = {}
+    if json_ok and isinstance(parsed, dict):
+        for k, want in TRUTH.items():
+            got = parsed.get(k)
+            if isinstance(want, str):
+                ok = isinstance(got, str) and want.lower() in got.lower()
+            else:
+                ok = got == want
+            checks[k] = {"expected": want, "got": got, "pass": ok}
+    image_checks = [k for k in ("printed_word", "printed_number",
+                                "top_left_block_color")]
+    image_ok = all(checks.get(k, {}).get("pass") for k in image_checks)
+
     result.update({
         "authentication": "OK",
         "requested_model": model,
@@ -136,18 +172,23 @@ def main() -> int:
         "response_id": raw.get("id"),
         "provider_request_id": headers.get("x-request-id"),
         "reasoning_effort_requested": args.effort,
+        "reasoning_tokens_observed":
+            (raw.get("usage") or {}).get("output_tokens_details", {})
+            .get("reasoning_tokens"),
         "tools_registered": [],
         "tools_key_sent": "tools" in payload,
         "transport": "https://api.openai.com/v1/responses only",
-        "image_ingestion": "OK" if json_ok and parsed
-                           and "image_top_left_color" in parsed else "CHECK",
+        "synthetic_image_size_px": "1600x600",
+        "ground_truth_checks": checks,
+        "image_ingestion": "OK" if image_ok else "FAILED",
         "json_output": json_ok,
         "model_answer": parsed if json_ok else text[:400],
         "usage": raw.get("usage"),
     })
     result["status"] = ("PASS" if (result["model_identity_match"] and json_ok
+                                   and image_ok
                                    and not result["tools_key_sent"])
-                        else "REVIEW")
+                        else "FAIL")
     args.out.write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result, indent=2))
     return 0 if result["status"] == "PASS" else 1
