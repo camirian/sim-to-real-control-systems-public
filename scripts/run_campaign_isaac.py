@@ -352,6 +352,12 @@ def run_one(run_id: str, condition: str, seed: int, position: int,
         joint_limits=LIMITS,
     )
 
+    # Equal time slice per waypoint across the fixed-length run: with 2
+    # waypoints over 10 s, waypoint 0 is the reference for [0, 5) s and
+    # waypoint 1 for [5, 10) s. Frozen in the manifest, not chosen per run.
+    REF_SEGMENT_S = float(RC["run_duration_sim_s"]) / len(waypoints)
+    t_run_start = None
+
     rows = []
     t_col, ref_col, meas_col, noisy_col, true_col, cmd_col = [], [], [], [], [], []
     clamp_cycles = 0
@@ -371,6 +377,8 @@ def run_one(run_id: str, condition: str, seed: int, position: int,
         if pos is None:
             continue
         last_stamp = stamp
+        if t_run_start is None:
+            t_run_start = stamp
 
         noisy = noise.apply(pos, stamp)
         estimate = filt.process(noisy)
@@ -387,10 +395,17 @@ def run_one(run_id: str, condition: str, seed: int, position: int,
             )
             last_status = out.status.value
 
-        # `reference` is the ACTIVE waypoint's target for the representative
-        # joint; when the tracker is terminal it holds the last target, so the
-        # reference is defined for every row of a fixed-length run.
-        wp_idx = out.active_index if out.active_index is not None else len(waypoints) - 1
+        # `reference` is EXOGENOUS: a pure function of elapsed simulated time,
+        # identical in both arms and for every seed. It is deliberately NOT the
+        # tracker's active waypoint. An active-waypoint reference depends on
+        # controller progress, which depends on the condition — so the two arms
+        # would be scored against DIFFERENT reference signals, and a condition
+        # that never advances past waypoint 0 would present a zero-span
+        # reference (making overshoot_pct fall back to a span of 1.0 while the
+        # converging arm is divided by 0.4). That confound was observed in the
+        # pilot and removed here, before the campaign was frozen.
+        elapsed = stamp - t_run_start
+        wp_idx = min(int(elapsed / REF_SEGMENT_S), len(waypoints) - 1)
         reference = waypoints[wp_idx][REP_IDX]
 
         t_col.append(stamp)

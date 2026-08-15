@@ -40,6 +40,14 @@ def main() -> int:
     ap.add_argument("--runtime-parent", required=True,
                     help="head of the runtime-validation branch this stacks on")
     ap.add_argument("--isaac-build", required=True)
+    # The environment that must be recorded is the one that PRODUCES the
+    # numbers — the simulation host's bundled interpreter — not whichever
+    # machine happens to be freezing the manifest. Pass it explicitly rather
+    # than letting the local versions masquerade as the runtime's.
+    ap.add_argument("--runtime-env", default=None,
+                    help='JSON of the SIM HOST interpreter/library versions, '
+                         'e.g. \'{"python":"3.12.13","numpy":"2.3.1"}\'. '
+                         "Defaults to this machine's versions.")
     ap.add_argument("--out-dir", default=str(REPO / "campaign" / "manifests"))
     ap.add_argument("--force", action="store_true",
                     help="allow overwrite (only for pre-freeze dry runs)")
@@ -48,12 +56,18 @@ def main() -> int:
     scene = REPO / "scenes" / "franka_ros2_bridge_scene.usd"
     fingerprint = graph_fingerprint(scene)
 
+    if args.runtime_env:
+        import json as _json
+        env = {str(k): str(v) for k, v in _json.loads(args.runtime_env).items()}
+    else:
+        env = environment_versions()
+
     manifest = build_manifest(
         repo_commit=args.repo_commit,
         runtime_parent_commit=args.runtime_parent,
         scene_graph_fingerprint=fingerprint,
         isaac_build=args.isaac_build,
-        environment=environment_versions(),
+        environment=env,
     )
 
     out = Path(args.out_dir) / f"{CAMPAIGN_ID}-v{CAMPAIGN_VERSION}.json"
@@ -68,7 +82,11 @@ def main() -> int:
     print(f"manifest sha256         : {manifest['manifest_sha256']}")
     print(f"scheduled runs          : {manifest['design']['scheduled_runs']}")
     print(f"seeds                   : {manifest['design']['seeds']}")
-    print(f"written                 : {out.relative_to(REPO)}")
+    try:
+        shown = out.relative_to(REPO)
+    except ValueError:
+        shown = out  # out-of-tree scratch dir (pilot dry runs)
+    print(f"written                 : {shown}")
     return 0
 
 

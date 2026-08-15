@@ -202,3 +202,45 @@ class TestCommittedManifest:
             m = load_manifest(path)
             assert m["design"]["scheduled_runs"] == 40
             assert json.loads(path.read_text())["manifest_sha256"] == manifest_hash(m)
+
+
+class TestTheReferenceSignalIsExogenous:
+    """A reference that depends on the treatment cannot support a comparison.
+
+    The pilot ran with an active-waypoint reference and produced a zero-span
+    reference in the arm that never converged, which silently swapped
+    overshoot_pct's denominator between conditions. These tests pin the fix.
+    """
+
+    def test_reference_schedule_tiles_the_run_evenly(self):
+        m = make()
+        rc = m["run_contract"]
+        n_wp = len(m["controller"]["waypoints_flat"]) // len(m["controller"]["joint_names"])
+        assert rc["reference_segment_s"] * n_wp == rc["run_duration_sim_s"]
+
+    def test_reference_is_declared_independent_of_controller_progress(self):
+        assert "independent of controller progress" in make()["run_contract"]["reference_signal"]
+
+    def test_a_mistiled_reference_schedule_is_rejected(self):
+        m = make()
+        m["run_contract"]["reference_segment_s"] = 4.0
+        m["manifest_sha256"] = manifest_hash(m)
+        with pytest.raises(CampaignError, match="does not tile"):
+            validate_manifest(m)
+
+    def test_run_length_must_match_the_sample_rate(self):
+        m = make()
+        m["run_contract"]["samples_per_run"] = 1500
+        m["manifest_sha256"] = manifest_hash(m)
+        with pytest.raises(CampaignError, match="disagrees with"):
+            validate_manifest(m)
+
+    def test_the_scheduled_reference_has_nonzero_span_in_every_arm(self):
+        # The span is a property of the SCHEDULE, so it is identical in both
+        # conditions by construction — which is the whole point.
+        m = make()
+        joints = m["controller"]["joint_names"]
+        flat = m["controller"]["waypoints_flat"]
+        rep = joints.index(m["run_contract"]["representative_joint"])
+        targets = [flat[i * len(joints) + rep] for i in range(len(flat) // len(joints))]
+        assert max(targets) - min(targets) > 0.0

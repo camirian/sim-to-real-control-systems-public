@@ -220,6 +220,19 @@ def build_manifest(
             "run_duration_sim_s": 10.0,
             "step_cap_per_run": 20000,
             "representative_joint": REPRESENTATIVE_JOINT,
+            # EXOGENOUS by construction. The reference must not depend on the
+            # treatment: scoring each arm against the waypoint its own
+            # controller happens to have reached means the two arms are graded
+            # against different signals, and an arm that never advances presents
+            # a zero-span reference — which silently changes the denominator of
+            # overshoot_pct. Observed in the pilot; removed before freezing.
+            "reference_signal": (
+                "exogenous, time-parameterized: waypoint k is the reference "
+                "for elapsed simulated time in [k*T/K, (k+1)*T/K), with "
+                "T=run_duration_sim_s and K=len(waypoints). Identical in both "
+                "arms and for every seed; independent of controller progress."
+            ),
+            "reference_segment_s": 5.0,
             "reset_between_runs": [
                 "articulation commanded back to start_pose_rad and verified "
                 "within reset_tolerance_rad before the run begins",
@@ -348,6 +361,29 @@ def validate_manifest(manifest: Dict[str, Any]) -> Dict[str, Any]:
         )
     if float(manifest["filter"]["sample_rate_hz"]) != fs:
         raise CampaignError("filter sample_rate_hz disagrees with sampling block")
+
+    # The run length must be exactly the sample count the rate implies, and the
+    # reference schedule must tile it evenly. A mismatch here would mean the
+    # committed reference signal is not the one the driver actually emits.
+    rc = manifest["run_contract"]
+    ctrl = manifest["controller"]
+    n_joints = len(ctrl["joint_names"])
+    n_waypoints, remainder = divmod(len(ctrl["waypoints_flat"]), n_joints)
+    if remainder or n_waypoints < 1:
+        raise CampaignError(
+            f"waypoints_flat length {len(ctrl['waypoints_flat'])} is not a "
+            f"positive multiple of {n_joints} joints"
+        )
+    if int(rc["samples_per_run"]) != round(float(rc["run_duration_sim_s"]) * fs):
+        raise CampaignError(
+            f"samples_per_run={rc['samples_per_run']} disagrees with "
+            f"{rc['run_duration_sim_s']} s at {fs} Hz"
+        )
+    if float(rc["reference_segment_s"]) != float(rc["run_duration_sim_s"]) / n_waypoints:
+        raise CampaignError(
+            f"reference_segment_s={rc['reference_segment_s']} does not tile "
+            f"{rc['run_duration_sim_s']} s across {n_waypoints} waypoints"
+        )
 
     if "manifest_sha256" in manifest:
         expected = manifest_hash(manifest)
