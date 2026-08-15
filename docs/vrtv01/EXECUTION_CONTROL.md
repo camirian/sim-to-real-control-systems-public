@@ -56,7 +56,7 @@ experiment next* — it does not mean the effect is established.
 - the same model and version string;
 - materially identical model configuration (temperature/reasoning effort/sampling, tool
   access, system prompt scaffolding, context limits, filesystem permissions, and network
-  permissions).
+  posture — both the reviewer tool/data denial and the model-transport route, per §5b).
 
 **Only the representation/input packet and the clean/seeded assignment may vary.**
 
@@ -74,8 +74,9 @@ The selected treatment model must also satisfy all of these properties before V0
 - enough context for the complete frozen source set;
 - a reproducible, pinnable model identity;
 - the same provider/model/configuration available for all five treatment sessions;
-- no need for repository access: each session can run from its staged input directory
-  with repository and network access denied.
+- no need for repository access: each session can run from its staged input directory with
+  repository access denied and **reviewer tool/data network access denied** (§5b Class 1).
+  Model-provider transport (§5b Class 2) may be open; a cloud-hosted model is permitted.
 
 Note one unavoidable asymmetry: V1 and V2 require a multimodal model, V0 does not. The
 rule resolves this by requiring the *same multimodal-capable model* for all five reviewer
@@ -93,7 +94,10 @@ No condition may start until this table is filled in and committed.
 | Multimodal image input confirmed | `TO BE RECORDED BEFORE V0-CLEAN` |
 | Frozen-source context capacity confirmed | `TO BE RECORDED BEFORE V0-CLEAN` |
 | Repository/filesystem access denied | `TO BE RECORDED BEFORE V0-CLEAN` |
-| Network access denied | `TO BE RECORDED BEFORE V0-CLEAN` |
+| Reviewer tool/data network access denied (§5b Class 1) | `TO BE RECORDED BEFORE V0-CLEAN` |
+| Reviewer tools registered (must be none that fetch/search/execute) | `TO BE RECORDED BEFORE V0-CLEAN` |
+| Model transport route (§5b Class 2: provider API / local model) | `TO BE RECORDED BEFORE V0-CLEAN` |
+| Transport identical across all five treatment sessions | `TO BE RECORDED BEFORE V0-CLEAN` |
 | Five-session pin availability confirmed | `TO BE RECORDED BEFORE V0-CLEAN` |
 | V3 provider | `TO BE RECORDED BEFORE V3` |
 | V3 model + exact version string | `TO BE RECORDED BEFORE V3` |
@@ -122,6 +126,67 @@ so that rendering seeded controls can never re-render or rewrite a clean artifac
 Before the first condition: verify `sha256sum -c VIEW_HASHES.txt` and
 `sha256sum -c SEEDED_HASHES.txt` both pass, and record that they did.
 
+## 5b. Network boundary — two different things, do not conflate
+
+Earlier wording said reviewer sessions run with "network access denied." Read literally
+that would forbid a cloud-hosted treatment model, which is **not** the intent. The
+isolation requirement governs what the *reviewer* can reach, not how inference is
+transported.
+
+### Class 1 — reviewer tool and data network access: **DENIED**
+
+The reviewer must have no capability to reach anything beyond its staged inputs. Denied:
+
+- browsing the web;
+- accessing GitHub or any git remote;
+- fetching repository files by any path or protocol;
+- arbitrary HTTP/HTTPS, DNS, or socket tools;
+- any retrieval, search, code-execution, or file-download affordance that could surface
+  forbidden experiment material.
+
+Concretely: no web-search tool, no URL-fetch tool, no repository or MCP connector, no
+shell with outbound access, no package installation, no "read this link" affordance.
+**If the reviewer can name a URL and receive its contents, the run is void.**
+
+### Class 2 — model transport: **MAY be allowed, minimum path only**
+
+The single network path required to reach the **preselected** model provider/API is
+permitted. This is inference transport, not reviewer capability.
+
+Permitted only as: outbound to the provider's API endpoint, for the pinned model,
+carrying exactly the staged inputs and the prompt. Nothing else may traverse it.
+
+### The invariant
+
+> **The reviewer sees only the files in its staged input directory.**
+
+Model transport does not widen that set. If transport is allowed, the reviewer's *inputs*
+remain exactly the staging manifest — no more.
+
+### If the harness cannot enforce the distinction
+
+Some harnesses expose network to the model as a *tool* rather than as transport. There
+Class 1 and Class 2 are not separable and the setup is unusable as written. Then either:
+
+- **use a harness that can enforce the distinction** — provider transport open, reviewer
+  tools closed. In practice this means a plain API client with **no tools registered**,
+  rather than an agentic harness that has web/file tools available; or
+- **use a sufficiently capable local multimodal model**, so no transport is needed and
+  Class 1 and Class 2 collapse into a single denial.
+
+Choosing a local model purely to satisfy this is legitimate, but it must still meet every
+§3 requirement — multimodal understanding, context capacity for the full frozen source
+set, pinnable identity, and availability for all five treatment sessions on identical
+configuration. Do not trade experimental validity for isolation convenience: a model too
+weak to review this material produces a null result that says nothing about
+representation, which is a worse outcome than a harness change.
+
+### Record either way
+
+Whichever route is taken, record it in §4 and apply it **identically to all five treatment
+sessions**. A transport difference between conditions is a configuration difference, and
+under §3 that voids the affected run.
+
 ## 6. Required fail-closed staging and launch boundary
 
 The repository is an operator workspace, not a reviewer sandbox. A reviewer must never
@@ -129,8 +194,9 @@ be launched from the repository, a repository worktree, or a directory whose mou
 filesystem includes the repository. Reviewer conditions must run from a separate,
 permission-restricted staging root outside the repository, with no `.git`, remote,
 symlink, parent traversal path to the repository, answer key, package, preregistration,
-or Mermaid source. Disable network and mount only the run's input directory plus a
-separate output location.
+or Mermaid source. Mount only the run's input directory plus a separate output location,
+and deny reviewer tool/data network access per §5b Class 1. Model-provider transport
+(§5b Class 2) may remain open.
 
 Use the committed `docs/vrtv01/stage_runs.py` helper. It copies the frozen source from
 `SOURCE_BASELINE_SHA` using `git archive`, verifies image hashes before copying, rejects
@@ -173,5 +239,7 @@ python3 docs/vrtv01/stage_runs.py \
 ```
 
 The operator must inspect the manifest and launch each fresh session in a restricted
-environment with repository and network access denied. A working directory alone is
-not an isolation boundary.
+environment with repository access denied and reviewer tool/data network access denied
+(§5b Class 1). Model-provider transport (§5b Class 2) may be open, so a cloud-hosted
+pinned model is permitted. A working directory alone is not an isolation boundary, and
+neither is an instruction telling the model not to browse — the capability must be absent.

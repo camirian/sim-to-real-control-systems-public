@@ -67,7 +67,8 @@ The source is physically unavailable during stage 1. Create the stage-1 director
 `docs/vrtv01/stage_runs.py`, save the output outside the staging tree, and use the
 helper's `--advance-v1` operation to create stage 2. Do not launch from the repository
 or rely on an instruction not to read it; the reviewer environment must deny repository
-and network access.
+access and reviewer tool/data network access (`00_COMMON.md` rule 3b). Model-provider
+transport may remain open — a cloud-hosted pinned model is permitted.
 
 ## Record
 As V0, plus: which packet (clean or seeded), and the sha256 of each image actually supplied.

@@ -4,8 +4,10 @@ Read `00_COMMON.md` for binding rules, SHAs, and schemas. Run in a fresh session
 
 ## Allowed inputs
 The frozen source set **and** four rendered PNGs together, from an isolated stage-1
-directory. Hash-verify every image before supplying it. The repository, packages,
-Mermaid sources, answer key, and network are unavailable to the reviewer.
+directory. Hash-verify every image before supplying it. The repository, packages, Mermaid
+sources, and answer key are unavailable to the reviewer, as is reviewer tool/data network
+access (`00_COMMON.md` rule 3b). Model-provider transport may remain open — a cloud-hosted
+pinned model is permitted.
 
 ### Two distinct runs
 
