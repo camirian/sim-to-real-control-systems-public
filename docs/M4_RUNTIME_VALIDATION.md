@@ -4,8 +4,9 @@ The project control boundary, observed rather than assumed. Every number below
 came from `scripts/validate_isaac6_runtime.py` running against the committed
 project scene on a live simulator.
 
-**Verdict: `M4_RUNTIME_GATE_PASS`** — with one measured result that materially
-changes the experimental contract and blocks the campaign pending review (§6).
+**Verdict: `M4_RUNTIME_GATE_PASS`.** D6 is measured and resolved; the
+experimental contract is preserved by fixing the sampling boundary rather than
+retuning the filter (§6).
 
 ## 1. Runtime configuration
 
@@ -67,29 +68,31 @@ The `/joint_command` → articulation path is unchanged from PR #10, and
 `jointNames` remains wired so 7 arm commands cannot smear across the 9-DOF
 articulation (proven in §4).
 
-## 3. `/joint_states` proven live — and D6 resolved
+## 3. `/joint_states` proven live
 
-Observation: **1434 messages over 29.866 s**.
+Final configuration (`--target-hz 200`): **1833 messages over 29.996 s**.
 
 | Measure | Value |
 |---|---|
-| Wall-clock rate | 47.98 Hz (mean Δ 20.8 ms, stdev 14.8 ms) |
-| **Sim-time stamp rate** | **30.02 Hz** (mean Δ **33.31 ms**, stdev 0.62 ms) |
-| Stamp range | 2.050 s → 49.783 s, monotonic, non-degenerate |
+| **Sim-time stamp rate** | **200.492 Hz** (mean Δ **4.988 ms**, stdev 0.175 ms) |
+| Stamps | monotonic, non-degenerate |
 | Joint names | `panda_joint1..7`, `panda_finger_joint1/2` (9 DOF) |
+| Positions update | yes |
 
 The wall-clock rate is an artifact of headless stepping faster than real time
-and is **not** the sampling boundary. The DSP-relevant rate is the sim-time
-stamp spacing: **30 Hz**, and it is metronomic (stdev 0.62 ms).
+and is **not** the sampling boundary; the DSP-relevant rate is the sim-time
+stamp spacing. The scene's *default* rate was 30 Hz — that first measurement,
+and why it mattered, is §6.1.
 
 This also settles the D4 question left open in PR #10: header stamps advance
 and are non-degenerate, so the `ReadSimulationTime` wiring works and
 `waypoint_timeout_s` can fire. The earlier "unwired publisher may stamp 0.0"
 inference is retired — it was never asserted, and is now moot.
 
-`positions_update: false` during this phase is **correct**: the arm is
-uncommanded and at rest, and a resting articulation should not drift. Evidence
-that positions track is §4 and §5.
+In the earlier default-rate run this phase reported `positions_update: false`,
+which is **correct** for an uncommanded arm at rest — a resting articulation
+should not drift. It is deliberately not a gate criterion; the evidence that
+positions track is §4 and §5.
 
 ## 4. `/joint_command` proven consumed
 
@@ -102,7 +105,7 @@ A single conservative in-limits command on `panda_joint4`:
 | Commanded | `-2.66` |
 | After | `-2.66` (Δ `+0.15`, toward command) |
 | Within limits | yes |
-| Finger drift | `+0.0001` rad on both — undriven |
+| Finger drift | `0.0` rad on both — undriven |
 
 The subscriber receives, the articulation controller consumes, the correct
 joint moves, and the fingers do not. That last one is the check that would
@@ -116,19 +119,21 @@ not reimplemented — computing each command from the measured feedback:
 
 | | value |
 |---|---|
-| Cycles | 409 |
+| Cycles | 527 |
 | Tracker status | `done` |
 | Tracking error | `1.237` → `0.000` rad |
-| Waypoints reached | `[0 @ 5.133 s, 1 @ 1.667 s]` (sim time) |
+| Waypoints reached | `[0 @ 0.99 s, 1 @ 0.325 s]` (sim time) |
 | Limit clamping during run | none |
 
 This is a loop, not two independent endpoints: the command published each
 cycle is a function of the `/joint_states` sample received that cycle, and the
 error collapses to zero with both waypoints reaching their tolerance.
 
-## 6. D6 disposition — measured, and it breaks the contract
+## 6. D6 disposition — measured, then fixed at the sampling boundary
 
-**Assumed: `sample_rate_hz = 200.0`. Measured: `30.02 Hz`.** A factor of 6.67.
+### 6.1 What the default scene actually delivered
+
+**Assumed: `sample_rate_hz = 200.0`. First measured: `30.02 Hz`.** A factor of 6.67.
 
 Classification: **`CONFIG_DEFECT`, observed.** Two consequences follow by
 arithmetic, not opinion:
@@ -159,8 +164,48 @@ two coherent resolutions are genuinely different experiments:
   design holds as written. Preserves the documented contract; costs sim
   configuration work and needs re-measurement to confirm.
 
-Choosing between these is an experimental-design decision, not an
-implementation detail, so it is escalated rather than taken.
+Option (b) was chosen by the owner: change the sampling boundary, not the
+experiment.
+
+### 6.2 Resolution — /joint_states now really publishes at 200 Hz
+
+The OmniGraph publisher is driven by `OnPlaybackTick`, i.e. once per rendered
+frame, so the publication rate is the rendering rate. Driving physics and
+rendering together via `SimulationContext(physics_dt=rendering_dt=dt)` fixes
+it — with one empirical wrinkle that was measured rather than reasoned:
+
+| configured `dt` | observed `/joint_states` |
+|---|---|
+| `1/200` | 100.199 Hz |
+| `1/400` | 200.498 Hz |
+
+The graph ticks once every **two** physics steps, so the delivered rate is half
+the configured rate. `--target-hz` therefore means the desired publication rate
+and sets `dt = 1/(2 · target)`.
+
+Final measurement, 1833 messages over 29.996 s:
+
+| Measure | Value |
+|---|---|
+| Sim-time stamp rate | **200.492 Hz** (target 200.0, rel. error **0.25 %**) |
+| Mean Δ | 4.988 ms (stdev **0.175 ms**) |
+| Nyquist | 100.2 Hz |
+| Contract check | within 2 % tolerance — **pass** |
+
+The documented contract now holds as written: `sample_rate_hz = 200`,
+`cutoff_hz = 5`, `vibration_freq_hz = 25`, with 25 Hz comfortably below the
+100 Hz Nyquist. **Nothing about the filter was changed.**
+
+### 6.3 The guard, so this cannot recur silently
+
+`control_loop/logic/sampling.py` records the measured rate with its provenance
+and provides `assert_campaign_sampling_valid()`, which refuses a configuration
+when the DSP rate disagrees with the measured rate, when the injected vibration
+is at or above Nyquist, or when the cutoff is. `test_sampling.py` reads the
+shipped launch defaults statically and asserts they form a valid campaign
+config — and includes the original 30 Hz-vs-200 Hz defect as an explicit
+failing case. The runtime validator additionally fails the gate outright if the
+measured rate misses the target by more than 2 %.
 
 ## 7. Limitations that survive this document
 

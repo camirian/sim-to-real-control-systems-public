@@ -39,6 +39,12 @@ parser.add_argument("--repo", required=True, help="path to the repo checkout")
 parser.add_argument("--observe-s", type=float, default=20.0,
                     help="how long to observe /joint_states for the rate measurement")
 parser.add_argument("--settle-steps", type=int, default=120)
+parser.add_argument(
+    "--target-hz", type=float, default=None,
+    help="drive physics AND rendering at this rate so /joint_states is sampled "
+         "at it. Omit to observe the scene's default (measured 30 Hz), which is "
+         "how D6 was first established.",
+)
 args, _ = parser.parse_known_args()
 
 from isaacsim import SimulationApp  # noqa: E402
@@ -107,10 +113,41 @@ from control_loop.logic.waypoint_tracker import (  # noqa: E402
     waypoints_from_flat,
 )
 
+# The OmniGraph publisher is driven by OnPlaybackTick, i.e. once per rendered
+# app frame, so the /joint_states sampling rate IS the rendering rate. Setting
+# physics_dt and rendering_dt together makes that rate explicit and equal to
+# the physics rate, which is the deterministic clock a seeded campaign wants.
+sim_context = None
+if args.target_hz:
+    from isaacsim.core.api import SimulationContext
+
+    # EMPIRICAL, and measured rather than reasoned: with physics_dt ==
+    # rendering_dt, the OmniGraph publisher ticks once every TWO physics steps,
+    # so the observed publication rate is HALF the configured rate. Confirmed
+    # on this runtime: dt=1/200 -> 100.199 Hz observed; dt=1/400 -> 200.498 Hz.
+    # Hence the factor of 2. `--target-hz` means the desired /joint_states
+    # rate; the tolerance check below fails loudly if this relationship ever
+    # stops holding, so a campaign can never silently sample at the wrong rate.
+    dt = 1.0 / (2.0 * float(args.target_hz))
+    sim_context = SimulationContext(physics_dt=dt, rendering_dt=dt,
+                                    stage_units_in_meters=1.0)
+    sim_context.initialize_physics()
+    record("A_rate_config", target_publish_hz=args.target_hz, physics_dt=dt,
+           rendering_dt=dt, tick_to_physics_ratio=2)
+
+
+def step() -> None:
+    """Advance one simulation step, ticking the graph exactly once."""
+    if sim_context is not None:
+        sim_context.step(render=True)
+    else:
+        simulation_app.update()
+
+
 timeline = omni.timeline.get_timeline_interface()
 timeline.play()
 for _ in range(args.settle_steps):
-    simulation_app.update()
+    step()
 
 # --------------------------------------------------------------------------- #
 # B. /joint_states — existence, content, and the REAL rate (resolves D6)
@@ -135,7 +172,7 @@ commander = observer.create_publisher(JointState, "/joint_command", 10)
 
 t0 = time.monotonic()
 while time.monotonic() - t0 < args.observe_s:
-    simulation_app.update()
+    step()
     rclpy.spin_once(observer, timeout_sec=0.0)
 
 if len(samples) < 2:
@@ -205,7 +242,7 @@ t0 = time.monotonic()
 while time.monotonic() - t0 < 6.0:
     cmd.header.stamp = observer.get_clock().now().to_msg()
     commander.publish(cmd)
-    simulation_app.update()
+    step()
     rclpy.spin_once(observer, timeout_sec=0.0)
 
 after = latest_positions()
@@ -248,7 +285,7 @@ clamped_any = False
 t0 = time.monotonic()
 loop_cycles = 0
 while time.monotonic() - t0 < 45.0:
-    simulation_app.update()
+    step()
     rclpy.spin_once(observer, timeout_sec=0.0)
     if not samples:
         continue
@@ -282,6 +319,18 @@ timeline.stop()
 observer.destroy_node()
 rclpy.shutdown()
 
+# If a target rate was requested, the MEASURED rate must match it. This is the
+# clause that stops a seeded campaign from running against a filter designed
+# for a sample rate the simulator is not actually delivering (D6).
+rate_ok = True
+if args.target_hz:
+    measured = RESULT["steps"]["B_joint_states"]["sim_stamp_rate_hz"] or 0.0
+    rel_err = abs(measured - args.target_hz) / args.target_hz
+    rate_ok = rel_err <= 0.02
+    record("B_rate_contract", target_hz=args.target_hz, measured_hz=measured,
+           rel_error=round(rel_err, 5), tolerance=0.02, within_tolerance=rate_ok,
+           nyquist_hz=measured / 2.0)
+
 b = RESULT["steps"]["B_joint_states"]
 c = RESULT["steps"]["C_joint_command"]
 d = RESULT["steps"]["D_closed_loop"]
@@ -296,7 +345,8 @@ RESULT["verdict"] = (
         and not b["stamp_degenerate"] and b["stamp_monotonic"]
         and c["responded"] and c["moved_toward_command"] and c["within_limits"]
         and c["fingers_undriven"]
-        and d["error_reduced"] and d["tracker_status"] == "done")
+        and d["error_reduced"] and d["tracker_status"] == "done"
+        and rate_ok)
     else "M4_RUNTIME_GATE_BLOCKED"
 )
 print("VALIDATION_JSON=" + json.dumps(RESULT), flush=True)
