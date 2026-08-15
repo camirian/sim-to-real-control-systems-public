@@ -30,15 +30,39 @@ docker images               # no Isaac container on either machine
 uname -m                    # x86_64 / aarch64
 ```
 
-Isaac Sim 4.5.0 ships no aarch64 desktop build, so the ARM node is not a
-candidate host regardless of installation effort.
-
 **Consequence:** every `EDGEXPERT-VERIFY` item in
 [RUN_ON_EDGEXPERT.md](RUN_ON_EDGEXPERT.md) §7 remains unverified, and the
-20+20 seeded campaign cannot be executed. This is a `RUNTIME_BLOCKER`. It has
-**not** been worked around, simulated, approximated, or substituted with a
+20+20 seeded campaign has not been executed. This is a `RUNTIME_BLOCKER`. It
+has **not** been worked around, simulated, approximated, or substituted with a
 plain-Python plant model — an environment failure must not become an
 experiment result.
+
+### 1a. The blocker is the version pin, not the hardware
+
+An earlier draft of this document claimed the ARM node "is not a candidate host
+regardless of installation effort." **That was wrong**, and the correction
+matters enough to state plainly rather than quietly edit.
+
+Isaac Sim 4.5.0 ships no aarch64 build — that part is true
+([4.5.0 requirements](https://docs.isaacsim.omniverse.nvidia.com/4.5.0/installation/requirements.html)
+lists only Ubuntu 20.04/22.04 and Windows). But aarch64 support arrived in
+**5.1.0**, and 6.0.x added full container and livestreaming support. NVIDIA
+supports exactly one aarch64 platform:
+
+> "aarch64: NVIDIA DGX Spark with DGX OS 7 only"
+> — [Isaac Sim 6.0 requirements](https://docs.isaacsim.omniverse.nvidia.com/6.0.0/installation/requirements.html)
+
+The ARM node **is** a DGX Spark running DGX OS 7.5.0 (Ubuntu 24.04, GB10,
+driver 580.173.02, Docker 29.2.1, 3.3 TB free). It meets that requirement.
+
+Meanwhile the x86 workstation fails on two independent counts: its RTX 2070
+Super (Turing, 8 GB) is below the stated minimum for *both* versions (4.5.0
+asks RTX 3070/8 GB, 6.0 asks RTX 4080/16 GB), and its ROS 2 Jazzy install is
+incompatible with the Humble-only 4.5.0 pin.
+
+So the honest statement of the blocker is: **the campaign is blocked by the
+4.5.0 pin, on hardware that could run a newer Isaac Sim.** Unpinning is a
+documented decision, not a workaround — see §7.
 
 ## 2. Test baseline at `a69189e` — green before any edit
 
@@ -190,3 +214,48 @@ The run manifest, exclusion rules, `RESULTS.md`, uncertainty summaries, and the
 demo outline are deliberately **not** written yet. Authoring them now would
 produce a document describing runs that do not exist, and a preregistration
 written after the fact is not a preregistration.
+
+## 7. The unpin decision (proposed, not taken)
+
+AGENTS.md §2 pins Isaac Sim 4.5.0 and forbids "latest"; the M4 issue allows
+changing a pinned version only when "a concrete blocker requires a documented
+decision." §1a is that concrete blocker. This section is the documented
+decision, offered for owner review — **nothing here has been executed.**
+
+**Proposal:** retire the 4.5.0 pin in favour of **Isaac Sim 6.0.1** on the DGX
+Spark, via the multi-arch container (`nvcr.io/nvidia/isaac-sim:6.0.1`, ~9.96 GB
+compressed, run with `--aarch64`).
+
+Why 6.0.1 and not 5.1.0, the first aarch64 release: 5.1.0 lacks full DGX Spark
+container and livestreaming support, both added in 6.0. Stopping at 5.1.0 buys
+one migration and then needs another.
+
+**Migration cost is smaller than it looks.** All four OmniGraph node type
+tokens this repo authors survive verbatim into 6.0.1 — the *extension* that
+provides them was renamed (`isaacsim.ros2.bridge` → `isaacsim.ros2.nodes`) but
+the `node:type` strings are unchanged, confirmed against the 6.0.1 OGN
+reference and the 6.0.1 Franka manipulation tutorial. Concretely:
+
+1. Enable `isaacsim.ros2.nodes` rather than `isaacsim.ros2.bridge`
+   (`scripts/run_franka_headless.py` extension id).
+2. Insert an **Isaac Read Joint State** node upstream of the joint-state
+   publisher: in 6.0 the ROS 2 publishers no longer resolve USD prims
+   internally, so `inputs:targetPrim` on the publisher is deprecated in favour
+   of wired `jointNames`/`jointPositions`/… inputs
+   ([6.0 OmniGraph migration guide](https://docs.isaacsim.omniverse.nvidia.com/6.0.1/migration_guides/isaac_sim_6_0/ros2_omnigraph_migration.html)).
+   `scenes/scene_contract.py` encodes the 4.5.0 shape and would need updating
+   in the same change — which is the check doing its job.
+3. ROS 2: 6.0.1 supports **both Humble and Jazzy**, so this also removes the
+   Humble-only constraint.
+
+**Known risks, not hidden.** GB10 has open NVIDIA forum reports on this exact
+stack: PhysX GPU not working under 5.1.0, and a 6.0.1 GPU crash reported
+2026-07-24 against driver 595.71.05. This box is on 580.173.02, so it is not
+the reported-crashing driver, but the minimum driver for 6.0.1 has not been
+verified here. Isaac Lab on this platform additionally wants CUDA ≥ 13.
+
+**Recommended first step is a throwaway, not a port:** pull the container and
+run a stock Franka sample on the DGX Spark. If that smoke test fails, the
+pin question is moot and nothing in this repo was touched. Only after it
+passes is it worth migrating repo code, re-authoring the scene for 6.0, and
+settling D6 with a real `ros2 topic hz` reading.
