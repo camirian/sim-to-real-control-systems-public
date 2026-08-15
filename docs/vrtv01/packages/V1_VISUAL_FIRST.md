@@ -13,7 +13,18 @@ docs/vrtv01/views/view_d_claim_boundary.png
 ```
 Plus the legend below. **Verify each PNG's sha256 against `docs/vrtv01/VIEW_HASHES.txt` before supplying it.**
 
-Half of the V1 instances receive the seeded packet from `docs/vrtv01/seeded/` instead. The operator records which packet was used; the reviewer is never told seeding exists.
+### Two distinct runs
+
+| Run | Images supplied |
+|---|---|
+| `V1-CLEAN` | the four clean PNGs above — **primary comparison** |
+| `V1-SEEDED` | `docs/vrtv01/seeded/view_a_system_topology_seeded.png`, `docs/vrtv01/seeded/view_b_evidence_provenance_seeded.png`, plus **clean** C and D — **robustness control only** |
+
+Verify seeded PNGs against `docs/vrtv01/SEEDED_HASHES.txt`. The reviewer is never told that seeding exists, that two runs exist, or which packet it received.
+
+`V1-SEEDED` output is scored for seeded-defect detection only and must not be pooled into the primary representation comparison.
+
+Both runs use the same provider, model/version and configuration as V0-CLEAN and V2 — see the binding model-control rule in `docs/vrtv01/EXECUTION_CONTROL.md`.
 
 **Stage 2 — the frozen source set.**
 

@@ -9,7 +9,8 @@ Read `00_COMMON.md`. Run in a fresh session, by an operator who did **not** auth
 ## Forbidden information
 - Which condition produced any finding.
 - How many conditions exist, or their names.
-- The seeded-defect list and the View C pre-disclosure list. **The operator holds these and applies them after V3 returns.** The adjudicator must not know a finding was planted.
+- The seeded-defect answer key (`docs/vrtv01/SEEDED_ANSWER_KEY.OPERATOR_ONLY.md`) and the View C pre-disclosure list. **The human operator holds these and applies them after V3 returns.** V3 must not know that seeding exists at all, nor how many defects were planted.
+- Note: §3.3 of the frozen preregistration says this list is held "by the adjudicator only." That means the *human operator performing adjudication*, not the V3 model session. See the superseding note in the answer key.
 - Any reviewer's confidence score, rationale, or self-verdict from stage 2.
 
 ## Prompt — verbatim
@@ -39,7 +40,7 @@ Prefer deterministic evidence over judgment. Cite the exact path and field for e
 
 ## Blinding and randomization procedure — operator steps
 
-1. Pool every stage-1 candidate from V0, V1 and V2. **Do not use stage-2 self-verdicts.**
+1. Pool every stage-1 candidate from **all five reviewer runs** — `V0-CLEAN`, `V1-CLEAN`, `V1-SEEDED`, `V2-CLEAN`, `V2-SEEDED`. **Do not use stage-2 self-verdicts.** Seeded-run findings enter the same blinded pool so that V3 cannot infer packet type from what it is asked to judge.
 2. Replace each `local_id` with a fresh opaque `finding_id` (e.g. `f_001`…). Keep the mapping in a file V3 never sees.
 3. Strip `reviewer_confidence`, `derived_from`, `rationale`, and every phrase naming a view ("as shown in the diagram", "View B indicates"). Rewrite such phrasing to a neutral assertion of the same claim. **Record every rewrite** — over-aggressive normalization can destroy a finding's meaning, and the rewrite log is auditable.
 4. Deduplicate **only exact semantic duplicates**. Preserve disagreements and near-misses; near-duplicates across conditions are signal, not noise.
@@ -74,9 +75,17 @@ Prefer deterministic evidence over judgment. Cite the exact path and field for e
 
 ```json
 {
-  "prereg_sha": "string",
+  "preregistration_sha": "0369dab5b83cedcc92847088ba939de092c295c0",
+  "current_execution_package_head": "string",
   "source_baseline_sha": "f03c748ae0b0e6b30de572e9cb7ef49b2c88fe29",
-  "view_hashes_verified": true,
+  "clean_view_hashes_verified": true,
+  "seeded_view_hashes_verified": true,
+  "reviewer_provider": "string",
+  "reviewer_model_version": "string",
+  "reviewer_config": "string",
+  "v3_provider": "string",
+  "v3_model_version": "string",
+  "model_control_rule_upheld": true,
   "randomization_seed": "string",
   "per_condition": {
     "<V0|V1|V2>": {
@@ -97,7 +106,8 @@ Prefer deterministic evidence over judgment. Cite the exact path and field for e
       "stage2_duration_s": 0,
       "tokens_or_cost": null,
       "model_provider_version": "string",
-      "packet": "clean | seeded"
+      "packet": "clean | seeded",
+      "counts_toward_primary_comparison": true
     }
   },
   "human_comprehension": {

@@ -1,9 +1,13 @@
-# Package V0 — SOURCE ONLY
+# Package V0-CLEAN — SOURCE ONLY
 
 Read `00_COMMON.md` for binding rules, SHAs, and schemas. Run in a fresh session.
 
 ## Allowed inputs
-The frozen source set only. Read-only.
+The frozen source set only, at `SOURCE_BASELINE_SHA` `f03c748`. Read-only.
+
+One run. This is a **primary comparison** condition. There is no seeded V0 — seeding alters views, and V0 receives no views.
+
+Runs on the same provider, model/version and configuration as V1 and V2, including the same multimodal-capable model. See `docs/vrtv01/EXECUTION_CONTROL.md`.
 
 ## Forbidden information
 - Any rendered view, diagram, image, or Mermaid source.

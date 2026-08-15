@@ -1,0 +1,11 @@
+flowchart LR
+    MANIFEST["Frozen campaign manifest\n20 paired seeds"] --> HARNESS["Campaign harness"]
+    HARNESS --> RUNS["40 scheduled runs\n20 filtered + 20 unfiltered"]
+    RUNS --> RAW["Per-run raw telemetry"]
+    RAW --> PACKETS["Per-run evidence + checks"]
+    PACKETS --> HASH["Manifest/hash verification"]
+    RAW --> AGG["scripts/build_results.py"]
+    AGG --> RESULTS["RESULTS.md"]
+    RESULTS --> CLAIMS["Bounded public claims"]
+    PACKETS --> REPRO["CPU-only evidence reproduction"]
+    REPRO --> CLAIMS

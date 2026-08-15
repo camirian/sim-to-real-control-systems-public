@@ -3,7 +3,18 @@
 Read `00_COMMON.md` for binding rules, SHAs, and schemas. Run in a fresh session.
 
 ## Allowed inputs
-The frozen source set **and** the four rendered PNGs together, from stage 1. Hash-verify the images. Half the instances receive the seeded packet.
+The frozen source set **and** four rendered PNGs together, from stage 1. Hash-verify every image before supplying it.
+
+### Two distinct runs
+
+| Run | Images supplied |
+|---|---|
+| `V2-CLEAN` | the four clean PNGs — **primary comparison** |
+| `V2-SEEDED` | seeded A + seeded B + **clean** C and D — **robustness control only** |
+
+The reviewer is never told that seeding exists, that two runs exist, or which packet it received. `V2-SEEDED` is scored for seeded-defect detection only and must not be pooled into the primary representation comparison.
+
+Both runs use the same provider, model/version and configuration as V0-CLEAN and V1 — see `docs/vrtv01/EXECUTION_CONTROL.md`.
 
 ## Forbidden information
 - Mermaid source text.

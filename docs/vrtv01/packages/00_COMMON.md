@@ -1,9 +1,36 @@
 # VRTV-01 execution packages — common header
 
-**Preregistration SHA (this file's commit's parent chain):** `0369dab5b83cedcc92847088ba939de092c295c0`
-**Frozen source baseline (`main`):** `f03c748ae0b0e6b30de572e9cb7ef49b2c88fe29`
-**View hash manifest:** `docs/vrtv01/VIEW_HASHES.txt`
+## Three distinct SHAs — do not conflate
+
+| Identity | SHA |
+|---|---|
+| `SOURCE_BASELINE_SHA` | `f03c748ae0b0e6b30de572e9cb7ef49b2c88fe29` |
+| `PREREGISTRATION_SHA` | `0369dab5b83cedcc92847088ba939de092c295c0` |
+| `CURRENT_EXECUTION_PACKAGE_HEAD` | recorded in issue #17; advances with control-plane commits |
+
+**`PREREGISTRATION_SHA` is `0369dab`.** Later commits on this branch add execution
+artifacts and do not move it. Never cite the PR head as the preregistration SHA.
+
+**Control plane:** `docs/vrtv01/EXECUTION_CONTROL.md` — execution matrix, binding
+model-control rule, and the model selection record that must be completed before V0 runs.
+
+**View hash manifests:** `docs/vrtv01/VIEW_HASHES.txt` (clean), `docs/vrtv01/SEEDED_HASHES.txt` (seeded)
 **Execution record:** issue #17
+
+## Execution matrix — one instance each
+
+`V0-CLEAN` · `V1-CLEAN` · `V1-SEEDED` · `V2-CLEAN` · `V2-SEEDED` · `V3`
+
+Primary representation comparison is **`V0-CLEAN` vs `V1-CLEAN` vs `V2-CLEAN`**. The
+seeded runs are a transformation-error robustness control and must not be counted as
+ordinary clean-condition outcomes.
+
+## Binding model control
+
+All five reviewer runs use the **same provider, model/version, and materially identical
+configuration**. Only the input packet and clean/seeded assignment may vary. A run that
+cannot meet this is void — record it and rerun. V3 may use a different independent model.
+V0 must run on the same multimodal-capable model as V1/V2, not a text-only model.
 
 ## Rules binding every package
 
