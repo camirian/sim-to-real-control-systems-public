@@ -10,7 +10,7 @@
     control_loop/logic/ (unit-testable without ROS); the rclpy nodes are thin
     wrappers around them.
   </description>
-  <maintainer email="caaren.amirian.build@gmail.com">Caaren Amirian</maintainer>
+  <maintainer email="153974602+camirian@users.noreply.github.com">Caaren Amirian</maintainer>
   <license>Apache-2.0</license>
 
   <depend>rclpy</depend>

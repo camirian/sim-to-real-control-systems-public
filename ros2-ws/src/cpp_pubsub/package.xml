@@ -4,7 +4,7 @@
   <name>cpp_pubsub</name>
   <version>0.0.0</version>
   <description>A simple ROS 2 publisher/subscriber package in C++.</description>
-  <maintainer email="caaren.amirian.build@gmail.com">Caaren Amirian</maintainer>
+  <maintainer email="153974602+camirian@users.noreply.github.com">Caaren Amirian</maintainer>
   <license>Apache-2.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>rclcpp</depend>
