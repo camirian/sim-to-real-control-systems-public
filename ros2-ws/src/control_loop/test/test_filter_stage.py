@@ -115,6 +115,60 @@ class TestDegenerateStreams:
         assert np.array_equal(first, second)
 
 
+class TestPassthroughUnfilteredCondition:
+    """The campaign's UNFILTERED arm (REQ-S2R-102).
+
+    ``campaign.run_campaign.launch_command`` emits ``filter_kind:=passthrough``
+    for every unfiltered run. Before this kind existed, ``FilterSpec.validate``
+    rejected it, so all 20 unfiltered runs would have died at node startup.
+    These tests pin the contract from BOTH ends: the exact token the campaign
+    emits, and identity behavior at the filter.
+    """
+
+    def test_campaign_unfiltered_token_is_an_accepted_filter_kind(self):
+        # Guards the campaign/control_loop boundary: the token the campaign
+        # puts on the ros2 launch command line must be one the node accepts.
+        from campaign.run_campaign import RunSpec, launch_command
+
+        spec = RunSpec(
+            condition="unfiltered", seed=1, run_id="unfiltered-0001",
+            filter_enabled=False,
+        )
+        argv = launch_command(spec)
+        kinds = [a.split(":=", 1)[1] for a in argv if a.startswith("filter_kind:=")]
+        assert kinds, f"no filter_kind in {argv}"
+        for kind in kinds:
+            FilterSpec(kind=kind, sample_rate_hz=FS, cutoff_hz=5.0).validate()
+
+    def test_passthrough_output_is_bit_identical_to_input(self):
+        _, _, noisy = generate_telemetry(duration=2.0, fs=FS)
+        stage = FilterStage(FilterSpec(kind="passthrough", sample_rate_hz=FS), 1)
+        streamed = np.array([stage.process([x])[0] for x in noisy])
+        assert np.array_equal(streamed, noisy)
+
+    def test_passthrough_does_not_attenuate_the_vibration_band(self):
+        # The paired contrast the money table rests on: at 25 Hz the filtered
+        # condition attenuates and the unfiltered one must not.
+        _, _, noisy = generate_telemetry(duration=4.0, fs=FS)
+        through = FilterStage(FilterSpec(kind="passthrough", sample_rate_hz=FS), 1)
+        passed = np.array([through.process([x])[0] for x in noisy])
+        filtered = apply_causal_batch(IIR, noisy)
+        band_in = _band_amplitude(noisy, FS, 25.0)
+        assert _band_amplitude(passed, FS, 25.0) == pytest.approx(band_in)
+        assert _band_amplitude(filtered, FS, 25.0) < 0.5 * band_in
+
+    def test_passthrough_ignores_frequency_parameters(self):
+        # cutoff/order are meaningless for identity; a cutoff that would be
+        # rejected as above-Nyquist for a real design must not block the
+        # unfiltered arm from starting.
+        FilterSpec(kind="passthrough", sample_rate_hz=100.0, cutoff_hz=60.0).validate()
+
+    def test_passthrough_multi_joint_is_identity_per_joint(self):
+        stage = FilterStage(FilterSpec(kind="passthrough", sample_rate_hz=FS), 3)
+        sample = [0.1, -0.2, 1.5]
+        np.testing.assert_array_equal(stage.process(sample), sample)
+
+
 class TestValidation:
     def test_rejects_bad_kind(self):
         with pytest.raises(ValueError, match="kind"):
