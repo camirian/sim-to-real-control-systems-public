@@ -26,6 +26,14 @@ import numpy as np
 
 DEFAULT_TOLERANCE_RAD = 0.01
 
+# A small two-waypoint default plan around the Franka ready pose (7 joints per
+# waypoint, radians). Lives here rather than in the rclpy wrapper so the shipped
+# plan can be validated against the joint limits without a ROS install.
+DEFAULT_WAYPOINTS_FLAT = [
+    0.2, -0.6, 0.0, -2.2, 0.0, 1.8, 0.6,
+    -0.2, -0.4, 0.2, -2.0, 0.2, 1.6, 0.9,
+]
+
 
 class TrackerStatus(enum.Enum):
     """Lifecycle of a waypoint plan."""
@@ -73,6 +81,7 @@ class TrackerOutput:
     status: TrackerStatus
     active_index: Optional[int]  # waypoint being tracked, None when terminal
     error_norm_rad: float  # inf-norm error to active/last target
+    limit_clamped: bool = False  # command hit a joint limit this cycle
 
 
 @dataclass
@@ -94,6 +103,16 @@ class WaypointTracker:
         Per-joint, per-update command step clip (rate limiting).
     waypoint_timeout_s:
         Max time on one waypoint before latching TIMED_OUT.
+    joint_limits:
+        Optional per-joint ``(lower_rad, upper_rad)`` bounds. Every emitted
+        command is clipped into this box, and ``TrackerOutput.limit_clamped``
+        records whether the clip bit. Defaults to None (unbounded), which is
+        what the pure unit tests use; the node passes the real Franka table
+        from :mod:`control_loop.logic.franka_limits`.
+
+        This bounds the *simulated* articulation's commanded position so a run
+        cannot generate physically meaningless evidence. It is not a safety
+        function and makes no claim about a physical robot.
     """
 
     def __init__(
@@ -102,6 +121,7 @@ class WaypointTracker:
         kp: float = 0.8,
         max_step_rad: float = 0.05,
         waypoint_timeout_s: float = 10.0,
+        joint_limits: Optional[Sequence[Tuple[float, float]]] = None,
     ) -> None:
         waypoints = list(waypoints)
         if kp <= 0.0:
@@ -117,6 +137,7 @@ class WaypointTracker:
             raise ValueError(f"waypoints disagree on joint count: {sorted(dims)}")
         self._waypoints = waypoints
         self._num_joints = dims.pop() if dims else None  # None: empty plan
+        self._lower, self._upper = self._validate_limits(joint_limits)
         self._kp = float(kp)
         self._max_step = float(max_step_rad)
         self._timeout = float(waypoint_timeout_s)
@@ -141,6 +162,43 @@ class WaypointTracker:
     def timed_out(self) -> bool:
         return self._status is TrackerStatus.TIMED_OUT
 
+    def _validate_limits(self, joint_limits):
+        """Normalize the limit table to ``(lower, upper)`` arrays, or (None, None)."""
+        if joint_limits is None:
+            return None, None
+        pairs = [(float(lo), float(hi)) for lo, hi in joint_limits]
+        if self._num_joints is not None and len(pairs) != self._num_joints:
+            raise ValueError(
+                f"joint_limits has {len(pairs)} entries but the plan has "
+                f"{self._num_joints} joints"
+            )
+        for i, (lo, hi) in enumerate(pairs):
+            if not (math.isfinite(lo) and math.isfinite(hi)):
+                raise ValueError(f"joint {i} limits must be finite, got ({lo}, {hi})")
+            if lo >= hi:
+                raise ValueError(f"joint {i} limits must satisfy lower < upper: ({lo}, {hi})")
+        # A waypoint outside the limits can never be reached, so it would burn
+        # waypoint_timeout_s and land as a TIMED_OUT run in the evidence. Fail
+        # loudly at construction instead — that is a plan defect, not a result.
+        for w_i, wp in enumerate(self._waypoints):
+            for j, p in enumerate(wp.positions):
+                lo, hi = pairs[j]
+                if not lo <= p <= hi:
+                    raise ValueError(
+                        f"waypoint {w_i} joint {j} target {p} is outside its "
+                        f"limits [{lo}, {hi}] and can never be reached"
+                    )
+        lower = np.array([lo for lo, _ in pairs], dtype=float)
+        upper = np.array([hi for _, hi in pairs], dtype=float)
+        return lower, upper
+
+    def _clamp(self, command: np.ndarray) -> Tuple[np.ndarray, bool]:
+        """Clip a command into the joint-limit box; report whether it bit."""
+        if self._lower is None:
+            return command, False
+        clamped = np.clip(command, self._lower, self._upper)
+        return clamped, bool(np.any(clamped != command))
+
     def _target(self) -> np.ndarray:
         return np.asarray(self._waypoints[self._index].positions, dtype=float)
 
@@ -163,7 +221,8 @@ class WaypointTracker:
             raise ValueError(f"timestamp must be finite, got {t}")
 
         if self._status in (TrackerStatus.DONE, TrackerStatus.TIMED_OUT):
-            return TrackerOutput(meas.copy(), self._status, None, 0.0)
+            hold, clamped = self._clamp(meas.copy())
+            return TrackerOutput(hold, self._status, None, 0.0, clamped)
 
         if self._segment is None:
             self._segment = _Segment(start_t=t)
@@ -190,7 +249,8 @@ class WaypointTracker:
 
         if self._index >= len(self._waypoints):
             self._status = TrackerStatus.DONE
-            return TrackerOutput(meas.copy(), self._status, None, 0.0)
+            hold, clamped = self._clamp(meas.copy())
+            return TrackerOutput(hold, self._status, None, 0.0, clamped)
 
         wp = self._waypoints[self._index]
         err = self._target() - meas
@@ -206,11 +266,12 @@ class WaypointTracker:
                 )
             )
             self._status = TrackerStatus.TIMED_OUT
-            return TrackerOutput(meas.copy(), self._status, None, err_norm)
+            hold, clamped = self._clamp(meas.copy())
+            return TrackerOutput(hold, self._status, None, err_norm, clamped)
 
         step = np.clip(self._kp * err, -self._max_step, self._max_step)
-        command = meas + step
-        return TrackerOutput(command, self._status, self._index, err_norm)
+        command, clamped = self._clamp(meas + step)
+        return TrackerOutput(command, self._status, self._index, err_norm, clamped)
 
 
 def waypoints_from_flat(

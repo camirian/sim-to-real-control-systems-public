@@ -16,28 +16,18 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 
+from control_loop.logic.franka_limits import ARM_JOINT_NAMES, limits_for
 from control_loop.logic.waypoint_tracker import (
+    DEFAULT_WAYPOINTS_FLAT,
     TrackerStatus,
     WaypointTracker,
     waypoints_from_flat,
 )
 
-# Franka Panda arm joints (fingers excluded from tracking commands).
-DEFAULT_JOINT_NAMES = [
-    "panda_joint1",
-    "panda_joint2",
-    "panda_joint3",
-    "panda_joint4",
-    "panda_joint5",
-    "panda_joint6",
-    "panda_joint7",
-]
-
-# A small two-waypoint default plan around the Franka ready pose.
-DEFAULT_WAYPOINTS_FLAT = [
-    0.2, -0.6, 0.0, -2.2, 0.0, 1.8, 0.6,
-    -0.2, -0.4, 0.2, -2.0, 0.2, 1.6, 0.9,
-]
+# Franka Panda arm joints (fingers excluded from tracking commands). Defined in
+# the ROS-free logic layer so tests and CI can reach them without rclpy; kept
+# under the historical name here because it is this node's parameter default.
+DEFAULT_JOINT_NAMES = list(ARM_JOINT_NAMES)
 
 
 class WaypointControllerNode(Node):
@@ -53,6 +43,7 @@ class WaypointControllerNode(Node):
         self.declare_parameter("waypoint_timeout_s", 10.0)
         self.declare_parameter("input_topic", "/joint_states_filtered")
         self.declare_parameter("command_topic", "/joint_command")
+        self.declare_parameter("enforce_joint_limits", True)
 
         self._joint_names = [str(n) for n in self.get_parameter("joint_names").value]
         waypoints = waypoints_from_flat(
@@ -60,13 +51,24 @@ class WaypointControllerNode(Node):
             num_joints=len(self._joint_names),
             tolerance_rad=float(self.get_parameter("tolerance_rad").value),
         )
+        # Joint limits come from the Isaac Franka asset the scene references
+        # (see logic.franka_limits for the extraction provenance). Bounding the
+        # commanded position keeps a run from producing physically meaningless
+        # evidence; it is not a safety function and says nothing about hardware.
+        joint_limits = (
+            limits_for(self._joint_names)
+            if bool(self.get_parameter("enforce_joint_limits").value)
+            else None
+        )
         self._tracker = WaypointTracker(
             waypoints,
             kp=float(self.get_parameter("kp").value),
             max_step_rad=float(self.get_parameter("max_step_rad").value),
             waypoint_timeout_s=float(self.get_parameter("waypoint_timeout_s").value),
+            joint_limits=joint_limits,
         )
         self._terminal_logged = False
+        self._clamp_logged = False
 
         self._sub = self.create_subscription(
             JointState,
@@ -115,6 +117,15 @@ class WaypointControllerNode(Node):
                     f"{[(r.index, r.reached, round(r.elapsed_s, 3)) for r in self._tracker.results]}"
                 )
             # Terminal: hold position (command = measured) so the arm stops.
+
+        if out.limit_clamped and not self._clamp_logged:
+            # Once, not per sample: at loop rate this would flood the log. A
+            # clamped command means the plan or the gains are driving the arm
+            # into a limit — worth seeing in the run's stdout evidence.
+            self._clamp_logged = True
+            self.get_logger().warn(
+                "command clamped to Franka joint limits (logged once per run)"
+            )
 
         cmd = JointState()
         cmd.header.stamp = msg.header.stamp
