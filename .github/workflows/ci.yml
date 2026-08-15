@@ -67,6 +67,28 @@ jobs:
       - name: Run gauntlet tests
         run: python -m pytest gauntlet/ -q
 
+  scene:
+    name: Franka scene ROS 2 graph contract (REQ-S2R-005)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      # usd-core is the pip-installable USD library — plain data, NOT Isaac
+      # Sim, so AGENTS.md §2 ("Isaac never becomes a CI dependency") holds. It
+      # lets CI open the committed .usd as a layer and assert the OmniGraph
+      # wiring the closed loop depends on, so the scene can never silently
+      # regress to publish-only the way it was before M4.
+      - name: Install usd-core
+        run: pip install usd-core pytest
+      - name: Verify the scene's ROS 2 graph contract
+        run: python -m pytest scenes/ -q
+      # The same check as a standalone gate, so a failure reads as a contract
+      # report rather than a pytest traceback.
+      - name: Scene contract report
+        run: python -m scenes.scene_contract
+
   campaign:
     name: campaign aggregation tests + smoke test (REQ-S2R-102)
     runs-on: ubuntu-22.04

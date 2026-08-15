@@ -23,7 +23,9 @@ class DspFilterNode(Node):
 
     def __init__(self) -> None:
         super().__init__("dsp_filter")
-        self.declare_parameter("filter_kind", "iir")  # "fir" | "iir"
+        # "fir" | "iir" | "passthrough" (the campaign's unfiltered condition:
+        # identity response, same topology — see logic.filter_stage.FilterSpec).
+        self.declare_parameter("filter_kind", "iir")
         self.declare_parameter("sample_rate_hz", 200.0)
         self.declare_parameter("cutoff_hz", 5.0)
         self.declare_parameter("numtaps", 101)

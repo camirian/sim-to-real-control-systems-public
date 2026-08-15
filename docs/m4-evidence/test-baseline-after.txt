@@ -1,0 +1,12 @@
+$ python -m pytest dsp/ gauntlet/ campaign/ -q
+........................................................................ [ 61%]
+..............................................                           [100%]
+118 passed in 0.31s
+
+$ PYTHONPATH=ros2-ws/src/control_loop python -m pytest ros2-ws/src/control_loop/test -q
+....................................................                     [100%]
+52 passed in 1.35s
+
+$ python -m pytest scenes/ -q
+..............                                                           [100%]
+14 passed in 0.16s

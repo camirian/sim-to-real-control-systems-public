@@ -39,6 +39,8 @@ def generate_launch_description() -> LaunchDescription:
         DeclareLaunchArgument("vibration_amplitude", default_value="0.3"),
         DeclareLaunchArgument("vibration_freq_hz", default_value="25.0"),
         # Filter spec (REQ-S2R-003)
+        # "iir" | "fir" | "passthrough"; the campaign's unfiltered condition
+        # passes "passthrough" (identity filter, unchanged topology).
         DeclareLaunchArgument("filter_kind", default_value="iir"),
         DeclareLaunchArgument("sample_rate_hz", default_value="200.0"),
         DeclareLaunchArgument("cutoff_hz", default_value="5.0"),

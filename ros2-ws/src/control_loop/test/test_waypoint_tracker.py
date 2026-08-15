@@ -168,3 +168,147 @@ class TestFlatParamHelper:
             waypoints_from_flat([1.0, 2.0, 3.0], num_joints=2)
         with pytest.raises(ValueError, match="multiple"):
             waypoints_from_flat([], num_joints=2)
+
+
+class TestJointLimits:
+    """Command bounding against the simulated articulation's limits.
+
+    Not a safety function — see logic.franka_limits. What this buys the
+    campaign is that a run cannot emit commands the articulation could never
+    hold, which would put physically meaningless numbers into an evidence
+    packet.
+    """
+
+    LIMITS = [(-1.0, 1.0), (-2.0, 2.0)]
+
+    def test_command_is_clipped_into_the_limit_box(self):
+        # kp > 1 overshoots the target: error 0.9 * gain 2.0 = a 1.8 rad step
+        # from 0.0, i.e. a command of 1.8 against an upper limit of 1.0. This
+        # is the realistic way the limit gets hit — an aggressive gain, not an
+        # out-of-range target (those are rejected at construction).
+        tracker = WaypointTracker(
+            [Waypoint((0.9, 0.0))], kp=2.0, max_step_rad=10.0, joint_limits=self.LIMITS
+        )
+        out = tracker.update([0.0, 0.0], 0.0)
+        assert out.command[0] == 1.0
+        assert out.limit_clamped is True
+
+    def test_unclamped_command_reports_false(self):
+        tracker = WaypointTracker(
+            [Waypoint((0.5, 0.0))], kp=0.5, max_step_rad=0.05, joint_limits=self.LIMITS
+        )
+        out = tracker.update([0.0, 0.0], 0.0)
+        assert out.limit_clamped is False
+        assert -1.0 <= out.command[0] <= 1.0
+
+    def test_every_command_of_a_full_run_stays_inside_the_limits(self):
+        tracker = WaypointTracker(
+            [Waypoint((0.9, 1.9)), Waypoint((-0.9, -1.9))],
+            kp=0.8,
+            max_step_rad=0.05,
+            joint_limits=self.LIMITS,
+        )
+        pos = np.array([0.0, 0.0])
+        for i in range(5000):
+            out = tracker.update(pos, i * DT)
+            assert out.command[0] >= -1.0 and out.command[0] <= 1.0
+            assert out.command[1] >= -2.0 and out.command[1] <= 2.0
+            pos = out.command
+            if tracker.status in (TrackerStatus.DONE, TrackerStatus.TIMED_OUT):
+                break
+        assert tracker.status is TrackerStatus.DONE
+
+    def test_terminal_hold_is_also_clamped(self):
+        # A measurement outside the limits (sensor noise, a nudged sim) must
+        # not be echoed back as a command verbatim once the plan is terminal.
+        tracker = WaypointTracker([Waypoint((0.0, 0.0))], joint_limits=self.LIMITS)
+        tracker.update([0.0, 0.0], 0.0)  # reaches immediately -> DONE
+        assert tracker.status is TrackerStatus.DONE
+        out = tracker.update([9.0, 0.0], 1.0)
+        assert out.command[0] == 1.0
+        assert out.limit_clamped is True
+
+    def test_unreachable_waypoint_is_rejected_at_construction(self):
+        # Outside the limits the waypoint can never be reached, so it would
+        # burn waypoint_timeout_s and land in the evidence as a TIMED_OUT run.
+        # That is a plan defect, not a result — fail loudly instead.
+        with pytest.raises(ValueError, match="outside its limits"):
+            WaypointTracker([Waypoint((5.0, 0.0))], joint_limits=self.LIMITS)
+
+    def test_rejects_limit_table_of_the_wrong_width(self):
+        with pytest.raises(ValueError, match="joint_limits has"):
+            WaypointTracker([Waypoint((0.0, 0.0))], joint_limits=[(-1.0, 1.0)])
+
+    def test_rejects_inverted_limits(self):
+        with pytest.raises(ValueError, match="lower < upper"):
+            WaypointTracker([Waypoint((0.0,))], joint_limits=[(1.0, -1.0)])
+
+    def test_no_limits_means_unbounded_and_never_clamped(self):
+        tracker = WaypointTracker([Waypoint((100.0,))], kp=1.0, max_step_rad=10.0)
+        out = tracker.update([0.0], 0.0)
+        assert out.limit_clamped is False
+
+
+class TestFrankaLimitTable:
+    """The limit table's own contract (values are asset-derived, not invented)."""
+
+    def test_covers_exactly_the_seven_controlled_arm_joints(self):
+        from control_loop.logic.franka_limits import (
+            ARM_JOINT_NAMES,
+            FRANKA_JOINT_LIMITS_RAD,
+        )
+
+        assert set(FRANKA_JOINT_LIMITS_RAD) == set(ARM_JOINT_NAMES)
+        assert len(ARM_JOINT_NAMES) == 7
+
+    def test_default_waypoint_plan_is_inside_the_limits(self):
+        # Guards the shipped default plan: if someone edits
+        # DEFAULT_WAYPOINTS_FLAT into an unreachable pose, every campaign run
+        # would time out and the money table would fill with failures.
+        from control_loop.logic.franka_limits import ARM_JOINT_NAMES, within_limits
+        from control_loop.logic.waypoint_tracker import DEFAULT_WAYPOINTS_FLAT
+
+        DEFAULT_JOINT_NAMES = ARM_JOINT_NAMES
+        n = len(DEFAULT_JOINT_NAMES)
+        assert len(DEFAULT_WAYPOINTS_FLAT) % n == 0
+        for i in range(0, len(DEFAULT_WAYPOINTS_FLAT), n):
+            chunk = DEFAULT_WAYPOINTS_FLAT[i : i + n]
+            assert within_limits(DEFAULT_JOINT_NAMES, chunk), chunk
+
+    def test_degrees_and_radians_tables_agree(self):
+        import math
+
+        from control_loop.logic.franka_limits import (
+            FRANKA_JOINT_LIMITS_DEG,
+            FRANKA_JOINT_LIMITS_RAD,
+        )
+
+        for name, (lo_d, hi_d) in FRANKA_JOINT_LIMITS_DEG.items():
+            lo_r, hi_r = FRANKA_JOINT_LIMITS_RAD[name]
+            assert lo_r == pytest.approx(math.radians(lo_d))
+            assert hi_r == pytest.approx(math.radians(hi_d))
+
+    def test_matches_the_published_franka_panda_limits(self):
+        # Independent corroboration that the asset table is the real robot's:
+        # converted to radians it reproduces Franka Emika's published limits.
+        from control_loop.logic.franka_limits import FRANKA_JOINT_LIMITS_RAD
+
+        published = {
+            "panda_joint1": (-2.8973, 2.8973),
+            "panda_joint2": (-1.7628, 1.7628),
+            "panda_joint3": (-2.8973, 2.8973),
+            "panda_joint4": (-3.0718, -0.0698),
+            "panda_joint5": (-2.8973, 2.8973),
+            "panda_joint6": (-0.0175, 3.7525),
+            "panda_joint7": (-2.8973, 2.8973),
+        }
+        for name, (lo, hi) in published.items():
+            got_lo, got_hi = FRANKA_JOINT_LIMITS_RAD[name]
+            assert got_lo == pytest.approx(lo, abs=1e-4)
+            assert got_hi == pytest.approx(hi, abs=1e-4)
+
+    def test_unknown_joint_raises_rather_than_silently_unbounding(self):
+        from control_loop.logic.franka_limits import limits_for
+
+        with pytest.raises(KeyError, match="no limit table entry"):
+            limits_for(["panda_joint1", "not_a_joint"])

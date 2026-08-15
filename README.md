@@ -72,10 +72,19 @@ Honest state of the repo today:
   **[docs/RUN_ON_EDGEXPERT.md](docs/RUN_ON_EDGEXPERT.md)** for the complete
   fresh-box-to-recorded-demo runbook and the consolidated `EDGEXPERT-VERIFY`
   checklist.
-- **Known gap blocking loop closure:** `scenes/franka_ros2_bridge_scene.usd`
-  currently only **publishes** `/joint_states`; the OmniGraph
-  `ROS2SubscribeJointState` node for `/joint_command` must be added on the sim
-  box before the controller can drive the arm (RUN_ON_EDGEXPERT.md §3).
+- **Loop closed scene-side (was the blocking gap):**
+  `scenes/franka_ros2_bridge_scene.usd` published `/joint_states` but nothing
+  subscribed to `/joint_command`, so the controller could not drive the arm.
+  The scene now carries a `ROS2SubscribeJointState` on `/joint_command` feeding
+  an articulation controller, authored as data by
+  `scripts/author_joint_command_graph.py` (no Isaac Sim needed) and verified in
+  CI by `scenes/scene_contract.py`. **This is the scene-side contract only** —
+  that Isaac loads the graph and the arm actually moves is still unverified.
+- **Campaign not run.** No Isaac Sim 4.5.0 host is available to this project
+  right now, so the 20+20 seeded campaign has not been executed and no real
+  evidence packets exist. What blocks it, what was measured instead, and the
+  one open filter-sample-rate question are recorded in
+  **[docs/M4_BASELINE.md](docs/M4_BASELINE.md)**.
 
 ## Repository layout
 

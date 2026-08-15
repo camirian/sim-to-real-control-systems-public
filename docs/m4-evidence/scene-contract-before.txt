@@ -1,0 +1,11 @@
+$ python scripts/author_joint_command_graph.py --check   # BEFORE, on a69189e
+graph nodes:
+  /World/ActionGraph/on_playback_tick  omni.graph.action.OnPlaybackTick
+  /World/ActionGraph/ros2_publish_joint_state  isaacsim.ros2.bridge.ROS2PublishJointState
+FAILED: 5 contract violation(s)
+  - /World/ActionGraph/ros2_subscribe_joint_command: missing; expected isaacsim.ros2.bridge.ROS2SubscribeJointState
+  - /World/ActionGraph/articulation_controller: missing; expected isaacsim.core.nodes.IsaacArticulationController
+  - /World/ActionGraph/read_sim_time: missing; expected isaacsim.core.nodes.IsaacReadSimulationTime
+  - /World/ActionGraph/ros2_publish_joint_state.inputs:topicName: is None, expected 'joint_states' (unauthored means the node default, which is not a contract this repo controls)
+  - /World/ActionGraph/ros2_publish_joint_state.inputs:timeStamp: not connected to /World/ActionGraph/read_sim_time.outputs:simulationTime (connections: none)
+exit=1

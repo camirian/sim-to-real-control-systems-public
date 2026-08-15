@@ -27,7 +27,7 @@ import numpy as np
 import scipy.signal as signal
 from s2r_dsp import apply_filter_realtime, design_fir_lowpass, design_iir_lowpass
 
-_VALID_KINDS = ("fir", "iir")
+_VALID_KINDS = ("fir", "iir", "passthrough")
 
 
 @dataclass(frozen=True)
@@ -36,6 +36,14 @@ class FilterSpec:
 
     ``kind`` selects the s2r_dsp designer: ``"fir"`` (windowed FIR,
     ``numtaps`` coefficients) or ``"iir"`` (Butterworth, ``order``).
+
+    ``"passthrough"`` is the campaign's UNFILTERED condition (REQ-S2R-102): the
+    identity filter ``b=[1], a=[1]``, i.e. output == input. It keeps the launch
+    topology identical between conditions (the node still subscribes and
+    republishes) so the only difference between a filtered and an unfiltered
+    run is the filter response — see ``campaign/run_campaign.launch_command``,
+    which emits ``filter_kind:=passthrough`` for every unfiltered run.
+    ``cutoff_hz``/``numtaps``/``order`` are ignored for this kind.
     """
 
     kind: str = "iir"
@@ -49,6 +57,9 @@ class FilterSpec:
             raise ValueError(f"kind must be one of {_VALID_KINDS}, got {self.kind!r}")
         if self.sample_rate_hz <= 0.0:
             raise ValueError(f"sample_rate_hz must be > 0, got {self.sample_rate_hz}")
+        if self.kind == "passthrough":
+            # Identity filter: no frequency-domain parameters to validate.
+            return
         if not 0.0 < self.cutoff_hz < 0.5 * self.sample_rate_hz:
             raise ValueError(
                 "cutoff_hz must be in (0, Nyquist) = "
@@ -62,6 +73,12 @@ class FilterSpec:
     def design(self):
         """Return ``(b, a)`` coefficients via the s2r_dsp designers."""
         self.validate()
+        if self.kind == "passthrough":
+            # Identity: y[n] = x[n]. Runs through the same lfilter machinery as
+            # the real designs, so the unfiltered condition exercises the same
+            # code path (and the same per-joint state handling) as the filtered
+            # one, with a flat 0 dB response.
+            return np.array([1.0]), np.array([1.0])
         if self.kind == "fir":
             return design_fir_lowpass(self.sample_rate_hz, self.cutoff_hz, self.numtaps)
         return design_iir_lowpass(self.sample_rate_hz, self.cutoff_hz, self.order)
