@@ -44,7 +44,7 @@ from campaign.raw_evidence import (  # noqa: E402
     load_raw_packet,
     verify_integrity,
 )
-from gauntlet.checks import run_checks  # noqa: E402
+from gauntlet.checks import DEFAULT_THRESHOLDS, run_checks  # noqa: E402
 from gauntlet.evidence import build_packet, write_packet  # noqa: E402
 from gauntlet.run_log import load_run_log  # noqa: E402
 
@@ -310,9 +310,12 @@ def render(manifest, results, raw, graded, by_cond, paired, secondary) -> str:
       f"{len(integ['missing'])} missing.")
     A("")
     rs = results["rate"]
+    # Enough digits to show the spread. At 7 significant figures every run
+    # rounds to "200" and the reader cannot tell a tight distribution from a
+    # rounded one.
     A(f"Measured sample rate across all {rs['n']} runs: "
-      f"{fmt(rs['min'], 7)}–{fmt(rs['max'], 7)} Hz "
-      f"(mean {fmt(rs['mean'], 7)} Hz). "
+      f"{fmt(rs['min'], 15)} – {fmt(rs['max'], 15)} Hz "
+      f"(mean {fmt(rs['mean'], 15)} Hz). "
       f"All within the frozen ±2% tolerance: **{rs['all_within_tolerance']}**.")
     A("")
     if results["excluded_runs"]:
@@ -329,23 +332,47 @@ def render(manifest, results, raw, graded, by_cond, paired, secondary) -> str:
 
     A("## 5. Filtered vs unfiltered")
     A("")
-    A("Per-condition means over valid runs. Lower is better for all but")
+    A("Per-condition statistics over valid runs. Lower is better for all but")
     A("attenuation.")
     A("")
-    A("| metric | unit | filtered | unfiltered |")
-    A("|---|---|---|---|")
+    A("The MEDIAN is shown alongside the mean because the mean is inf-aware: a")
+    A("single run that never settles makes the mean settling time `inf`, which")
+    A("is correct but says nothing about the other 19. The median survives it.")
+    A("")
+    A("| metric | unit | filtered mean | filtered median | unfiltered mean | unfiltered median |")
+    A("|---|---|---|---|---|---|")
+
+    def mean(xs):
+        if not xs:
+            return None
+        return math.inf if any(math.isinf(x) for x in xs) else sum(xs) / len(xs)
+
+    def median(xs):
+        if not xs:
+            return None
+        s = sorted(xs)
+        n = len(s)
+        if n % 2:
+            return s[n // 2]
+        lo, hi = s[n // 2 - 1], s[n // 2]
+        return math.inf if (math.isinf(lo) or math.isinf(hi)) else (lo + hi) / 2.0
+
     for metric in METRIC_ORDER:
         pm = paired[metric]
         fv = [v for _, v, _ in pm.pairs if v is not None]
         uv = [v for _, _, v in pm.pairs if v is not None]
-
-        def mean(xs):
-            if not xs:
-                return None
-            return math.inf if any(math.isinf(x) for x in xs) else sum(xs) / len(xs)
-
         A(f"| `{metric}` | {METRIC_UNITS[metric]} | {fmt(mean(fv))} | "
-          f"{fmt(mean(uv))} |")
+          f"{fmt(median(fv))} | {fmt(mean(uv))} | {fmt(median(uv))} |")
+    A("")
+    A("`settling_time_s` is `inf` for any run whose error never stays inside")
+    A(f"the ±{DEFAULT_THRESHOLDS['settling_band_rad']} rad band through the end "
+      f"of the run. Counts of such runs per condition:")
+    st = paired["settling_time_s"]
+    n_f_inf = sum(1 for _, v, _ in st.pairs if v is not None and math.isinf(v))
+    n_u_inf = sum(1 for _, _, v in st.pairs if v is not None and math.isinf(v))
+    A("")
+    A(f"- filtered: {n_f_inf}/{st.n_pairs} never settled")
+    A(f"- unfiltered: {n_u_inf}/{st.n_pairs} never settled")
     A("")
     A("Secondary diagnostics from the raw packets — `true_*` are the")
     A("articulation's ACTUAL position, which the controller never observes:")

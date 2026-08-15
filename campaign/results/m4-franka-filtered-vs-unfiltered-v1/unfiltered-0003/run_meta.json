@@ -1,0 +1,5 @@
+{
+  "run_id": "unfiltered-0003",
+  "scenario": "franka-joint-tracking",
+  "seed": 3
+}

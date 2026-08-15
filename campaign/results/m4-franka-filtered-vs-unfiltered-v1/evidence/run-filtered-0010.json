@@ -1,0 +1,55 @@
+{
+  "checks": [
+    {
+      "comparator": "<=",
+      "detail": "RMS of measured-vs-reference joint position (rad)",
+      "name": "tracking_rms_error",
+      "status": "passed",
+      "threshold": 0.15,
+      "value": 0.07340170370106151
+    },
+    {
+      "comparator": "<=",
+      "detail": "time to stay within ±0.2 rad of reference",
+      "name": "settling_time_s",
+      "status": "failed",
+      "threshold": 2.0,
+      "value": 5.0
+    },
+    {
+      "comparator": "<=",
+      "detail": "worst |error| as % of reference span",
+      "name": "overshoot_pct",
+      "status": "failed",
+      "threshold": 25.0,
+      "value": 72.22728985564835
+    },
+    {
+      "comparator": ">=",
+      "detail": "band-power drop noisy->measured at 25.0±2.0 Hz",
+      "name": "filter_attenuation_db",
+      "status": "passed",
+      "threshold": 20.0,
+      "value": 45.23122078275189
+    }
+  ],
+  "environment": {
+    "gauntlet": "0.1.0",
+    "numpy": "2.3.1",
+    "python": "3.12.13",
+    "s2r_dsp": "0.1.0",
+    "scipy": "1.17.0"
+  },
+  "generated_at": "2026-08-14T21:00:00Z",
+  "overall_passed": false,
+  "run_id": "filtered-0010",
+  "scenario": "franka-joint-tracking",
+  "schema_version": 1,
+  "seed": 10,
+  "thresholds": {
+    "filter_attenuation_db": 20.0,
+    "overshoot_pct": 25.0,
+    "settling_time_s": 2.0,
+    "tracking_rms_error": 0.15
+  }
+}
