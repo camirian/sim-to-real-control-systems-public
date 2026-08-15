@@ -1,0 +1,6 @@
+# Generated at execution time by the operator, never committed ahead of a run.
+# Committing a stale MODEL_PIN.json or PREFLIGHT_RESULT.json would let a later
+# reader mistake a blocked or previous run for a completed gate.
+MODEL_PIN.json
+PREFLIGHT_RESULT.json
+__pycache__/

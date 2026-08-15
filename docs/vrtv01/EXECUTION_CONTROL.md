@@ -84,29 +84,74 @@ runs, including V0. Do not run V0 on a text-only model.
 
 ## 4. Model selection record — complete BEFORE the first condition runs
 
-No condition may start until this table is filled in and committed.
+No condition may start until this record is complete and committed.
+
+**Decision (recorded 2026-08-15).**
 
 | Field | Value |
 |---|---|
-| Reviewer provider | `TO BE RECORDED BEFORE V0-CLEAN` |
-| Reviewer model + exact version string | `TO BE RECORDED BEFORE V0-CLEAN` |
-| Reviewer configuration (temperature / effort / tools / limits) | `TO BE RECORDED BEFORE V0-CLEAN` |
-| Multimodal image input confirmed | `TO BE RECORDED BEFORE V0-CLEAN` |
-| Frozen-source context capacity confirmed | `TO BE RECORDED BEFORE V0-CLEAN` |
-| Repository/filesystem access denied | `TO BE RECORDED BEFORE V0-CLEAN` |
-| Reviewer tool/data network access denied (§5b Class 1) | `TO BE RECORDED BEFORE V0-CLEAN` |
-| Reviewer tools registered (must be none that fetch/search/execute) | `TO BE RECORDED BEFORE V0-CLEAN` |
-| Model transport route (§5b Class 2: provider API / local model) | `TO BE RECORDED BEFORE V0-CLEAN` |
-| Transport identical across all five treatment sessions | `TO BE RECORDED BEFORE V0-CLEAN` |
-| Five-session pin availability confirmed | `TO BE RECORDED BEFORE V0-CLEAN` |
-| V3 provider | `TO BE RECORDED BEFORE V3` |
-| V3 model + exact version string | `TO BE RECORDED BEFORE V3` |
-| Selection rationale | `TO BE RECORDED BEFORE V0-CLEAN` |
-| Selected by | `TO BE RECORDED BEFORE V0-CLEAN` |
-| Date/time of selection | `TO BE RECORDED BEFORE V0-CLEAN` |
+| Treatment provider | **OpenAI** |
+| Treatment family | **GPT-5.6 Sol** |
+| Treatment model ID | **PENDING — must be resolved by `harness/pin_model_id.py`** |
+| Treatment API | plain OpenAI API client — **not** Codex, ChatGPT, or any agent harness |
+| Reasoning effort | **high** |
+| Registered tools | **NONE** (the `tools` key is never sent, so no tool capability is advertised) |
+| Reviewer web/GitHub/network/tool access | **NONE** (§5b Class 1 denied) |
+| Model transport | OpenAI API endpoint only (§5b Class 2) |
+| Multimodal image input | verified by synthetic preflight before V0 |
+| Frozen-source context capacity | verified before V0 |
+| Repository/filesystem access denied | enforced by `stage_runs.py` + `harness/run_condition.py` |
+| Five-session pin availability | same pinned ID for all five treatment runs |
+| V3 provider | **Anthropic** |
+| V3 model ID | **`claude-opus-4-8`** — to be confirmed visible via the Models endpoint |
+| V3 API | plain Anthropic Messages API |
+| V3 effort | pinned explicitly at the highest supported setting |
+| V3 registered tools | **NONE** |
+| V3 transport | Anthropic API endpoint only |
 
-Selecting the model **after** seeing any condition's output is a post-hoc tuning route and
-is forbidden by the preregistration freeze.
+### Model ID resolution rule
+
+The treatment model ID **must be derived from the provider Models endpoint, never typed
+from memory.** Run `harness/pin_model_id.py` with the experiment API account; it writes
+`harness/MODEL_PIN.json`.
+
+1. If an immutable/snapshot-specific `gpt-5.6-sol-*` ID is published, **pin that**.
+2. If no snapshot exists, pin the explicit ID **`gpt-5.6-sol`**.
+3. **Never** pin the generic alias `gpt-5.6` (or `gpt-5.6-latest`). The script rejects
+   these explicitly — a floating alias can re-point mid-experiment, which is exactly the
+   drift the model-control rule exists to prevent.
+
+### Why not Fable 5 for V3
+
+Fable 5 is excluded as the adjudicator because its safeguard architecture can route some
+requests to Opus 4.8. That would introduce a model-routing variable into adjudication for
+no benefit. `claude-opus-4-8` is pinned directly.
+
+### Identity capture and drift handling
+
+Every treatment run records all returned identity fields: `requested_model`,
+`returned_model`, `response_id`, `system_fingerprint`, `service_tier`, the provider
+`x-request-id`, and usage. `harness/run_condition.py` writes these to
+`<run>_<stage>_metadata.json` alongside the verbatim raw response.
+
+**If an identity or fingerprint that should remain stable changes between treatment runs,
+VOID the affected run.** Do not silently accept model drift: a mid-experiment model change
+and a representation effect are indistinguishable after the fact. Re-run on the pinned
+configuration and record the void.
+
+### Preflight requirement
+
+Before V0, run `harness/synthetic_preflight.py`. It generates its own 2×2 synthetic PNG
+and a trivial synthetic sentence, and verifies authentication, image ingestion, JSON
+output, model identity, reasoning configuration, `tools_registered == []`, and transport
+restriction.
+
+**It must not expose the selected model or session to any VRTV artifact** — no source, no
+view, no prompt, no finding. The script reads nothing from the repository or the staging
+tree by construction.
+
+Selecting or changing the model **after** seeing any condition's output is a post-hoc
+tuning route and is forbidden by the preregistration freeze.
 
 ## 5. Artifact manifest
 
