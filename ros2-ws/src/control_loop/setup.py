@@ -17,7 +17,7 @@ setup(
     install_requires=["setuptools", "numpy", "scipy", "s2r-dsp"],
     zip_safe=True,
     maintainer="Caaren Amirian",
-    maintainer_email="caaren.amirian.build@gmail.com",
+    maintainer_email="153974602+camirian@users.noreply.github.com",
     description=(
         "Closed-loop nodes for the sim-to-real Franka demo: seeded noise "
         "injector, causal DSP filter node, joint-space waypoint controller "

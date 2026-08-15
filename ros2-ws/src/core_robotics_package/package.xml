@@ -4,7 +4,7 @@
   <name>core_robotics_package</name>
   <version>0.0.0</version>
   <description>Core ROS 2 publisher/subscriber examples for sim-to-real robotics control experiments.</description>
-  <maintainer email="caaren.amirian.build@gmail.com">Caaren Amirian</maintainer>
+  <maintainer email="153974602+camirian@users.noreply.github.com">Caaren Amirian</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
