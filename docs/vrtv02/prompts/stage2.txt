@@ -1,0 +1,21 @@
+Below is the complete committed source and evidence corpus.
+
+For each item you produced in your previous response, decide whether that corpus confirms it, rejects it, leaves it undecided, or cannot decide it because the necessary artifact is not part of the corpus you were given.
+
+Return ONLY a JSON array. Each element must use exactly this schema:
+
+{
+  "local_id": "string, matching the local_id from your previous response",
+  "self_verdict": "CONFIRMED | REJECTED | UNRESOLVED | NOT_CHECKABLE_FROM_REVIEW_CORPUS",
+  "evidence_path": "the exact file and field or section you consulted",
+  "notes": "string"
+}
+
+Use the verdicts precisely:
+
+- CONFIRMED: the corpus supports the item.
+- REJECTED: the corpus contradicts the item.
+- UNRESOLVED: the corpus contains the relevant evidence surface, but it does not decide the item either way.
+- NOT_CHECKABLE_FROM_REVIEW_CORPUS: deciding the item would require an artifact that is not present in the corpus you were given. Use this rather than guessing. It is a correct answer, not a failure.
+
+Do not mark an item CONFIRMED or REJECTED on the basis of an artifact you were not given. Return no prose outside the JSON array.

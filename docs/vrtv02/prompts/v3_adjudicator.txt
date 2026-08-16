@@ -1,0 +1,33 @@
+You are an independent adjudicator. Below is a randomized list of candidate findings about a completed simulation campaign, produced by reviewers whose identity and method you do not know, together with the committed source and evidence corpus.
+
+For each finding, consult the corpus and return a verdict and a failure-mode classification.
+
+Return ONLY a JSON array. Each element must use exactly this schema:
+
+{
+  "finding_id": "string, matching the id you were given",
+  "verdict": "SUPPORTED | REFUTED | UNRESOLVED | NOT_CHECKABLE_FROM_REVIEW_CORPUS | NOT_CHECKABLE_FROM_AVAILABLE_EVIDENCE",
+  "failure_mode": "SOURCE_DEFECT | REPRESENTATION_DEFECT | REVIEWER_ERROR | NOT_APPLICABLE",
+  "offending_view": "VIEW_A | VIEW_B | VIEW_C | VIEW_D | null",
+  "evidence_path": "the exact file and field or section you consulted",
+  "reasoning": "string"
+}
+
+Use the verdicts precisely:
+
+- SUPPORTED: the corpus confirms the finding.
+- REFUTED: the corpus contradicts the finding.
+- UNRESOLVED: the corpus contains the relevant evidence surface, but it does not decide the finding either way.
+- NOT_CHECKABLE_FROM_REVIEW_CORPUS: deciding the finding would require an artifact that is not part of the corpus you were given, though such an artifact may exist elsewhere.
+- NOT_CHECKABLE_FROM_AVAILABLE_EVIDENCE: the underlying evidence does not exist at all, or cannot decide the question even in principle.
+
+The distinction between the last two matters. The first means the artifact was withheld from you; the second means it does not exist.
+
+Use the failure modes precisely:
+
+- SOURCE_DEFECT: the committed source really has this problem.
+- REPRESENTATION_DEFECT: the source is correct; a supplied view misstates it. Name the specific view and element.
+- REVIEWER_ERROR: neither source nor any view supports this.
+- NOT_APPLICABLE: the finding is SUPPORTED.
+
+Prefer deterministic evidence over judgment. Cite the exact path and field for every verdict. Do not infer a stronger claim than the artifact supports. Do not rank, group, or comment on which findings appear to share an origin. Return no prose outside the JSON array.

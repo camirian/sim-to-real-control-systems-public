@@ -1,5 +1,7 @@
 {
   "corpus_dir": "/tmp/claude-1000/-home-caaren-dev/62bb8954-eee9-41e7-a365-befbf6eaa8c1/scratchpad/corpus",
+  "gate_semantics": "ALL required evidence dimensions must be satisfied; narrow locators only; this gate records corpus coverage, never diagram correctness",
+  "total_required_dimensions": 58,
   "assertions_total": 36,
   "assertions_supported": 36,
   "assertions_unsupported": 0,
@@ -9,23 +11,28 @@
       "id": "A1",
       "view": "A",
       "assertion": "Simulator is Isaac Sim with a Franka articulation",
+      "required_dimensions": [
+        "simulator_is_isaac",
+        "robot_is_franka"
+      ],
+      "dimension_results": {
+        "simulator_is_isaac": true,
+        "robot_is_franka": true
+      },
       "supported": true,
-      "supporting_artifact_count": 128,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "simulator_is_isaac",
           "artifact": "MASTER_PLAN.md",
-          "pattern": "Isaac\\s*Sim",
+          "locator": "re:Isaac\\s*Sim",
           "excerpt": "oop demo with certification-style evidence: a Franka arm in Isaac Sim tracks a joint-space trajectory, injected sensor noise is c"
         },
         {
-          "artifact": "README.md",
-          "pattern": "Isaac\\s*Sim",
-          "excerpt": "oop demo with certification-style evidence: a Franka arm in Isaac Sim tracks a joint-space trajectory, injected sensor noise is c"
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "Isaac\\s*Sim",
-          "excerpt": ".  ## 2. Exact runtime and configuration  | | | |---|---| | Isaac Sim | `6.0.1-rc.7+release.42383.32955d8d.gl` | | Platform | aar"
+          "dimension": "robot_is_franka",
+          "artifact": "MASTER_PLAN.md",
+          "locator": "re:\\bFranka\\b",
+          "excerpt": "orded closed-loop demo with certification-style evidence: a Franka arm in Isaac Sim tracks a joint-space trajectory, injected "
         }
       ]
     },
@@ -33,22 +40,27 @@
       "id": "A2",
       "view": "A",
       "assertion": "Seeded disturbance is 25 Hz plus AWGN",
+      "required_dimensions": [
+        "tone_frequency_25hz",
+        "noise_is_awgn"
+      ],
+      "dimension_results": {
+        "tone_frequency_25hz": true,
+        "noise_is_awgn": true
+      },
       "supported": true,
-      "supporting_artifact_count": 6,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "tone_frequency_25hz",
           "artifact": "MASTER_PLAN.md",
-          "pattern": "\\b25(\\.0+)?\\s*Hz",
+          "locator": "re:25(\\.0+)?\\s*Hz",
           "excerpt": "Unit test with synthesized telemetry; attenuation \u2265 spec at 25 Hz vibration band. | | REQ-S2R-004 | Waypoint controller track"
         },
         {
-          "artifact": "README.md",
-          "pattern": "\\b25(\\.0+)?\\s*Hz",
-          "excerpt": " better in 20/20 seeds) and 48.1 dB of attenuation   at the 25 Hz disturbance band versus 0.0 dB. Numbers, uncertainty, failu"
-        },
-        {
+          "dimension": "noise_is_awgn",
           "artifact": "RESULTS.md",
-          "pattern": "AWGN",
+          "locator": "re:\\bAWGN\\b",
           "excerpt": "t 100.0 Hz.  Disturbance: 0.3 rad vibration at 25.0 Hz plus AWGN sigma 0.1 rad, injected on the joint-state feedback path, p"
         }
       ]
@@ -57,23 +69,28 @@
       "id": "A3",
       "view": "A",
       "assertion": "Disturbance is injected before the condition split, so both arms share it",
+      "required_dimensions": [
+        "injection_point_defined",
+        "both_arms_share_disturbance"
+      ],
+      "dimension_results": {
+        "injection_point_defined": true,
+        "both_arms_share_disturbance": true
+      },
       "supported": true,
-      "supporting_artifact_count": 6,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "MASTER_PLAN.md",
-          "pattern": "inject",
-          "excerpt": " a Franka arm in Isaac Sim tracks a joint-space trajectory, injected sensor noise is cleaned in-loop by the repo's DSP filter,"
+          "dimension": "injection_point_defined",
+          "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
+          "locator": "json:manifests:disturbance",
+          "excerpt": "{\"awgn_sigma_rad\": 0.1, \"injection_point\": \"joint-state feedback path, pre-filter\", \"model\": \"control_loop.logic.noise_model.JointStateNoiseModel\", \"r"
         },
         {
-          "artifact": "README.md",
-          "pattern": "inject",
-          "excerpt": " a Franka arm in Isaac Sim tracks a joint-space trajectory, injected sensor noise is cleaned in-loop by this repo's DSP filter"
-        },
-        {
+          "dimension": "both_arms_share_disturbance",
           "artifact": "RESULTS.md",
-          "pattern": "inject",
-          "excerpt": "ance: 0.3 rad vibration at 25.0 Hz plus AWGN sigma 0.1 rad, injected on the joint-state feedback path, pre-filter, drawn from "
+          "locator": "re:only difference is the filter",
+          "excerpt": "l through unchanged?  Both arms run identical topology. The only difference is the filter response: a 4th-order Butterworth IIR at a 5 Hz cutoff, ver"
         }
       ]
     },
@@ -81,18 +98,36 @@
       "id": "A4",
       "view": "A",
       "assertion": "Filter is a 4th-order Butterworth IIR",
+      "required_dimensions": [
+        "family_butterworth",
+        "order_is_4",
+        "type_is_iir"
+      ],
+      "dimension_results": {
+        "family_butterworth": true,
+        "order_is_4": true,
+        "type_is_iir": true
+      },
       "supported": true,
-      "supporting_artifact_count": 2,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "family_butterworth",
           "artifact": "RESULTS.md",
-          "pattern": "Butterworth",
+          "locator": "re:Butterworth",
           "excerpt": "gy. The only difference is the filter response: a 4th-order Butterworth IIR at a 5 Hz cutoff, versus a passthrough identity filter "
         },
         {
+          "dimension": "order_is_4",
           "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
-          "pattern": "\"?order\"?\\s*[:=]\\s*4",
-          "excerpt": "\"cutoff_hz\": 5.0,     \"filtered_kind\": \"iir\",     \"filtered_order\": 4,     \"implementation\": \"control_loop.logic.filter_stage.Fil"
+          "locator": "json:manifests:filter.filtered_order",
+          "excerpt": "4"
+        },
+        {
+          "dimension": "type_is_iir",
+          "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
+          "locator": "json:manifests:filter.filtered_kind",
+          "excerpt": "\"iir\""
         }
       ]
     },
@@ -100,23 +135,20 @@
       "id": "A5",
       "view": "A",
       "assertion": "Filter cutoff is 5 Hz",
+      "required_dimensions": [
+        "cutoff_value_5hz"
+      ],
+      "dimension_results": {
+        "cutoff_value_5hz": true
+      },
       "supported": true,
-      "supporting_artifact_count": 5,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "README.md",
-          "pattern": "cutoff",
-          "excerpt": "that would have aliased the 25 Hz disturbance onto the 5 Hz cutoff,   and an endogenous reference signal caught by a pilot run"
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "cutoff",
-          "excerpt": " the filter response: a 4th-order Butterworth IIR at a 5 Hz cutoff, versus a passthrough identity filter with a flat 0 dB resp"
-        },
-        {
+          "dimension": "cutoff_value_5hz",
           "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
-          "pattern": "cutoff",
-          "excerpt": "    \"measured\",       \"noisy\"     ]   },   \"filter\": {     \"cutoff_hz\": 5.0,     \"filtered_kind\": \"iir\",     \"filtered_order\":"
+          "locator": "json:manifests:filter.cutoff_hz",
+          "excerpt": "5.0"
         }
       ]
     },
@@ -124,23 +156,20 @@
       "id": "A6",
       "view": "A",
       "assertion": "The in-loop filter path is causal",
+      "required_dimensions": [
+        "causal_path_named"
+      ],
+      "dimension_results": {
+        "causal_path_named": true
+      },
       "supported": true,
-      "supporting_artifact_count": 4,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "causal_path_named",
           "artifact": "MASTER_PLAN.md",
-          "pattern": "causal",
+          "locator": "re:causal",
           "excerpt": "oisy\" --> FILT[\"dsp_filter node\\ndsp.apply_filter_realtime (causal)\"]     FILT -- \"/joint_states_filtered\" --> CTRL[\"waypoint_"
-        },
-        {
-          "artifact": "README.md",
-          "pattern": "causal",
-          "excerpt": "is injected into `/joint_states` and cleaned in-loop by the causal `apply_filter_realtime` DSP path. Every run is seeded and r"
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "causal",
-          "excerpt": "on plus Gaussian sensor noise, does inserting the project's causal low-pass filter between the joint-state feedback and the co"
         }
       ]
     },
@@ -148,23 +177,28 @@
       "id": "A7",
       "view": "A",
       "assertion": "Unfiltered arm is identity/passthrough at 0 dB",
+      "required_dimensions": [
+        "arm_is_passthrough",
+        "attenuation_is_zero"
+      ],
+      "dimension_results": {
+        "arm_is_passthrough": true,
+        "attenuation_is_zero": true
+      },
       "supported": true,
-      "supporting_artifact_count": 23,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "arm_is_passthrough",
           "artifact": "RESULTS.md",
-          "pattern": "passthrough",
+          "locator": "re:passthrough",
           "excerpt": "nse: a 4th-order Butterworth IIR at a 5 Hz cutoff, versus a passthrough identity filter with a flat 0 dB response.  ## 2. Exact run"
         },
         {
-          "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
-          "pattern": "passthrough",
-          "excerpt": "loop\",     \"sample_rate_hz\": 200.0,     \"unfiltered_kind\": \"passthrough\",     \"unfiltered_response\": \"identity b=[1], a=[1] (flat 0"
-        },
-        {
-          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0000/raw_evidence.json",
-          "pattern": "passthrough",
-          "excerpt": "le_target_reached\",     \"cycles\": 2000,     \"filter_kind\": \"passthrough\",     \"implementation\": \"control_loop.logic.waypoint_tracke"
+          "dimension": "attenuation_is_zero",
+          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0000/raw_evidence.json",
+          "locator": "json:raw_evidence.json:signals_summary",
+          "excerpt": "{\"command_max_rad\": 0.2082115846490123, \"command_min_rad\": -0.22756455061481312, \"n_rows\": 2000, \"noisy_rms_error_rad\": 0.30251945857732565, \"peak_tra"
         }
       ]
     },
@@ -172,23 +206,28 @@
       "id": "A8",
       "view": "A",
       "assertion": "Controller is WaypointTracker with an exogenous time reference",
+      "required_dimensions": [
+        "controller_is_waypointtracker",
+        "reference_is_exogenous"
+      ],
+      "dimension_results": {
+        "controller_is_waypointtracker": true,
+        "reference_is_exogenous": true
+      },
       "supported": true,
-      "supporting_artifact_count": 44,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "controller_is_waypointtracker",
           "artifact": "README.md",
-          "pattern": "WaypointTracker",
+          "locator": "re:WaypointTracker",
           "excerpt": " consumed, and the loop closes through the project's own   `WaypointTracker`. The scene-side-only caveat above is now retired. - **Hist"
         },
         {
+          "dimension": "reference_is_exogenous",
           "artifact": "RESULTS.md",
-          "pattern": "exogenous",
+          "locator": "re:exogenous",
           "excerpt": "regardless of whether the controller converges - reference: exogenous, time-parameterized: waypoint k is the reference for elapse"
-        },
-        {
-          "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
-          "pattern": "WaypointTracker",
-          "excerpt": "     \"implementation\": \"control_loop.logic.waypoint_tracker.WaypointTracker\",     \"joint_limits\": \"control_loop.logic.franka_limits.lim"
         }
       ]
     },
@@ -196,23 +235,20 @@
       "id": "A9",
       "view": "A",
       "assertion": "Loop is closed: controller commands return to the simulator",
+      "required_dimensions": [
+        "commands_written_back"
+      ],
+      "dimension_results": {
+        "commands_written_back": true
+      },
       "supported": true,
-      "supporting_artifact_count": 45,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "commands_written_back",
           "artifact": "MASTER_PLAN.md",
-          "pattern": "joint[_ ]command",
+          "locator": "re:joint[_ ]command",
           "excerpt": "oint_controller node\\njoint-space trajectory\"]     CTRL -- \"joint commands\" --> ISAAC     subgraph logging       BAG[\"rosbag / CSV \u2014 "
-        },
-        {
-          "artifact": "README.md",
-          "pattern": "joint[_ ]command",
-          "excerpt": "oint_controller node\\njoint-space trajectory\"]     CTRL -- \"joint commands\" --> ISAAC     subgraph logging       BAG[\"rosbag / CSV \u2014 "
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "closed[- ]loop",
-          "excerpt": "pen-loop   synthetic profile in `s2r_dsp`, not against this closed loop. Runs are   graded against them for consistency with the ce"
         }
       ]
     },
@@ -220,23 +256,20 @@
       "id": "A10",
       "view": "A",
       "assertion": "Raw telemetry targets 200 Hz",
+      "required_dimensions": [
+        "target_rate_200hz"
+      ],
+      "dimension_results": {
+        "target_rate_200hz": true
+      },
       "supported": true,
-      "supporting_artifact_count": 89,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "MASTER_PLAN.md",
-          "pattern": "\"?rate\"?",
-          "excerpt": "ified improvement. | Table + packets in repo; numbers regenerate from seeds. | | REQ-S2R-200 | CI runs DSP + gauntlet tests "
-        },
-        {
-          "artifact": "README.md",
-          "pattern": "\\b200(\\.0+)?\\s*Hz",
-          "excerpt": " loads   the graph, `/joint_states` publishes at a measured 200 Hz, `/joint_command` is   provably consumed, and the loop clos"
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "\\b200(\\.0+)?\\s*Hz",
-          "excerpt": "ent are evidence about the tested RC build only.  Sampling: 200.0 Hz publication (physics dt 0.0025 s, graph ticks once per 2 ph"
+          "dimension": "target_rate_200hz",
+          "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
+          "locator": "json:manifests:sampling",
+          "excerpt": "{\"graph_tick_per_physics_steps\": 2, \"nyquist_hz\": 100.0, \"physics_dt_s\": 0.0025, \"rate_evidence\": \"per-run inter-sample simulated-time deltas\", \"rate_"
         }
       ]
     },
@@ -244,23 +277,28 @@
       "id": "A11",
       "view": "A",
       "assertion": "Runs produce a gauntlet/evidence packet",
+      "required_dimensions": [
+        "evidence_packet_exists",
+        "checks_recorded"
+      ],
+      "dimension_results": {
+        "evidence_packet_exists": true,
+        "checks_recorded": true
+      },
       "supported": true,
-      "supporting_artifact_count": 46,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "MASTER_PLAN.md",
-          "pattern": "gauntlet",
-          "excerpt": "er, and every run is auto-graded by a seeded \"certification gauntlet\" that emits a JSON evidence packet and a markdown complianc"
+          "dimension": "evidence_packet_exists",
+          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0000/raw_evidence.json",
+          "locator": "json:raw_evidence.json:files",
+          "excerpt": "{\"run_meta.json\": \"c1474ceb2c773dbb5f1ecbe77b72300fe0ddc943b78051d8ea81a728d8fe1937\", \"telemetry.csv\": \"3342230d39050c2fd53624f2739a919f7b593eb7f09252"
         },
         {
-          "artifact": "README.md",
-          "pattern": "gauntlet",
-          "excerpt": "er, and every run is auto-graded by a seeded \"certification gauntlet\" that emits a JSON evidence packet and a markdown complianc"
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "gauntlet",
-          "excerpt": " | RMW | `rmw_fastrtps_cpp` | | rclpy | omniverse-built | | gauntlet | 0.1.0 | | numpy | 2.3.1 | | python | 3.12.13 | | s2r_dsp "
+          "dimension": "checks_recorded",
+          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0000.json",
+          "locator": "json:evidence/:checks",
+          "excerpt": "[{\"comparator\": \"<=\", \"detail\": \"RMS of measured-vs-reference joint position (rad)\", \"name\": \"tracking_rms_error\", \"status\": \"failed\", \"threshold\": 0."
         }
       ]
     },
@@ -268,23 +306,28 @@
       "id": "B1",
       "view": "B",
       "assertion": "Frozen campaign manifest defines 20 paired seeds",
+      "required_dimensions": [
+        "seed_count_20",
+        "seeds_are_paired"
+      ],
+      "dimension_results": {
+        "seed_count_20": true,
+        "seeds_are_paired": true
+      },
       "supported": true,
-      "supporting_artifact_count": 5,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "MASTER_PLAN.md",
-          "pattern": "\\b20\\b.{0,40}seed",
-          "excerpt": "uns are reproducible. 2. The money artifact: a table of N \u2265 20 seeded runs, filtered vs. unfiltered,    showing quantified impr"
+          "dimension": "seed_count_20",
+          "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
+          "locator": "json:manifests:design",
+          "excerpt": "{\"arm_order_policy\": \"even seed: filtered first; odd seed: unfiltered first (balanced, frozen pre-run)\", \"conditions\": [\"filtered\", \"unfiltered\"], \"ex"
         },
         {
+          "dimension": "seeds_are_paired",
           "artifact": "README.md",
-          "pattern": "\\b20\\b.{0,40}seed",
-          "excerpt": "nto an evidence packet. The target artifact is a table of \u2265 20 seeded runs, filtered vs. unfiltered, plus a 2\u20133 minute recorded"
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "\\b20\\b.{0,40}seed",
-          "excerpt": "fore** the first run. Its hash covers every value below.  - 20 seeds: `[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1"
+          "locator": "re:paired",
+          "excerpt": "ltered on every metric \u2014   tracking RMS 0.177 vs 0.406 rad (paired mean difference \u22120.229 rad, 95% CI   [\u22120.248, \u22120.212], filt"
         }
       ]
     },
@@ -292,22 +335,19 @@
       "id": "B2",
       "view": "B",
       "assertion": "A campaign harness executes the runs",
+      "required_dimensions": [
+        "harness_named"
+      ],
+      "dimension_results": {
+        "harness_named": true
+      },
       "supported": true,
-      "supporting_artifact_count": 48,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "MASTER_PLAN.md",
-          "pattern": "campaign",
-          "excerpt": "ntlet jobs). - Integration (EdgeXpert): the 2\u00d720 seeded-run campaign \u2192 results table.  **M4 \u2014 Record & ship** (Week 8\u20139) \u2192 REQ-3"
-        },
-        {
-          "artifact": "README.md",
-          "pattern": "campaign",
-          "excerpt": "tatus \u2014 M1\u2013M3 complete; M4 runtime validated and the 40-run campaign executed  Honest state of the repo today:  > **Which simula"
-        },
-        {
+          "dimension": "harness_named",
           "artifact": "RESULTS.md",
-          "pattern": "harness",
+          "locator": "re:harness",
           "excerpt": "7317bac11df209d39ac264d7b4ffe9d5f9b5d4bf8c805f266b238052` - harness commit: `65bf383c624e082152596130ef75fb8fa1fd157f` - runtim"
         }
       ]
@@ -316,23 +356,28 @@
       "id": "B3",
       "view": "B",
       "assertion": "40 scheduled runs = 20 filtered + 20 unfiltered",
+      "required_dimensions": [
+        "scheduled_is_40",
+        "split_by_condition"
+      ],
+      "dimension_results": {
+        "scheduled_is_40": true,
+        "split_by_condition": true
+      },
       "supported": true,
-      "supporting_artifact_count": 7,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "README.md",
-          "pattern": "\\b40\\b",
-          "excerpt": "rrent status \u2014 M1\u2013M3 complete; M4 runtime validated and the 40-run campaign executed  Honest state of the repo today:  > *"
+          "dimension": "scheduled_is_40",
+          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_summary.json",
+          "locator": "json:campaign_summary.json:scheduled",
+          "excerpt": "40"
         },
         {
-          "artifact": "RESULTS.md",
-          "pattern": "\\b40\\b",
-          "excerpt": ", 16, 17, 18, 19]` - each seed run under BOTH conditions -> 40 scheduled runs - pairing: same seed in both conditions -> i"
-        },
-        {
-          "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
-          "pattern": "\\b40\\b",
-          "excerpt": "ngful\",     \"runs_per_condition\": 20,     \"scheduled_runs\": 40,     \"seeds\": [       0,       1,       2,       3,       4"
+          "dimension": "split_by_condition",
+          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_summary.json",
+          "locator": "json:campaign_summary.json:by_condition",
+          "excerpt": "{\"filtered\": {\"invalid\": 0, \"scheduled\": 20, \"valid\": 20}, \"unfiltered\": {\"invalid\": 0, \"scheduled\": 20, \"valid\": 20}}"
         }
       ]
     },
@@ -340,23 +385,20 @@
       "id": "B4",
       "view": "B",
       "assertion": "Per-run raw telemetry is produced",
+      "required_dimensions": [
+        "telemetry_artifact_named"
+      ],
+      "dimension_results": {
+        "telemetry_artifact_named": true
+      },
       "supported": true,
-      "supporting_artifact_count": 46,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "MASTER_PLAN.md",
-          "pattern": "telemetry",
-          "excerpt": "/IIR design, causal + zero-phase apply, deterministic noisy-telemetry synthesizer, 4 passing tests), `ros2-ws/src/control_loop/` "
-        },
-        {
-          "artifact": "README.md",
-          "pattern": "telemetry",
-          "excerpt": "001): FIR/IIR design,     causal + zero-phase apply, seeded telemetry synthesizer, tests green.   - `ros2-ws/src/control_loop/` \u2014"
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "telemetry",
-          "excerpt": "ashes every evidence file, re-grades every run from its raw telemetry, and regenerates this document. Regenerating it must produc"
+          "dimension": "telemetry_artifact_named",
+          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0000/raw_evidence.json",
+          "locator": "json:raw_evidence.json:files",
+          "excerpt": "{\"run_meta.json\": \"c1474ceb2c773dbb5f1ecbe77b72300fe0ddc943b78051d8ea81a728d8fe1937\", \"telemetry.csv\": \"3342230d39050c2fd53624f2739a919f7b593eb7f09252"
         }
       ]
     },
@@ -364,23 +406,28 @@
       "id": "B5",
       "view": "B",
       "assertion": "Per-run evidence packets carry checks",
+      "required_dimensions": [
+        "checks_present",
+        "pass_state_present"
+      ],
+      "dimension_results": {
+        "checks_present": true,
+        "pass_state_present": true
+      },
       "supported": true,
-      "supporting_artifact_count": 46,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "MASTER_PLAN.md",
-          "pattern": "\"?checks\"?",
-          "excerpt": " quantified improvement (tracking RMS, settling, overshoot, checks passed). 3. A 2\u20133 minute recorded demo: noisy run failing c"
+          "dimension": "checks_present",
+          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0000.json",
+          "locator": "json:evidence/:checks",
+          "excerpt": "[{\"comparator\": \"<=\", \"detail\": \"RMS of measured-vs-reference joint position (rad)\", \"name\": \"tracking_rms_error\", \"status\": \"failed\", \"threshold\": 0."
         },
         {
-          "artifact": "README.md",
-          "pattern": "\"?checks\"?",
-          "excerpt": "e loop\"]     end     BAG --> GAUNT[\"gauntlet runner\\nseeded checks\"]     GAUNT --> EVID[\"evidence/run-&lt;id&gt;.json\\n+ markdo"
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "evidence",
-          "excerpt": "ed by `scripts/build_results.py` from the committed per-run evidence. No number in this document was entered by hand.  - campaig"
+          "dimension": "pass_state_present",
+          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0000.json",
+          "locator": "json:evidence/:overall_passed",
+          "excerpt": "false"
         }
       ]
     },
@@ -388,23 +435,28 @@
       "id": "B6",
       "view": "B",
       "assertion": "Manifest/hash verification occurs",
+      "required_dimensions": [
+        "manifest_hash_recorded",
+        "integrity_verified"
+      ],
+      "dimension_results": {
+        "manifest_hash_recorded": true,
+        "integrity_verified": true
+      },
       "supported": true,
-      "supporting_artifact_count": 45,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "RESULTS.md",
-          "pattern": "sha256",
-          "excerpt": " campaign: `m4-franka-filtered-vs-unfiltered` v1 - manifest sha256: `1d227e437317bac11df209d39ac264d7b4ffe9d5f9b5d4bf8c805f266"
+          "dimension": "manifest_hash_recorded",
+          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0000/raw_evidence.json",
+          "locator": "json:raw_evidence.json:manifest_sha256",
+          "excerpt": "\"1d227e437317bac11df209d39ac264d7b4ffe9d5f9b5d4bf8c805f266b238052\""
         },
         {
-          "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
-          "pattern": "manifest_sha256",
-          "excerpt": "ered_response\": \"identity b=[1], a=[1] (flat 0 dB)\"   },   \"manifest_sha256\": \"1d227e437317bac11df209d39ac264d7b4ffe9d5f9b5d4bf8c805f26"
-        },
-        {
-          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_results.json",
-          "pattern": "manifest_sha256",
-          "excerpt": "   \"missing\": [],     \"ok\": 120,     \"passed\": true   },   \"manifest_sha256\": \"1d227e437317bac11df209d39ac264d7b4ffe9d5f9b5d4bf8c805f26"
+          "dimension": "integrity_verified",
+          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_summary.json",
+          "locator": "json:campaign_summary.json:integrity_index",
+          "excerpt": "{\"files\": {\"filtered-0000/run_meta.json\": \"c1474ceb2c773dbb5f1ecbe77b72300fe0ddc943b78051d8ea81a728d8fe1937\", \"filtered-0000/telemetry.csv\": \"3342230d"
         }
       ]
     },
@@ -412,23 +464,20 @@
       "id": "B7",
       "view": "B",
       "assertion": "Aggregation is performed by scripts/build_results.py",
+      "required_dimensions": [
+        "aggregator_named"
+      ],
+      "dimension_results": {
+        "aggregator_named": true
+      },
       "supported": true,
-      "supporting_artifact_count": 3,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "aggregator_named",
           "artifact": "README.md",
-          "pattern": "build_results\\.py",
-          "excerpt": "Every figure is   regenerated from raw evidence by `scripts/build_results.py`; nothing is   hand-entered. **Simulation only \u2014 no hardwar"
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "build_results\\.py",
-          "excerpt": "d vs unfiltered joint-state feedback  Generated by `scripts/build_results.py` from the committed per-run evidence. No number in this doc"
-        },
-        {
-          "artifact": "docs/REPRODUCE_CAMPAIGN.md",
-          "pattern": "build_results\\.py",
-          "excerpt": "A2. Regenerate the results document  ```bash python scripts/build_results.py \\     --logs-root campaign/results/m4-franka-filtered-vs-un"
+          "locator": "re:scripts/build_results\\.py",
+          "excerpt": ".md)**. Every figure is   regenerated from raw evidence by `scripts/build_results.py`; nothing is   hand-entered. **Simulation only \u2014 no hardwar"
         }
       ]
     },
@@ -436,23 +485,20 @@
       "id": "B8",
       "view": "B",
       "assertion": "RESULTS.md is the aggregated result artifact",
+      "required_dimensions": [
+        "results_doc_is_generated"
+      ],
+      "dimension_results": {
+        "results_doc_is_generated": true
+      },
       "supported": true,
-      "supporting_artifact_count": 3,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "README.md",
-          "pattern": "RESULTS\\.md",
-          "excerpt": "Numbers, uncertainty, failure   analysis and non-claims: **[RESULTS.md](RESULTS.md)**. Every figure is   regenerated from raw evid"
-        },
-        {
+          "dimension": "results_doc_is_generated",
           "artifact": "RESULTS.md",
-          "pattern": "RESULTS\\.md",
-          "excerpt": "ifests/m4-franka-filtered-vs-unfiltered-v1.json \\     --out RESULTS.md ```  The last command re-hashes every evidence file, re-gra"
-        },
-        {
-          "artifact": "docs/REPRODUCE_CAMPAIGN.md",
-          "pattern": "RESULTS\\.md",
-          "excerpt": "ifests/m4-franka-filtered-vs-unfiltered-v1.json \\     --out RESULTS.md git diff --exit-code RESULTS.md ```  This re-grades every r"
+          "locator": "re:Generated by .{0,30}build_results",
+          "excerpt": "# RESULTS \u2014 filtered vs unfiltered joint-state feedback  Generated by `scripts/build_results.py` from the committed per-run evidence. No number in thi"
         }
       ]
     },
@@ -460,23 +506,20 @@
       "id": "B9",
       "view": "B",
       "assertion": "Public claims are bounded",
+      "required_dimensions": [
+        "non_claims_enumerated"
+      ],
+      "dimension_results": {
+        "non_claims_enumerated": true
+      },
       "supported": true,
-      "supporting_artifact_count": 5,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "README.md",
-          "pattern": "claim",
-          "excerpt": "of the repo today:  > **Which simulator build the empirical claims are about.** All runtime > validation and all 40 campaign "
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "claim",
-          "excerpt": "rcentile bootstrap seeded with 20260814.  **No significance claim is made.** no null-hypothesis significance claim is made fr"
-        },
-        {
+          "dimension": "non_claims_enumerated",
           "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
-          "pattern": "non[_ ]claims",
-          "excerpt": "17bac11df209d39ac264d7b4ffe9d5f9b5d4bf8c805f266b238052\",   \"non_claims\": [     \"simulation only; no physical hardware was involved"
+          "locator": "json:manifests:non_claims",
+          "excerpt": "[\"simulation only; no physical hardware was involved\", \"one Franka joint-space scenario; no generalization is claimed\", \"no sim-to-real transfer is de"
         }
       ]
     },
@@ -484,23 +527,20 @@
       "id": "B10",
       "view": "B",
       "assertion": "Committed evidence is reproducible CPU-only without Isaac",
+      "required_dimensions": [
+        "cpu_only_repro_documented"
+      ],
+      "dimension_results": {
+        "cpu_only_repro_documented": true
+      },
       "supported": true,
-      "supporting_artifact_count": 4,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "cpu_only_repro_documented",
           "artifact": "MASTER_PLAN.md",
-          "pattern": "without Isaac",
+          "locator": "re:without Isaac",
           "excerpt": "op` package \u2014 noise injector + filter node (unit-testable   without Isaac, against the DSP synthesizer). - Lane B: waypoint controlle"
-        },
-        {
-          "artifact": "README.md",
-          "pattern": "reproduc",
-          "excerpt": "l `apply_filter_realtime` DSP path. Every run is seeded and reproducible; a gauntlet grades tracking RMS, settling time, oversho"
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "reproduc",
-          "excerpt": " to any physical Franka or any**   **other robot.**  ## 10. Reproduction  Verifying the committed evidence requires NO simulator"
         }
       ]
     },
@@ -508,23 +548,20 @@
       "id": "C1",
       "view": "C",
       "assertion": "A pre-campaign validation phase existed",
+      "required_dimensions": [
+        "validation_phase_documented"
+      ],
+      "dimension_results": {
+        "validation_phase_documented": true
+      },
       "supported": true,
-      "supporting_artifact_count": 5,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "validation_phase_documented",
           "artifact": "RESULTS.md",
-          "pattern": "pre-campaign",
+          "locator": "re:Pre-campaign",
           "excerpt": "empirical run was deliberately corrupted to produce one.  **Pre-campaign failure case 1 \u2014 the 30.02 Hz sampling boundary.** Before t"
-        },
-        {
-          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_summary.json",
-          "pattern": "preflight",
-          "excerpt": "17bac11df209d39ac264d7b4ffe9d5f9b5d4bf8c805f266b238052\",   \"preflight\": {     \"joint_names\": [       \"panda_joint1\",       \"panda"
-        },
-        {
-          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/preflight.json",
-          "pattern": "preflight",
-          "excerpt": "{   \"preflight\": {     \"joint_names\": [       \"panda_joint1\",       \"panda"
         }
       ]
     },
@@ -532,23 +569,20 @@
       "id": "C2",
       "view": "C",
       "assertion": "A 30.02 Hz sampling-rate defect was found",
+      "required_dimensions": [
+        "measured_rate_30_02"
+      ],
+      "dimension_results": {
+        "measured_rate_30_02": true
+      },
       "supported": true,
-      "supporting_artifact_count": 3,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "measured_rate_30_02",
           "artifact": "README.md",
-          "pattern": "30\\.02",
+          "locator": "re:30\\.02",
           "excerpt": "t `stageMetersPerUnit` wired, a default graph sampling at   30.02 Hz that would have aliased the 25 Hz disturbance onto the 5"
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "30\\.02",
-          "excerpt": "rupted to produce one.  **Pre-campaign failure case 1 \u2014 the 30.02 Hz sampling boundary.** Before this campaign, the scene's d"
-        },
-        {
-          "artifact": "docs/M4_RUNTIME_VALIDATION.md",
-          "pattern": "30\\.02",
-          "excerpt": "ered  **Assumed: `sample_rate_hz = 200.0`. First measured: `30.02 Hz`.** A factor of 6.67.  Classification: **`CONFIG_DEFECT`"
         }
       ]
     },
@@ -556,23 +590,28 @@
       "id": "C3",
       "view": "C",
       "assertion": "25 Hz would alias near 5 Hz at that rate",
+      "required_dimensions": [
+        "aliasing_explained",
+        "relates_25_to_5"
+      ],
+      "dimension_results": {
+        "aliasing_explained": true,
+        "relates_25_to_5": true
+      },
       "supported": true,
-      "supporting_artifact_count": 4,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "aliasing_explained",
           "artifact": "README.md",
-          "pattern": "alias",
+          "locator": "re:alias",
           "excerpt": "red, a default graph sampling at   30.02 Hz that would have aliased the 25 Hz disturbance onto the 5 Hz cutoff,   and an endo"
         },
         {
-          "artifact": "RESULTS.md",
-          "pattern": "alias",
-          "excerpt": "Hz the Nyquist frequency is 15 Hz, so the 25 Hz disturbance aliases to ~5 Hz \u2014 exactly the filter's cutoff. A campaign run in"
-        },
-        {
-          "artifact": "docs/M4_RUNTIME_VALIDATION.md",
-          "pattern": "alias",
-          "excerpt": "ation_freq_hz = 25.0`, which cannot be    represented: it **aliases to `|30 \u2212 25| = 5 Hz`** \u2014 landing exactly on the    inten"
+          "dimension": "relates_25_to_5",
+          "artifact": "README.md",
+          "locator": "re:alias.{0,80}5",
+          "excerpt": "red, a default graph sampling at   30.02 Hz that would have aliased the 25 Hz disturbance onto the 5 Hz cutoff,   and an endogenous reference signal c"
         }
       ]
     },
@@ -580,23 +619,28 @@
       "id": "C4",
       "view": "C",
       "assertion": "A stageMetersPerUnit defect passed static contract but emitted zero",
+      "required_dimensions": [
+        "defect_named",
+        "zero_publication_symptom"
+      ],
+      "dimension_results": {
+        "defect_named": true,
+        "zero_publication_symptom": true
+      },
       "supported": true,
-      "supporting_artifact_count": 3,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "defect_named",
           "artifact": "README.md",
-          "pattern": "stageMetersPerUnit",
+          "locator": "re:stageMetersPerUnit",
           "excerpt": "ould not: a publisher that emitted   ZERO messages without `stageMetersPerUnit` wired, a default graph sampling at   30.02 Hz that would h"
         },
         {
-          "artifact": "RESULTS.md",
-          "pattern": "stageMetersPerUnit",
-          "excerpt": "s NOT one of the 40 runs.  **Pre-campaign failure case 2 \u2014 `stageMetersPerUnit` zero publication.** The first Isaac 6 graph migration pass"
-        },
-        {
-          "artifact": "docs/M4_RUNTIME_VALIDATION.md",
-          "pattern": "stageMetersPerUnit",
-          "excerpt": "rs.physics.nodes`. The `.nodes.` form does not resolve. 2. `stageMetersPerUnit` **must** be wired from the reader to the publisher.    Lea"
+          "dimension": "zero_publication_symptom",
+          "artifact": "README.md",
+          "locator": "re:ZERO messages",
+          "excerpt": "efects a static check could not: a publisher that emitted   ZERO messages without `stageMetersPerUnit` wired, a default graph samplin"
         }
       ]
     },
@@ -604,18 +648,28 @@
       "id": "C5",
       "view": "C",
       "assertion": "A pilot endogenous-reference defect was found",
+      "required_dimensions": [
+        "endogenous_reference_named",
+        "found_by_pilot"
+      ],
+      "dimension_results": {
+        "endogenous_reference_named": true,
+        "found_by_pilot": true
+      },
       "supported": true,
-      "supporting_artifact_count": 2,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "endogenous_reference_named",
           "artifact": "README.md",
-          "pattern": "endogenous",
+          "locator": "re:endogenous",
           "excerpt": "liased the 25 Hz disturbance onto the 5 Hz cutoff,   and an endogenous reference signal caught by a pilot run before the design wa"
         },
         {
-          "artifact": "RESULTS.md",
-          "pattern": "endogenous",
-          "excerpt": "e of the campaign runs.  **Pilot-discovered design defect \u2014 endogenous reference.** A pilot pair on non-campaign seeds ran with th"
+          "dimension": "found_by_pilot",
+          "artifact": "README.md",
+          "locator": "re:pilot",
+          "excerpt": "Hz cutoff,   and an endogenous reference signal caught by a pilot run before the design was   frozen. See **[docs/M4_RUNTIME_"
         }
       ]
     },
@@ -623,23 +677,28 @@
       "id": "C6",
       "view": "C",
       "assertion": "Defects were fixed before the manifest freeze",
+      "required_dimensions": [
+        "freeze_event_documented",
+        "manifest_is_frozen"
+      ],
+      "dimension_results": {
+        "freeze_event_documented": true,
+        "manifest_is_frozen": true
+      },
       "supported": true,
-      "supporting_artifact_count": 47,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "freeze_event_documented",
           "artifact": "README.md",
-          "pattern": "freeze|frozen",
+          "locator": "re:frozen",
           "excerpt": "erence signal caught by a pilot run before the design was   frozen. See **[docs/M4_RUNTIME_VALIDATION.md](docs/M4_RUNTIME_VALI"
         },
         {
-          "artifact": "RESULTS.md",
-          "pattern": "freeze|frozen",
-          "excerpt": "er in the loop.  ## 3. Preregistered design  The design was frozen in `campaign/manifests/` and committed **before** the first"
-        },
-        {
+          "dimension": "manifest_is_frozen",
           "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
-          "pattern": "freeze|frozen",
-          "excerpt": "seed: filtered first; odd seed: unfiltered first (balanced, frozen pre-run)\",     \"conditions\": [       \"filtered\",       \"unf"
+          "locator": "json:manifests:manifest_sha256",
+          "excerpt": "\"1d227e437317bac11df209d39ac264d7b4ffe9d5f9b5d4bf8c805f266b238052\""
         }
       ]
     },
@@ -647,23 +706,36 @@
       "id": "C7",
       "view": "C",
       "assertion": "Campaign returned 40 valid / 0 failed / 0 missing",
+      "required_dimensions": [
+        "valid_40",
+        "failed_0",
+        "missing_0"
+      ],
+      "dimension_results": {
+        "valid_40": true,
+        "failed_0": true,
+        "missing_0": true
+      },
       "supported": true,
-      "supporting_artifact_count": 3,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "README.md",
-          "pattern": "40/40",
-          "excerpt": "RC build and should be read that way.  - **M4 campaign RUN (40/40 valid).** The preregistered filtered-vs-unfiltered   campai"
-        },
-        {
-          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_results.json",
-          "pattern": "\"?valid\"?\\s*[:=]\\s*40",
-          "excerpt": "   \"invalid\": 0,     \"missing\": 0,     \"scheduled\": 40,     \"valid\": 40   },   \"excluded_runs\": [],   \"generated_at\": \"2026-08-14T2"
-        },
-        {
+          "dimension": "valid_40",
           "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_summary.json",
-          "pattern": "\"?valid\"?\\s*[:=]\\s*40",
-          "excerpt": "  },     \"within_tolerance\": true   },   \"scheduled\": 40,   \"valid\": 40,   \"wall_elapsed_s\": 1456.5 } "
+          "locator": "json:campaign_summary.json:valid",
+          "excerpt": "40"
+        },
+        {
+          "dimension": "failed_0",
+          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_summary.json",
+          "locator": "json:campaign_summary.json:failed",
+          "excerpt": "0"
+        },
+        {
+          "dimension": "missing_0",
+          "artifact": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_summary.json",
+          "locator": "json:campaign_summary.json:invalid",
+          "excerpt": "0"
         }
       ]
     },
@@ -671,23 +743,28 @@
       "id": "D1",
       "view": "D",
       "assertion": "Filtered feedback had lower tracking RMS in the tested scenario",
+      "required_dimensions": [
+        "metric_present",
+        "paired_comparison_present"
+      ],
+      "dimension_results": {
+        "metric_present": true,
+        "paired_comparison_present": true
+      },
       "supported": true,
-      "supporting_artifact_count": 85,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "MASTER_PLAN.md",
-          "pattern": "tracking RMS",
-          "excerpt": "filtered vs. unfiltered,    showing quantified improvement (tracking RMS, settling, overshoot, checks passed). 3. A 2\u20133 minute recor"
-        },
-        {
-          "artifact": "README.md",
-          "pattern": "tracking RMS",
-          "excerpt": "th. Every run is seeded and reproducible; a gauntlet grades tracking RMS, settling time, overshoot, and filter attenuation into an e"
-        },
-        {
+          "dimension": "metric_present",
           "artifact": "RESULTS.md",
-          "pattern": "tracking_rms_error",
+          "locator": "re:tracking_rms_error",
           "excerpt": "red mean | unfiltered median | |---|---|---|---|---|---| | `tracking_rms_error` | rad | 0.1767 | 0.1828 | 0.4055 | 0.4059 | | `settling_ti"
+        },
+        {
+          "dimension": "paired_comparison_present",
+          "artifact": "README.md",
+          "locator": "re:20/20",
+          "excerpt": "e \u22120.229 rad, 95% CI   [\u22120.248, \u22120.212], filtered better in 20/20 seeds) and 48.1 dB of attenuation   at the 25 Hz disturbanc"
         }
       ]
     },
@@ -695,23 +772,28 @@
       "id": "D2",
       "view": "D",
       "assertion": "The causal filter attenuated the injected 25 Hz disturbance",
+      "required_dimensions": [
+        "attenuation_metric_present",
+        "attenuation_value_reported"
+      ],
+      "dimension_results": {
+        "attenuation_metric_present": true,
+        "attenuation_value_reported": true
+      },
       "supported": true,
-      "supporting_artifact_count": 45,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "MASTER_PLAN.md",
-          "pattern": "attenuat",
-          "excerpt": "for analysis only). | Unit test with synthesized telemetry; attenuation \u2265 spec at 25 Hz vibration band. | | REQ-S2R-004 | Waypoi"
-        },
-        {
-          "artifact": "README.md",
-          "pattern": "attenuat",
-          "excerpt": "t grades tracking RMS, settling time, overshoot, and filter attenuation into an evidence packet. The target artifact is a table "
-        },
-        {
+          "dimension": "attenuation_metric_present",
           "artifact": "RESULTS.md",
-          "pattern": "filter_attenuation_db",
+          "locator": "re:filter_attenuation_db",
           "excerpt": " | | `overshoot_pct` | % | 104.2 | 107.9 | 267.2 | 268 | | `filter_attenuation_db` | dB | 48.12 | 48.18 | 0 | 0 |  `settling_time_s` is `inf`"
+        },
+        {
+          "dimension": "attenuation_value_reported",
+          "artifact": "RESULTS.md",
+          "locator": "re:48\\.12",
+          "excerpt": ".2 | 107.9 | 267.2 | 268 | | `filter_attenuation_db` | dB | 48.12 | 48.18 | 0 | 0 |  `settling_time_s` is `inf` for any run w"
         }
       ]
     },
@@ -719,23 +801,20 @@
       "id": "D3",
       "view": "D",
       "assertion": "Committed evidence is reproducible/inspectable without Isaac",
+      "required_dimensions": [
+        "cpu_only_repro_documented"
+      ],
+      "dimension_results": {
+        "cpu_only_repro_documented": true
+      },
       "supported": true,
-      "supporting_artifact_count": 4,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "cpu_only_repro_documented",
           "artifact": "MASTER_PLAN.md",
-          "pattern": "without Isaac",
+          "locator": "re:without Isaac",
           "excerpt": "op` package \u2014 noise injector + filter node (unit-testable   without Isaac, against the DSP synthesizer). - Lane B: waypoint controlle"
-        },
-        {
-          "artifact": "README.md",
-          "pattern": "reproduc",
-          "excerpt": "l `apply_filter_realtime` DSP path. Every run is seeded and reproducible; a gauntlet grades tracking RMS, settling time, oversho"
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "reproduc",
-          "excerpt": " to any physical Franka or any**   **other robot.**  ## 10. Reproduction  Verifying the committed evidence requires NO simulator"
         }
       ]
     },
@@ -743,23 +822,20 @@
       "id": "D4",
       "view": "D",
       "assertion": "NON-CLAIM: no physical hardware performance",
+      "required_dimensions": [
+        "hardware_non_claim"
+      ],
+      "dimension_results": {
+        "hardware_non_claim": true
+      },
       "supported": true,
-      "supporting_artifact_count": 6,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "MASTER_PLAN.md",
-          "pattern": "hardware",
-          "excerpt": "ld be a from-scratch build \u2014 rejected.  **Non-goals:** real hardware, multiple scenarios, RL/learned control, photorealism, Isaa"
-        },
-        {
+          "dimension": "hardware_non_claim",
           "artifact": "README.md",
-          "pattern": "hardware",
-          "excerpt": "filtered, plus a 2\u20133 minute recorded demo.  Non-goals: real hardware, multiple scenarios, RL/learned control, photorealism, Isaa"
-        },
-        {
-          "artifact": "RESULTS.md",
-          "pattern": "hardware",
-          "excerpt": "## 9. Explicit non-claims  - **Simulation only; no physical hardware was involved.** - **One Franka joint-space scenario; no gen"
+          "locator": "re:[Ss]imulation only",
+          "excerpt": "by `scripts/build_results.py`; nothing is   hand-entered. **Simulation only \u2014 no hardware, transfer, safety or   certification claim.**"
         }
       ]
     },
@@ -767,23 +843,20 @@
       "id": "D5",
       "view": "D",
       "assertion": "NON-CLAIM: no sim-to-real transfer",
+      "required_dimensions": [
+        "sim2real_non_claim"
+      ],
+      "dimension_results": {
+        "sim2real_non_claim": true
+      },
       "supported": true,
-      "supporting_artifact_count": 6,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "MASTER_PLAN.md",
-          "pattern": "sim-to-real|sim2real",
-          "excerpt": "# MASTER_PLAN \u2014 Sim-to-Real Control Systems  > Created 2026-07-18. Companion doc: [AGEN"
-        },
-        {
-          "artifact": "README.md",
-          "pattern": "sim-to-real|sim2real",
-          "excerpt": "# Sim-to-Real Control Systems  **Sim-to-real with receipts.** One recorde"
-        },
-        {
+          "dimension": "sim2real_non_claim",
           "artifact": "RESULTS.md",
-          "pattern": "sim-to-real|sim2real",
-          "excerpt": "oint-space scenario; no generalization is claimed.** - **No sim-to-real transfer is demonstrated or claimed.** - **No robot safety "
+          "locator": "re:[Nn]o sim-to-real transfer",
+          "excerpt": "a joint-space scenario; no generalization is claimed.** - **No sim-to-real transfer is demonstrated or claimed.** - **No robot safety claim.** "
         }
       ]
     },
@@ -791,23 +864,28 @@
       "id": "D6",
       "view": "D",
       "assertion": "NON-CLAIM: no robot safety or certification",
+      "required_dimensions": [
+        "safety_non_claim",
+        "stated_as_non_claim"
+      ],
+      "dimension_results": {
+        "safety_non_claim": true,
+        "stated_as_non_claim": true
+      },
       "supported": true,
-      "supporting_artifact_count": 6,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
-          "artifact": "MASTER_PLAN.md",
-          "pattern": "certification",
-          "excerpt": "hysical-AI proof point \u2014 ONE recorded closed-loop demo with certification-style evidence: a Franka arm in Isaac Sim tracks a joint-sp"
-        },
-        {
+          "dimension": "safety_non_claim",
           "artifact": "README.md",
-          "pattern": "safety",
+          "locator": "re:safety",
           "excerpt": "   hand-entered. **Simulation only \u2014 no hardware, transfer, safety or   certification claim.** - **M4 runtime validated on Isa"
         },
         {
-          "artifact": "RESULTS.md",
-          "pattern": "safety",
-          "excerpt": "to-real transfer is demonstrated or claimed.** - **No robot safety claim.** - **No certification or compliance claim.** - **No"
+          "dimension": "stated_as_non_claim",
+          "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
+          "locator": "json:manifests:non_claims",
+          "excerpt": "[\"simulation only; no physical hardware was involved\", \"one Franka joint-space scenario; no generalization is claimed\", \"no sim-to-real transfer is de"
         }
       ]
     },
@@ -815,23 +893,28 @@
       "id": "D7",
       "view": "D",
       "assertion": "NON-CLAIM: no Isaac Sim 6.0.1 GA equivalence",
+      "required_dimensions": [
+        "rc_build_identified",
+        "ga_equivalence_disclaimed"
+      ],
+      "dimension_results": {
+        "rc_build_identified": true,
+        "ga_equivalence_disclaimed": true
+      },
       "supported": true,
-      "supporting_artifact_count": 45,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "rc_build_identified",
           "artifact": "README.md",
-          "pattern": "GA\\b",
-          "excerpt": "That is a *release > candidate*. NVIDIA's Isaac Sim 6.0.1 **GA is a distinct, later release, and > this project has not ev"
+          "locator": "re:6\\.0\\.1-rc\\.7",
+          "excerpt": "ign runs were executed on exactly one build: > Isaac Sim **`6.0.1-rc.7+release.42383.32955d8d.gl`**. That is a *release > candidat"
         },
         {
+          "dimension": "ga_equivalence_disclaimed",
           "artifact": "RESULTS.md",
-          "pattern": "GA\\b",
-          "excerpt": "e.42383.32955d8d.gl` and on no other build. Isaac Sim 6.0.1 GA is a distinct, later release: it was not used, not measured"
-        },
-        {
-          "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
-          "pattern": "6\\.0\\.1",
-          "excerpt": "lass\": \"NVIDIA GB10 (DGX Spark class)\",     \"isaac_build\": \"6.0.1-rc.7+release.42383.32955d8d.gl\",     \"platform\": \"aarch64\","
+          "locator": "re:not .{0,20}GA",
+          "excerpt": "ned against the open-loop   synthetic profile in `s2r_dsp`, not against this closed loop. Runs are   graded against them for co"
         }
       ]
     },
@@ -839,18 +922,20 @@
       "id": "D8",
       "view": "D",
       "assertion": "NON-CLAIM: no generalization to other robots/scenarios",
+      "required_dimensions": [
+        "generalization_non_claim"
+      ],
+      "dimension_results": {
+        "generalization_non_claim": true
+      },
       "supported": true,
-      "supporting_artifact_count": 2,
+      "unsatisfied_dimensions": [],
       "evidence": [
         {
+          "dimension": "generalization_non_claim",
           "artifact": "RESULTS.md",
-          "pattern": "generaliz",
-          "excerpt": "are was involved.** - **One Franka joint-space scenario; no generalization is claimed.** - **No sim-to-real transfer is demonstra"
-        },
-        {
-          "artifact": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
-          "pattern": "generaliz",
-          "excerpt": "are was involved\",     \"one Franka joint-space scenario; no generalization is claimed\",     \"no sim-to-real transfer is demonstra"
+          "locator": "re:no generalization is claimed",
+          "excerpt": "rdware was involved.** - **One Franka joint-space scenario; no generalization is claimed.** - **No sim-to-real transfer is demonstrated or claimed.*"
         }
       ]
     }

@@ -36,6 +36,10 @@ TEXT_EXT = {".md", ".txt", ".json", ".yaml", ".yml"}
 IMAGE_EXT = {".png"}
 # Anything outside these is an unexpected input and fails the run closed.
 ALLOWED_EXT = TEXT_EXT | IMAGE_EXT
+# Operator-only control files that live inside a stage dir but are NOT
+# reviewer inputs. STAGE1_CONTINUATION.json records stage-1 response paths and
+# hashes; feeding it to the model would leak run bookkeeping into the context.
+OPERATOR_ONLY = {"STAGE1_CONTINUATION.json"}
 # Artifacts that must never reach a reviewer.
 FORBIDDEN_SUBSTRINGS = (
     "ANSWER_KEY", "VISUAL_ROUND_TRIP_EXPERIMENT", "EXECUTION_CONTROL",
@@ -57,7 +61,8 @@ def sha256(p: Path) -> str:
 def collect_inputs(stage_dir: Path) -> list[Path]:
     if not stage_dir.is_dir():
         die(f"stage directory missing: {stage_dir}")
-    files = sorted(p for p in stage_dir.rglob("*") if p.is_file())
+    files = sorted(p for p in stage_dir.rglob("*")
+                   if p.is_file() and p.name not in OPERATOR_ONLY)
     if not files:
         die(f"stage directory empty: {stage_dir}")
     for p in files:
@@ -81,7 +86,16 @@ def assert_no_repo(stage_root: Path) -> None:
 
 
 def build_openai_payload(model: str, effort: str, prompt: str,
-                         files: list[Path], stage_dir: Path) -> dict:
+                         files: list[Path], stage_dir: Path,
+                         history: list | None = None) -> dict:
+    """Build a Responses API request.
+
+    `history`, when given, is the verbatim replay of the prior turn:
+    [stage-1 user message, *stage-1 response output items]. With store=false
+    the provider holds no state, so faithful two-stage continuation requires
+    replaying the COMPLETE output array -- not just the text -- so reasoning
+    items and assistant phase values survive into stage 2.
+    """
     content: list[dict] = [{"type": "input_text", "text": prompt}]
     for p in files:
         rel = p.relative_to(stage_dir)
@@ -92,9 +106,11 @@ def build_openai_payload(model: str, effort: str, prompt: str,
         else:
             content.append({"type": "input_text",
                             "text": f"--- FILE: {rel} ---\n{p.read_text()}"})
+    turns: list = list(history or [])
+    turns.append({"role": "user", "content": content})
     return {
         "model": model,
-        "input": [{"role": "user", "content": content}],
+        "input": turns,
         "reasoning": {"effort": effort},
         # tools deliberately omitted -- registering zero tools is a hard
         # requirement, and an empty list still advertises tool capability.
@@ -139,6 +155,50 @@ def main() -> int:
     stage_dir = args.stage_root / args.run / args.stage
     files = collect_inputs(stage_dir)
 
+    # ---- stage-2 continuation, fail-closed -------------------------------
+    history = None
+    stage1_meta = None
+    if args.stage == "stage-2":
+        cont_path = stage_dir / "STAGE1_CONTINUATION.json"
+        if not cont_path.exists():
+            die("stage-2 requires STAGE1_CONTINUATION.json; build it with "
+                "stage_runs_v2.py --advance-stage2 after stage 1 completes")
+        cont = json.loads(cont_path.read_text())
+        if cont.get("run") != args.run:
+            die(f"continuation belongs to run {cont.get('run')!r}, not "
+                f"{args.run!r}; refusing cross-condition contamination")
+        resp_path = Path(cont["stage1_response_path"])
+        if not resp_path.exists():
+            die(f"saved stage-1 response missing: {resp_path}")
+        if sha256(resp_path) != cont["stage1_response_sha256"]:
+            die("stage-1 response hash mismatch; it changed after staging")
+        raw1 = json.loads(resp_path.read_text())
+        out1 = raw1.get("output") or []
+        if not out1:
+            die("saved stage-1 response has empty output; nothing to continue")
+        text1 = "".join(c.get("text", "")
+                        for it in out1 for c in (it.get("content") or [])
+                        if c.get("type") == "output_text")
+        if not text1.strip():
+            die("saved stage-1 response has no assistant-visible text")
+        if hashlib.sha256(text1.encode()).hexdigest() != \
+                cont["stage1_output_text_sha256"]:
+            die("stage-1 output text hash mismatch")
+        s1req = resp_path.parent / resp_path.name.replace(
+            "_raw_response.json", "_request.json")
+        if not s1req.exists():
+            die(f"stage-1 request record missing: {s1req}; the stage-1 user "
+                "turn must be replayed verbatim and cannot be reconstructed")
+        prior_user = json.loads(s1req.read_text())["input"]
+        history = [*prior_user, *out1]
+        stage1_meta = {
+            "stage1_response_sha256": cont["stage1_response_sha256"],
+            "stage1_output_text_sha256": cont["stage1_output_text_sha256"],
+            "stage1_output_items": len(out1),
+            "stage1_output_text_chars": len(text1),
+            "replayed_history_items": len(history),
+        }
+
     if args.out_dir.resolve().is_relative_to(args.stage_root.resolve()):
         die("output directory must be outside the staging tree")
     args.out_dir.mkdir(parents=True, exist_ok=True)
@@ -146,7 +206,8 @@ def main() -> int:
     manifest = [{"path": str(p.relative_to(stage_dir)), "sha256": sha256(p)}
                 for p in files]
     prompt = args.prompt_file.read_text()
-    payload = build_openai_payload(model, args.effort, prompt, files, stage_dir)
+    payload = build_openai_payload(model, args.effort, prompt, files,
+                                   stage_dir, history=history)
 
     # G7 -- blinding guard, scoped to HARNESS-ADDED METADATA ONLY.
     #
@@ -193,6 +254,10 @@ def main() -> int:
     stem = f"{args.run}_{args.stage}"
     (args.out_dir / f"{stem}_raw_response.json").write_text(
         json.dumps(raw, indent=2) + "\n")
+    # The exact request is preserved so a later stage can replay this turn
+    # verbatim rather than reconstruct it.
+    (args.out_dir / f"{stem}_request.json").write_text(
+        json.dumps(payload, indent=2) + "\n")
 
     meta = {
         "run": args.run,
@@ -212,6 +277,7 @@ def main() -> int:
         "input_manifest": manifest,
         "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
         "stage_dir": str(stage_dir),
+        "stage1_continuation": stage1_meta,
     }
     (args.out_dir / f"{stem}_metadata.json").write_text(
         json.dumps(meta, indent=2) + "\n")

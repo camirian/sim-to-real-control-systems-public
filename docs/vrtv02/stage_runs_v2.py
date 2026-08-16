@@ -38,11 +38,95 @@ def load_hashes(repo: Path, name: str) -> dict[str, str]:
     return out
 
 
+def advance_stage2(repo: Path, stage: Path, run: str,
+                   resp: Path | None) -> int:
+    """Create stage-2 for one run, gated on that run's completed stage-1.
+
+    Stage 2 must deterministically receive (a) that run's exact saved stage-1
+    output and (b) the identical bounded corpus. Nothing here depends on
+    operator memory or an undocumented chat session.
+    """
+    if resp is None:
+        die("--advance-stage2 requires --stage1-response")
+    if not resp.exists():
+        die(f"stage-1 response not found: {resp}. Stage 1 must complete and be "
+            "saved before stage 2 can be built.")
+    try:
+        payload = json.loads(resp.read_text())
+    except Exception as e:
+        die(f"stage-1 response is not readable JSON: {e}")
+
+    output = payload.get("output")
+    if not output:
+        die("stage-1 response has an empty or missing 'output'; refusing to "
+            "build stage 2 from nothing")
+    text = "".join(c.get("text", "")
+                   for item in output for c in (item.get("content") or [])
+                   if c.get("type") == "output_text")
+    if not text.strip():
+        die("stage-1 response contains no assistant-visible output text")
+
+    # Cross-run leakage guard: the saved response must belong to THIS run.
+    meta = resp.parent / resp.name.replace("_raw_response.json", "_metadata.json")
+    if meta.exists():
+        m = json.loads(meta.read_text())
+        if m.get("run") and m["run"] != run:
+            die(f"stage-1 response belongs to run {m['run']!r}, not {run!r}; "
+                "refusing to cross-contaminate conditions")
+        if m.get("stage") and m["stage"] != "stage-1":
+            die(f"response is from {m['stage']!r}, not stage-1")
+
+    run_root = stage / run
+    if not (run_root / "stage-1").is_dir():
+        die(f"{run}/stage-1 does not exist; stage 1 was never staged")
+    s2 = run_root / "stage-2"
+    if s2.exists() and any(s2.iterdir()):
+        die("stage-2 already exists and is non-empty; refusing to overwrite")
+    s2.mkdir(parents=True, exist_ok=True)
+
+    # identical bounded corpus, rebuilt from the same enumeration
+    corpus = s2 / ".build"
+    subprocess.run([sys.executable, str(repo / "docs/vrtv02/build_corpus.py"),
+                    "--repo", str(repo), "--emit-dir", str(corpus),
+                    "--out", str(s2 / ".corpus_manifest.json")],
+                   check=True, stdout=subprocess.DEVNULL)
+    subprocess.run(["mv", str(corpus), str(s2 / "source")], check=True)
+    (s2 / ".corpus_manifest.json").unlink()
+
+    cont = s2 / "STAGE1_CONTINUATION.json"
+    cont.write_text(json.dumps({
+        "run": run,
+        "stage1_response_path": str(resp),
+        "stage1_response_sha256": sha256(resp),
+        "stage1_output_text_sha256":
+            hashlib.sha256(text.encode()).hexdigest(),
+        "stage1_output_items": len(output),
+        "stage1_output_text_chars": len(text),
+        "replay_contract": "run_condition.py replays the stage-1 user message "
+                           "and the complete stage-1 output array verbatim, "
+                           "then appends the stage-2 prompt",
+    }, indent=2) + "\n")
+    cont.chmod(0o600)
+
+    n = sum(1 for p in (s2 / "source").rglob("*") if p.is_file())
+    print(f"{run} stage-2 staged: {n} corpus files, stage-1 output "
+          f"{len(text)} chars, sha256 {sha256(resp)[:16]}...")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--repo", type=Path, required=True)
     ap.add_argument("--stage-root", type=Path, required=True)
+    ap.add_argument("--advance-stage2", choices=RUNS,
+                    help="create stage-2 for a run whose stage-1 is complete")
+    ap.add_argument("--stage1-response", type=Path,
+                    help="saved raw stage-1 provider response for --advance-stage2")
     args = ap.parse_args()
+
+    if args.advance_stage2:
+        return advance_stage2(args.repo.resolve(), args.stage_root.resolve(),
+                              args.advance_stage2, args.stage1_response)
 
     repo = args.repo.resolve()
     if not (repo / ".git").exists():
