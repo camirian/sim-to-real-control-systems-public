@@ -148,19 +148,35 @@ def main() -> int:
     prompt = args.prompt_file.read_text()
     payload = build_openai_payload(model, args.effort, prompt, files, stage_dir)
 
-    # G7 -- blinding guard. Seeded artifacts are distinguishable by FILENAME
-    # ("..._seeded.png"). Image filenames are not transmitted today, but that is
-    # an implementation detail of build_openai_payload; a future edit adding
-    # filename labels would silently unblind every seeded run and the experiment
-    # would look fine while measuring nothing. Assert it at the payload level.
+    # G7 -- blinding guard, scoped to HARNESS-ADDED METADATA ONLY.
+    #
+    # Seeded artifacts are distinguishable by FILENAME ("..._seeded.png"), so
+    # the risk is that the harness labels an input and thereby reveals the
+    # packet assignment. Image filenames are not transmitted today, but that is
+    # an implementation detail; a future edit adding labels would silently
+    # unblind every seeded run.
+    #
+    # This must NOT scan file *contents*. The authoritative corpus legitimately
+    # contains the word "seeded" ("Seeded disturbance 25 Hz + AWGN") and names
+    # telemetry.csv in its documentation. Scanning bodies produced false
+    # positives that would have blocked V0-CLEAN -- a condition that receives no
+    # images at all -- and V2-*. Guarding content is G2/G3's job, at staging.
     scrubbed = re.sub(r"data:image/png;base64,[A-Za-z0-9+/=]+", "<IMG>",
                       json.dumps(payload))
-    if "seeded" in scrubbed.lower():
-        die("payload leaks the string 'seeded'; this would unblind the run")
     for f in files:
         if f.suffix.lower() in IMAGE_EXT and f.name in scrubbed:
             die(f"payload leaks image filename {f.name}; images must be sent "
                 "without identifying metadata")
+    # Inspect the payload STRUCTURE, not the serialized blob: json.dumps turns
+    # real newlines into literal \n two-char sequences, so a line-oriented
+    # regex over the dump spans the whole document and matches everything.
+    for item in payload["input"][0]["content"]:
+        if item.get("type") != "input_text":
+            continue
+        first_line = item.get("text", "").split("\n", 1)[0]
+        if first_line.startswith("--- FILE:") and "seeded" in first_line.lower():
+            die(f"harness label leaks packet assignment: {first_line!r}")
+
     if "tools" in payload:
         die("tools key present in payload; zero tools must mean the key is omitted")
 

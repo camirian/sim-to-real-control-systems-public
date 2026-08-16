@@ -1,0 +1,16 @@
+{
+  "tokenizer": "o200k_base",
+  "total_tokens": 109188,
+  "by_category": {
+    "authoritative_docs": 13134,
+    "campaign_manifest": 3472,
+    "campaign_rollup": 13362,
+    "per_run_evidence": 18932,
+    "per_run_raw_evidence": 58988,
+    "per_run_metadata": 1300
+  },
+  "max_input": 922000,
+  "pct_of_max": 11.84,
+  "safety_margin_tokens": 812812,
+  "below_long_context_threshold": true
+}

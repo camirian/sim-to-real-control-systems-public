@@ -1,0 +1,1279 @@
+{
+  "source_baseline_sha": "f03c748ae0b0e6b30de572e9cb7ef49b2c88fe29",
+  "rule_version": 1,
+  "retrieval": "none - fixed preregistered allow-list",
+  "included_file_count": 129,
+  "included_bytes": 311674,
+  "excluded_file_count": 80,
+  "excluded_bytes": 7108147,
+  "inclusion_categories": {
+    "authoritative_docs": "Authoritative project/results documentation carrying the campaign narrative, the reported statistics, the claim boundary, and the pre-campaign validation history.",
+    "campaign_manifest": "Frozen campaign manifest: design, disturbance, filter, sampling, controller, evidence policy, non-claims and provenance.",
+    "campaign_rollup": "Campaign-level machine-readable rollup: scheduled/valid/invalid/failed counts, integrity index, per-condition aggregates, preflight record.",
+    "per_run_evidence": "Per-run evidence/validation records: checks, thresholds, environment, overall_passed.",
+    "per_run_raw_evidence": "Per-run compact evidence header: controller, filter, rate, reset, signals_summary, start_state, seed, condition, status, file hashes and manifest_sha256. Contains no per-sample data.",
+    "per_run_metadata": "Per-run identity: run_id, scenario, seed."
+  },
+  "exclusion_categories": {
+    "raw_high_frequency_telemetry": "40 files, ~2.08M tokens. Raw 200 Hz per-sample signal traces. Remains authoritative evidence in the repository; excluded from the treatment model context because it is 57% of a corpus that cannot fit, and no assertion in the visual packet requires per-sample inspection.",
+    "raw_ground_truth_traces": "40 files, ~1.43M tokens. Raw per-sample reference traces. Same rationale as telemetry.csv."
+  },
+  "included": [
+    {
+      "path": "MASTER_PLAN.md",
+      "bytes": 6897,
+      "sha256": "5620fdd9c8fa067b8a0c886557fc66ab67e00942290b37dd834536d9d48ae8e0",
+      "category": "authoritative_docs"
+    },
+    {
+      "path": "README.md",
+      "bytes": 9489,
+      "sha256": "76850a35fa1081c1695ac3876373c645b4fe4ee1efa71a99c0978207c48491fe",
+      "category": "authoritative_docs"
+    },
+    {
+      "path": "RESULTS.md",
+      "bytes": 12705,
+      "sha256": "d50f320ad936cfe3cc66f2ca74cbef0b37e95a5481821faa4320b91b687ad0c0",
+      "category": "authoritative_docs"
+    },
+    {
+      "path": "campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json",
+      "bytes": 11767,
+      "sha256": "94be7d3d16b5d63c814aaaf2ebe0f0090c5139a12bc42ffe3f0bbe0e54dacc82",
+      "category": "campaign_manifest"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_results.json",
+      "bytes": 21530,
+      "sha256": "0f85300aecc5f03ae676ce98072cd1cf7d8e7aa6ff30d618140d97df9e35f14d",
+      "category": "campaign_rollup"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_summary.json",
+      "bytes": 13860,
+      "sha256": "2894d1fa2a0909994b6373887d039b16f65895c1af959a09d2b1948c0c9c984f",
+      "category": "campaign_rollup"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0000.json",
+      "bytes": 1355,
+      "sha256": "6865ab0c40ec37338ec6c1dd2072bd0a956afdc20004bbd42de82e4f50a65872",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0001.json",
+      "bytes": 1354,
+      "sha256": "29ff13d55f98bbaed4bdd7c779794e5c46fe35ae8f9796ad1be785fb016c4635",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0002.json",
+      "bytes": 1367,
+      "sha256": "048f4f2086e1a70b33842bca49393078dbadfc37927d5d9ffee93e5487ceaab9",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0003.json",
+      "bytes": 1352,
+      "sha256": "0a5d24a99ef14d967ffec7005be30ea6863312e06c3fc69b4ed754be2931c05a",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0004.json",
+      "bytes": 1354,
+      "sha256": "842d227f37159a342507a64678b38069479842f71aef65c84bac7af8a4292252",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0005.json",
+      "bytes": 1365,
+      "sha256": "423a1673ece720d6cb977dc215fef001c9c3a0db92f703738926fc61f3966923",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0006.json",
+      "bytes": 1365,
+      "sha256": "e1efdb4d41ed73bf2e2f27340eff0db6521992bc23ff880dbfd616dcc7c420bd",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0007.json",
+      "bytes": 1354,
+      "sha256": "ec5f7e47bb8f04fd96bfd0610bea58c06315cdd6642d6dcdcec3d5be405f4e75",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0008.json",
+      "bytes": 1353,
+      "sha256": "05a3141a348201cde2db6a9e14eecd3e9f3f6e1485427079158d4d97ed92a037",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0009.json",
+      "bytes": 1368,
+      "sha256": "25eb22323f532ea48f04cc45d99e3a045e857d81801baff9cb651cec7aa5e014",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0010.json",
+      "bytes": 1353,
+      "sha256": "f6d64427217e2aaf831ed2156318f86baf3760b19c8405fe81f2b9c71a6127d5",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0011.json",
+      "bytes": 1353,
+      "sha256": "c2725c7d31796e87fb472d8c18bf666905be48cb26f80470fecda2c53fdacf8b",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0012.json",
+      "bytes": 1354,
+      "sha256": "5e3e9b2dae5f7d7913e129dd37044ad5b7dbc6a4c75956a62493c0684cbdf900",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0013.json",
+      "bytes": 1355,
+      "sha256": "3cb93144b932d48e2adc81f2b044fa831ed9702a6fba28c48b285bcb0e79c50d",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0014.json",
+      "bytes": 1354,
+      "sha256": "588a44ffa412c4813559269267e680e80ad94d01ed3b21de370ada984021c06a",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0015.json",
+      "bytes": 1354,
+      "sha256": "c0eb3afea01955abe7d5c5d7caa1741de4394e07691337b95b10b612da15c4eb",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0016.json",
+      "bytes": 1354,
+      "sha256": "758fd751b1d36b52a8c6235b3cb63f5b0b2f020523b4cfa9211d0edbec467304",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0017.json",
+      "bytes": 1351,
+      "sha256": "2ac3dd5d560e0494a9ae46f9766180035f578212174f6fe23e151a71703abf2e",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0018.json",
+      "bytes": 1354,
+      "sha256": "8546da1b2976185bff80ae4764b2f2ecfcdb23050d2ca5caec14169cedadbde7",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-filtered-0019.json",
+      "bytes": 1354,
+      "sha256": "2293abfbaae4760ea61b4070da7feb3dd6c6d32b77a17a37cc08cf92854f5505",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0000.json",
+      "bytes": 1342,
+      "sha256": "7991f22b9e188fa78c5cef22990b6e0f3b96012a6a534b65539a52bf6d616a13",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0001.json",
+      "bytes": 1342,
+      "sha256": "f15fa073849636fa13542d2a175df2f249c5e98e4a3e4c1571a24348c2472566",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0002.json",
+      "bytes": 1354,
+      "sha256": "0047f55a274e419918dc9731f24e1e0bd72fd53f4a764952b17082e6c792241b",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0003.json",
+      "bytes": 1342,
+      "sha256": "ea2445f930938c04791950f62279a3c9a6977f5285123d46059e88c4875f7680",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0004.json",
+      "bytes": 1343,
+      "sha256": "ec2483d826d8443f1bec05f6acb93a85b961ddf0a624a33412088847e2a5c461",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0005.json",
+      "bytes": 1354,
+      "sha256": "3ba3fae373623d957743a95c74eab85c7aaff89b1deb3e62fc4826f1d3c5d48d",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0006.json",
+      "bytes": 1354,
+      "sha256": "83806e67b7f0ba99870149266f6f0b11da67ce3c7afd2aff93f913ff0fc90bc0",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0007.json",
+      "bytes": 1342,
+      "sha256": "bb0806792cebdc434b64c7df1b9b11b04c7a426d6f6b5047df31d95cebd3ac24",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0008.json",
+      "bytes": 1355,
+      "sha256": "10bf657a1e3e988d93b1f14aebf45584a6b27a5168b93e265071655ddd547c2a",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0009.json",
+      "bytes": 1353,
+      "sha256": "946bc1a25c82e3ccc5cce27b624ac507f8f5d781e9a8759bdeef01194805e9d2",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0010.json",
+      "bytes": 1344,
+      "sha256": "5465c376dbeb0039755168a7a76b90dbb056e5741bbfe2f34c8b896dbfc9db6d",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0011.json",
+      "bytes": 1354,
+      "sha256": "517f873abd098d6efc94827d7da1721114a3428b1168a18b6b293b7f3763beb9",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0012.json",
+      "bytes": 1354,
+      "sha256": "65e4ff662462aa64a1040d69df89e49e766a60bf171d8fb271f5f531343c0bd9",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0013.json",
+      "bytes": 1343,
+      "sha256": "07229d565452edd842cd8b5faeb7d20584e352dbdd835652637f5d3c1851db2b",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0014.json",
+      "bytes": 1343,
+      "sha256": "e2bdc65544db82aa2087689c164acbcea3da5dca40cf799db5450f08a0932ea6",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0015.json",
+      "bytes": 1355,
+      "sha256": "943ff846054fd5cdf185a00ee2c8e6d9ee5c651be066a105230de443221c47e5",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0016.json",
+      "bytes": 1343,
+      "sha256": "d44eaa5515c5a389a3bf10722c5676bc4feda34df820a7d4876cdc463a2cc55a",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0017.json",
+      "bytes": 1356,
+      "sha256": "2f7068616513d95d0f2404359875af38bb8b7180086085124137167970a0ac81",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0018.json",
+      "bytes": 1355,
+      "sha256": "766a1ced47f2c8bc97e7e66bb34653f67ea717e08aba7d2249337b19610333c2",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/run-unfiltered-0019.json",
+      "bytes": 1343,
+      "sha256": "90f26e1dc28bf8ba58877ff6e50b8743a578c0a94a3f5ae657394906fe617da5",
+      "category": "per_run_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0000/raw_evidence.json",
+      "bytes": 4134,
+      "sha256": "adf9bd3f10986bb0176f6907f7ada3503f6fd95fbc6f008ee99b6100a9c818f9",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0000/run_meta.json",
+      "bytes": 84,
+      "sha256": "c1474ceb2c773dbb5f1ecbe77b72300fe0ddc943b78051d8ea81a728d8fe1937",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0001/raw_evidence.json",
+      "bytes": 4149,
+      "sha256": "151f555596c67b1f156a95a7867e5e8b00e8dbcf8acfba98664d068abae4a9f5",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0001/run_meta.json",
+      "bytes": 84,
+      "sha256": "5b8e101aab9ea8dfe6c6702b4bcf8ef2b500663b2a1147c62c5ea76998dc96d8",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0002/raw_evidence.json",
+      "bytes": 4149,
+      "sha256": "b222a170c9dd6415bec0f19831b3d4f8ce98fc7bc4b776b006f9a039d45fb0b8",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0002/run_meta.json",
+      "bytes": 84,
+      "sha256": "844492f57bda000afb5804bb3b9c6446abd1805cb886a94375d2588fa473a68b",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0003/raw_evidence.json",
+      "bytes": 4145,
+      "sha256": "1b8f6f7628895bc63ef34985ddd3365f7ec4a1d8829f0972786a22afc3d58eb2",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0003/run_meta.json",
+      "bytes": 84,
+      "sha256": "df957835654674fb4d5adc4360bd9d6a2ed998b7fb5b5b04b34eadae2835ce26",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0004/raw_evidence.json",
+      "bytes": 4145,
+      "sha256": "0dfe7b70b490bd27859a69cde5d3b4eaf860522c2fd16ad68567dc4be7d8f0a1",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0004/run_meta.json",
+      "bytes": 84,
+      "sha256": "ceeb82bc10ebcd4b2d40ce3922621b639239f1a33f65d257b8d563a71305567d",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0005/raw_evidence.json",
+      "bytes": 4151,
+      "sha256": "c521d498e1d28123cbcb423162dddf469bb648c504fbe44b38bda2ba04d4ee1b",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0005/run_meta.json",
+      "bytes": 84,
+      "sha256": "06c785612ec4a644fa90ddeac4791839a391559fa377f52a3a69a06b33603f6c",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0006/raw_evidence.json",
+      "bytes": 4167,
+      "sha256": "800df5f757eb5ca4ac5028723caddc4bfb0ba29a8950d321c0d3424f1c6c4059",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0006/run_meta.json",
+      "bytes": 84,
+      "sha256": "6bb7f86f4a369e00e406aead3ae2f1fc2c7b3df173fdb2cf7e7f6889856ab935",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0007/raw_evidence.json",
+      "bytes": 4155,
+      "sha256": "c2b1b3fb5e030f5c87453e216c38345ed8b71e03bb89f7872147fe76ae91b6f8",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0007/run_meta.json",
+      "bytes": 84,
+      "sha256": "646d66c9dea3d5969e9ad79049833a7ff0dc3aca00196c7b4570ea264bdc8b1f",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0008/raw_evidence.json",
+      "bytes": 4164,
+      "sha256": "1160321a07378adee8172cbbb05a2035b5ace12f114b8352c4beb88583d7b509",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0008/run_meta.json",
+      "bytes": 84,
+      "sha256": "d9427a1315166487cdde4024dc32d5ded9b171a382942f04437362eb58f4364e",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0009/raw_evidence.json",
+      "bytes": 4153,
+      "sha256": "954df8f01f1d41f523e48c78cead466aab1084773894e094087015972f7b5c59",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0009/run_meta.json",
+      "bytes": 84,
+      "sha256": "e40c774df164f4f66e3b7176fb478c300784f190062d715add53fd4ae6b6f3d9",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0010/raw_evidence.json",
+      "bytes": 4156,
+      "sha256": "5d7ffba1bcf473a26e49c71ddc0ed60c59650b9eb065e67c753f2b8d83e45a16",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0010/run_meta.json",
+      "bytes": 85,
+      "sha256": "15e2a8d6f9399f0ddce86d482cc26ac601cfc887a6ab61f0051b688ff977fa6a",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0011/raw_evidence.json",
+      "bytes": 4156,
+      "sha256": "f5556f7ec2d7aace0466a549bd820fed8d8f93d6c9996e307884d413095abebe",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0011/run_meta.json",
+      "bytes": 85,
+      "sha256": "e0ef92ac1fad87155c4af274a0d5ab297087c4aa1458bbd9c41b873f4334c8ce",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0012/raw_evidence.json",
+      "bytes": 4158,
+      "sha256": "f2556a316d5a2f7251a2eee37238ce1b3e2fb3399a06dfdf5a8971b3b7f7daf3",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0012/run_meta.json",
+      "bytes": 85,
+      "sha256": "374ae0ddbe335a2c425fc612e7a85be855560d37c1ee85bb7ffee56e20f12c8b",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0013/raw_evidence.json",
+      "bytes": 4153,
+      "sha256": "ac084340061a29941092112e7a4739e138da26f5c806a7e266e2e31e6ef3b34e",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0013/run_meta.json",
+      "bytes": 85,
+      "sha256": "2767b5660594a29769df497ef78d3d005951aa187db3beac16a2e0c6396e2fa5",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0014/raw_evidence.json",
+      "bytes": 4166,
+      "sha256": "a6082f274bffa21a31a468239b47c9e515dd3c16606f932ee0ab1d1d70b666b1",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0014/run_meta.json",
+      "bytes": 85,
+      "sha256": "f6d220bc9ad91c4b31471d7d734b032c9d3cdade91466c7d7fe7403cf335f8e1",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0015/raw_evidence.json",
+      "bytes": 4169,
+      "sha256": "feb6c349ea5b6b13fca2b1b3510a2eedb4c29ca26641f9bce8db88a3f6e2337c",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0015/run_meta.json",
+      "bytes": 85,
+      "sha256": "98b2cb1acf7a3cfce89642ddde8775e09db0a2f6ceb0e1ce352a84c23f429409",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0016/raw_evidence.json",
+      "bytes": 4156,
+      "sha256": "fa64f5c6ca40658839d895f64728850ddd9e3c899518ece0e90a181bbf19de6f",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0016/run_meta.json",
+      "bytes": 85,
+      "sha256": "721620515b79d49535d18f8de4d501a8dc5cade75589f092b177b1e1413bc844",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0017/raw_evidence.json",
+      "bytes": 4170,
+      "sha256": "58e1765dd724d04032d7547eea6878e5ecdf18823b9fde4ef26bf283a851f01c",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0017/run_meta.json",
+      "bytes": 85,
+      "sha256": "5c45643f5915034979904149fadc547e70b1c63f15de3be61b66f0b1c2db5150",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0018/raw_evidence.json",
+      "bytes": 4155,
+      "sha256": "da2c9f916aad24724603bc142debc30a27acb094fc4dca4ac9fed7225f5d625f",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0018/run_meta.json",
+      "bytes": 85,
+      "sha256": "c9ef7a4c01a91fdc6f701f589956ca50b20d88a735c9a68518bc858ceefb0d5a",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0019/raw_evidence.json",
+      "bytes": 4154,
+      "sha256": "1c9f524ae012637cc23d338fe83c4b446b4dc01f1978488a6d24ca34cd9794a5",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0019/run_meta.json",
+      "bytes": 85,
+      "sha256": "93c0ad2a95281b8c64c052ba05584316621e6e25d1c5f76587ce7f28ae06bf3d",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/preflight.json",
+      "bytes": 689,
+      "sha256": "0a678476855493bcc763453f98b1298d5dafba0b2e02e787ef7ffadc74469664",
+      "category": "campaign_rollup"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0000/raw_evidence.json",
+      "bytes": 3752,
+      "sha256": "3693b8d16aa1c740630c51774c3884c94271995f86539d7f44a8f2cbe814a23d",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0000/run_meta.json",
+      "bytes": 86,
+      "sha256": "8839cb8240a095454b5fe00683dc4d3f42f992c748514288488d05d10dad7feb",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0001/raw_evidence.json",
+      "bytes": 3738,
+      "sha256": "63d75fe7751a2de3421114cdd67340931269ff7fff4720b9152213035692b939",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0001/run_meta.json",
+      "bytes": 86,
+      "sha256": "8aa0de78a748168547837ffb053eda86afac40b2431c232e501aa98df46d684b",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0002/raw_evidence.json",
+      "bytes": 3760,
+      "sha256": "c08233cc96d49ba9ac476d61d5732267e9172e8a93143f28f11ae8ad762d9808",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0002/run_meta.json",
+      "bytes": 86,
+      "sha256": "cbb8b81b94c29b2d829081cf9a40b4d31a0856dacb6e07c1ea8496e1b0559741",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0003/raw_evidence.json",
+      "bytes": 3762,
+      "sha256": "dc763569f57cffa8b0e0ac865bae521a6382ebef23e42f8a7f576e1ec39f0fb0",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0003/run_meta.json",
+      "bytes": 86,
+      "sha256": "8989b0da90c9148687c09e4b072b4adf879fa48b47ca27d66c83065e9058f94b",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0004/raw_evidence.json",
+      "bytes": 3762,
+      "sha256": "501d0b8dbbd9af2a5ef4b62b2b659ccc9f7a436b26a0041233b487a9385856fb",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0004/run_meta.json",
+      "bytes": 86,
+      "sha256": "2ae2cc90a04a051a797689c0fef10ed04eb48c2fe5fcddca43302490dd051415",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0005/raw_evidence.json",
+      "bytes": 3777,
+      "sha256": "8a7e89c71a577cfecc3d3f81ba6b671459b70e745f979ee04ac7148785ecbf2a",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0005/run_meta.json",
+      "bytes": 86,
+      "sha256": "4a2baf4cef177f75c77fd19a67bf015de815cb2812b274ea0d17eb372a51c731",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0006/raw_evidence.json",
+      "bytes": 3765,
+      "sha256": "93f5529797a5c36f6d827cf46426548021af9e7d4658f8b9080338b6a582b89e",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0006/run_meta.json",
+      "bytes": 86,
+      "sha256": "598261c4deae6f21f1d86ec5b42a218a22bde6fd4d236de024ce97221d82e1dd",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0007/raw_evidence.json",
+      "bytes": 3778,
+      "sha256": "e043602d4ef6940dc5cc8b11278718c5c580b42021c6d487ac3885c8e7a92242",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0007/run_meta.json",
+      "bytes": 86,
+      "sha256": "1a69c7df8d65b80ecd5941c7d617d2bbfe654358e990608759e3fda5c45026b6",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0008/raw_evidence.json",
+      "bytes": 3768,
+      "sha256": "39d5eb654948ae5538e62273e2e6e248133485e4ce5ae5ebfbd77961e01b7dc4",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0008/run_meta.json",
+      "bytes": 86,
+      "sha256": "968805ce977d656e99dc9caf9b4d18a4bd96466ec103df111bb179a6daba11a5",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0009/raw_evidence.json",
+      "bytes": 3777,
+      "sha256": "c2ed83243351a3d1fafa0ef86150346c9b5dbd8e31cee18edf8b228e016711c4",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0009/run_meta.json",
+      "bytes": 86,
+      "sha256": "f6814fb3041f378d4a0c52bc75b50b7ad3f6b72d99fee192ec00e8a0b6d5ec82",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0010/raw_evidence.json",
+      "bytes": 3767,
+      "sha256": "c4c6d116717a14f6168ecf6557794f42bbcd4d9d8c1a05895429c50f2adfd4c8",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0010/run_meta.json",
+      "bytes": 87,
+      "sha256": "15eba318dda2be5309c5c552ca2b08b6305aa4eb593ef420e7bcaba9e7535d06",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0011/raw_evidence.json",
+      "bytes": 3765,
+      "sha256": "bb26997a6a4fbca373548462abe2dae50da076220475d2e7fb01d64e2d5c81cf",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0011/run_meta.json",
+      "bytes": 87,
+      "sha256": "662e04a800ee21aa0189c6560b76e74bf897e31c26993a9da5966799f969e6e2",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0012/raw_evidence.json",
+      "bytes": 3773,
+      "sha256": "75e482897670f0bcbb58b7d62184b8557a117251f00ea70d1057da886ff03c39",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0012/run_meta.json",
+      "bytes": 87,
+      "sha256": "96b8eeb7db12133868a40001c489e51bcecec1011b55f511414e9a5a9cc02bdc",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0013/raw_evidence.json",
+      "bytes": 3787,
+      "sha256": "d5500f3d4397c47d67f36b0dc425046e9d14a4f141d3b3e355692707ff6a3691",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0013/run_meta.json",
+      "bytes": 87,
+      "sha256": "12fbb4716d3a3a70c803d11dd434b60a73dcdc0f63b65921825084ab2d9df1c7",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0014/raw_evidence.json",
+      "bytes": 3768,
+      "sha256": "7466992e0af4b29c975605dc28e7802016b338701e7ee4bf649c66d9c89f5ea7",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0014/run_meta.json",
+      "bytes": 87,
+      "sha256": "6093c1c3139f2b9d93175b5f25af74e53f949352a9a36305ebedab7e967cd15b",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0015/raw_evidence.json",
+      "bytes": 3765,
+      "sha256": "35ac35c75fa63f0ca08ee967b27cf1a998e5d5ad8b63e392b05b28e427883c6a",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0015/run_meta.json",
+      "bytes": 87,
+      "sha256": "70d2da8d9824f34fe15f85121d6c925c39bcc464ee62df3acb2da4a95d59c423",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0016/raw_evidence.json",
+      "bytes": 3770,
+      "sha256": "15f11e64982fee000814e72b034de4d3795054b254a652ecd54e0f1edcf40ec2",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0016/run_meta.json",
+      "bytes": 87,
+      "sha256": "7d01903f94e6b0c91f930104a7b21aceb1d7b154d50a51275cbb9a1a0c08164b",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0017/raw_evidence.json",
+      "bytes": 3765,
+      "sha256": "3029b2c2e7803b05d0e218cd5eb9592d0ef59a8b69cae4ab2273dfaf3e9a5a95",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0017/run_meta.json",
+      "bytes": 87,
+      "sha256": "fe38c893652aa7c0cec4b7683f09bc641ca69525826d46d85fe6b490e8a082e9",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0018/raw_evidence.json",
+      "bytes": 3781,
+      "sha256": "b1bc681a11a900c6df47907dc6f4ef86b65f2c9d9e9944240205f37fa8ab6925",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0018/run_meta.json",
+      "bytes": 87,
+      "sha256": "28059599a0518e3e87f28ddfbf29df5875a0680441569a79eb0b2b34047ead93",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0019/raw_evidence.json",
+      "bytes": 3780,
+      "sha256": "41021768ceb840a9c5bb94617f8eaeb4fd48d23bbce0ec25ca1b8fdef6e3566f",
+      "category": "per_run_raw_evidence"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0019/run_meta.json",
+      "bytes": 87,
+      "sha256": "514b91adc7c13dee15c7553fd7a367c798cb32ae48ee661523b8117b45aa1e13",
+      "category": "per_run_metadata"
+    },
+    {
+      "path": "docs/M4_RUNTIME_VALIDATION.md",
+      "bytes": 11336,
+      "sha256": "f0a459475bc908dcfdeb4aef8bb2fc95dd23ae4b6c5513f822a9638eada7efba",
+      "category": "authoritative_docs"
+    },
+    {
+      "path": "docs/REPRODUCE_CAMPAIGN.md",
+      "bytes": 7422,
+      "sha256": "c9863a27a30f5afc799f9c6a00dd99f92d1751504d82b17624beda5407688692",
+      "category": "authoritative_docs"
+    }
+  ],
+  "excluded": [
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0000/telemetry.csv",
+      "bytes": 105115,
+      "sha256": "3342230d39050c2fd53624f2739a919f7b593eb7f09252b1ebccd09cd0d2907b",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0000/truth.csv",
+      "bytes": 70702,
+      "sha256": "ec0b648a8f9c99470c429e828da5752942553c9f3c8fd79b95992f1a5342fb0e",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0001/telemetry.csv",
+      "bytes": 105658,
+      "sha256": "2c66959379ea4a4fe17183ee39924c2ca0ce176161beece1f7a14c2709c44d5c",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0001/truth.csv",
+      "bytes": 71393,
+      "sha256": "b7e99056f7b1f3458c051986a9cfc95178d67868a55dc130ad96e1c04fbc9105",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0002/telemetry.csv",
+      "bytes": 105947,
+      "sha256": "4d9bbd18c7f240e4ea3b2ba94e688e6c449a55d005bd430100a70f9fbc442399",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0002/truth.csv",
+      "bytes": 71380,
+      "sha256": "efb1a9f02a063a353eb0627a951393d04d1ba6f792f841b3aac3a397cb6c8335",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0003/telemetry.csv",
+      "bytes": 105145,
+      "sha256": "af272506ef5ab545708dff683440d2d7f5209bb066883b461dded685c7b91a6d",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0003/truth.csv",
+      "bytes": 70704,
+      "sha256": "09e16b3e6d2b8da323086a5f7e2a26fd77fb34978555e59eb6121c19c408e5e6",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0004/telemetry.csv",
+      "bytes": 105319,
+      "sha256": "aba0c754eaba823534643c746739486d093214ceac8c8a4271f774c09f77cfda",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0004/truth.csv",
+      "bytes": 70839,
+      "sha256": "a3a5af6478b415c8740c6b54edb1bb788142e934e807ce9d505c8c6314b627fc",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0005/telemetry.csv",
+      "bytes": 107741,
+      "sha256": "58b03f9c7b96ecfccf71693ad48ab3b2c4e39dba6882bb86c5c0bd3046d3a698",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0005/truth.csv",
+      "bytes": 73500,
+      "sha256": "5ff955ee148154462a6e86a07e27e4bd068d8230957cafba3e48f0eb362f6488",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0006/telemetry.csv",
+      "bytes": 110274,
+      "sha256": "04fe19ad95836ebb84ac453ff7191d8003fb67f384753020bc6c42fea27178e3",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0006/truth.csv",
+      "bytes": 75827,
+      "sha256": "5be040eb876b4ba2984247b0436ce56280c4df2d7ec3bf0b5ec4ed09dea7619b",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0007/telemetry.csv",
+      "bytes": 107455,
+      "sha256": "27c851acbeab3a58423fbbeeba0b817f6f8acda91bb9a095173a15da9f0b0e1a",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0007/truth.csv",
+      "bytes": 72997,
+      "sha256": "68414c3e10f5e152c989de2a80707e3eebd4d9565542345632f9c07e2437fca2",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0008/telemetry.csv",
+      "bytes": 107417,
+      "sha256": "9f8756baaec51c3009e9c492f9ee4bd166b5f01c4607838682af92baf9a4efac",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0008/truth.csv",
+      "bytes": 72902,
+      "sha256": "625db41615430552c72a3d131253f4977744e6a523a429f45bded39801914c9d",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0009/telemetry.csv",
+      "bytes": 107028,
+      "sha256": "69fe8c89ef90b16ef8dd4c11ea50fa14e1ab232f3947628c978fedf8dd129e46",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0009/truth.csv",
+      "bytes": 72569,
+      "sha256": "f59a4b4cd0db5639c19534712e4e0b7e1ce2d28cccecd3fcbaf74bef48c3b973",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0010/telemetry.csv",
+      "bytes": 106896,
+      "sha256": "6973ccaa728c63e8701485c464ca36b3a836220937bacb603ba29c7f8128e430",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0010/truth.csv",
+      "bytes": 72263,
+      "sha256": "33b32342b464c93bbb7055ba66e6d6e674f4c3800c7302eac9499c387a0d9980",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0011/telemetry.csv",
+      "bytes": 107457,
+      "sha256": "fcde890db7d699108c31663580444c98d10702be472d521ca35e6dbd9b7ac7fd",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0011/truth.csv",
+      "bytes": 73126,
+      "sha256": "177726e5fe6afecf391530cff3130cd4756973b01fbf9698c4105c9e76badbd7",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0012/telemetry.csv",
+      "bytes": 109260,
+      "sha256": "67e09f60a75c860160a7e5bbf5719c67c27f3e82b5078b60eb4dee8224846bc1",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0012/truth.csv",
+      "bytes": 74925,
+      "sha256": "70024323fb5353c219087ea6d6e885b779d9090bfc8df839333be88fbc3f1405",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0013/telemetry.csv",
+      "bytes": 107286,
+      "sha256": "ac9a1040389fcb25861fa103d66b1115272686fb66cfa3c38d115d65f0bf51d4",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0013/truth.csv",
+      "bytes": 72909,
+      "sha256": "8cfeb211f1a7db05cae40391c2e3d63b7739d57577d0ab023642a7f1dc948335",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0014/telemetry.csv",
+      "bytes": 107204,
+      "sha256": "f27f0d673b255bd205bb406514c4c74a166e0c013ba11f3f94b71e7514f7a2ae",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0014/truth.csv",
+      "bytes": 72686,
+      "sha256": "bfd1d342b8094ffabb6121f70972b788037d91d580206b5ec4c9c2220041a97e",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0015/telemetry.csv",
+      "bytes": 107333,
+      "sha256": "c2aaece7348bcb4a8fddd2f7a713e05eb6c7dd1610ebeaa8d8a8e86d84a3bfda",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0015/truth.csv",
+      "bytes": 73025,
+      "sha256": "541632676d33a9c324954367bc9dd387763c30b3c8c1b737b821d21a7e130f74",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0016/telemetry.csv",
+      "bytes": 107109,
+      "sha256": "145140d02f373905b40ade3294282b792670233ffd8cf3d949953afa97ad8146",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0016/truth.csv",
+      "bytes": 72683,
+      "sha256": "896511e5c50f32440322996ff846b8d82b1eef336d3908636907736fe0f20dfc",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0017/telemetry.csv",
+      "bytes": 106683,
+      "sha256": "580e05f6ae0c33f637f30b71a64ccf1b6f6255c769b5586a3784a5a4e5268192",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0017/truth.csv",
+      "bytes": 72057,
+      "sha256": "f082227461b7cb4121d1d857a3b24615854b350e97a0289cd9c0429d43d16746",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0018/telemetry.csv",
+      "bytes": 107570,
+      "sha256": "b1e6fcaf0fc132d5c8f31ada6a4f754803724942f49c4714a4c2e6fbb4e3c783",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0018/truth.csv",
+      "bytes": 73177,
+      "sha256": "dbfae414b61fced1d06e6a5b683619911798813f5d7a3195ba3a5bfebd7712e0",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0019/telemetry.csv",
+      "bytes": 107720,
+      "sha256": "b1eca891a4c01074e7e4a39c923a63bc36ef158b739dd9f7f52035a0b2325918",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/filtered-0019/truth.csv",
+      "bytes": 73492,
+      "sha256": "cdf1fd4167f08d322dd3fdbd7b6e328e5a7d06bae19a39d870a18d7e01dd4ac6",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0000/telemetry.csv",
+      "bytes": 103846,
+      "sha256": "5974ea4af41fd2fe1d112f3524910c50cbc31143b24bf659779c2a87cefc1115",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0000/truth.csv",
+      "bytes": 68880,
+      "sha256": "e08b1e53ff65e5fa87d575159b97d7efa3f77208e5e3b4838f482bf523e04aff",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0001/telemetry.csv",
+      "bytes": 104135,
+      "sha256": "9375e97d99461b9f756d18cc4bc92502bb95fa3b37a2182c9e6137872e247f61",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0001/truth.csv",
+      "bytes": 69169,
+      "sha256": "5dc1a35deee08be2b216ab4f3630fba886f38fa85cc5f717acfc7c0f1a882a83",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0002/telemetry.csv",
+      "bytes": 104092,
+      "sha256": "937128e70f75a336406c74963c00b09e405abd008aa544b1d257a3d5d28e6e9c",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0002/truth.csv",
+      "bytes": 68994,
+      "sha256": "88920fc4f644c648d672fab7496bae0aa8aa72a71a5af937954614d422611833",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0003/telemetry.csv",
+      "bytes": 104174,
+      "sha256": "11babd2c93a01223e70b1f65992fdb0b9b826ba1eb1ee3270262f5a5939530a9",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0003/truth.csv",
+      "bytes": 69266,
+      "sha256": "59b98cdc454053066a3a5992c574456a759b3f661c900c68d644758273d480e2",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0004/telemetry.csv",
+      "bytes": 104802,
+      "sha256": "9c77cf0621d44fbbc86637f6bb2f825809e8900d7b9a4326c511cd4b673e0ca1",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0004/truth.csv",
+      "bytes": 69822,
+      "sha256": "e850bdd77f485ffc3c874a636d19851d98277036414fec9cc8a1d2f6362b1e8b",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0005/telemetry.csv",
+      "bytes": 105244,
+      "sha256": "6ed962ed88c6f031fc86585c9ada069f8beab72b08ab5c476c1a3ec6f9962485",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0005/truth.csv",
+      "bytes": 70297,
+      "sha256": "84928bdc79aceb65001021592347cf0a8acbe28187208ba54019debb3f39d35b",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0006/telemetry.csv",
+      "bytes": 105504,
+      "sha256": "5232a28aa3dafa4b7d926c9bb8031187573fd1cefec0e6999ad97b9776471167",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0006/truth.csv",
+      "bytes": 70498,
+      "sha256": "c251ab7a41003ed504801b49d8e8931700a621603865bf2ce47c473e00935bb7",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0007/telemetry.csv",
+      "bytes": 105554,
+      "sha256": "431eed7bb77bea380305ddce2b842c69e9d77ad391302ad6439a3b586d8ca702",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0007/truth.csv",
+      "bytes": 70523,
+      "sha256": "6cf23d8cadd5a45566778b8d482d4a57425f2aca7b146df34598e33e8719b698",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0008/telemetry.csv",
+      "bytes": 105482,
+      "sha256": "70fe72fc133a9b75054dce847152f9e75c6056bf6bae0cdad6e0bca93cf6079b",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0008/truth.csv",
+      "bytes": 70488,
+      "sha256": "f41f7b0e8b389087e59a1d926e2bfb48abb6ad0701c7a0cab16177be4b2fcb52",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0009/telemetry.csv",
+      "bytes": 105462,
+      "sha256": "5dc3e04eddcc5a0405a205c1220782e3ecbfff4752f7bb65b647ddc923718534",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0009/truth.csv",
+      "bytes": 70446,
+      "sha256": "3083bb508972ebcecb850cd94a7712f971307cdcd279a05bc3ccbcfae1664873",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0010/telemetry.csv",
+      "bytes": 105464,
+      "sha256": "97a374fa6238f24164edc6c547a8cf7380132f9ccabfd0c7f4446d3f08e15811",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0010/truth.csv",
+      "bytes": 70513,
+      "sha256": "434ef403a5e4f6f7b02a63e94a24b429bee9bb0d7e2dd4a3b4f32fb0fdfc1967",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0011/telemetry.csv",
+      "bytes": 105240,
+      "sha256": "3d4d2361bd5a1fa1aa0c20919abd5348d626795934793a35002f80543c34e055",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0011/truth.csv",
+      "bytes": 70439,
+      "sha256": "cc5c7d44413cecae2d396dccb14fcee838c3d588d899828a9d0a35e488ea206b",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0012/telemetry.csv",
+      "bytes": 108718,
+      "sha256": "21186434ddd47ced5999029eff7354eff3a1986cb9ac92589713f25dc52c3887",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0012/truth.csv",
+      "bytes": 73623,
+      "sha256": "e2a0ae3e31cb8252d1ec82cc8c82058bd5b1516b3157c114cd8bb36cc60bb4f6",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0013/telemetry.csv",
+      "bytes": 106267,
+      "sha256": "dbf21dd8fcad9e54c5a0338420342f497041a34590c4270a5d74df8a3b6d379a",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0013/truth.csv",
+      "bytes": 71285,
+      "sha256": "b0b39b09598b9f61ef3ac4ff65de8ace5bec5181de4ac1f29ec6851791aa6b82",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0014/telemetry.csv",
+      "bytes": 105254,
+      "sha256": "a68d601ddab42b1a79d2b4c2f9b0c17bb403468b729264448bee3265f1cb3777",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0014/truth.csv",
+      "bytes": 70331,
+      "sha256": "478b79d5ad7aeacc5290f275a4fec29408771d22acc9b9c6a8b9239c8ba53d42",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0015/telemetry.csv",
+      "bytes": 105380,
+      "sha256": "aa3d9f188fe0dfdd65e231ce2358a138de5062095b136a90155069178a1805e6",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0015/truth.csv",
+      "bytes": 70469,
+      "sha256": "a367af09e48f3f9de52050cd8c66c71df9f308a4b2b9b714ce8498eb8cee3cbb",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0016/telemetry.csv",
+      "bytes": 105486,
+      "sha256": "c9d6a128ed832e74f2368d3db5dd611f50d42aaed643152310f21e0935a99e6e",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0016/truth.csv",
+      "bytes": 70518,
+      "sha256": "c7c0be97cd9261badbffce89e16a5d01c416cbd77edd5784d0295cb026cb0cb1",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0017/telemetry.csv",
+      "bytes": 105442,
+      "sha256": "817e4f541fbb43e4447683ff1a85e7f23f4d4c3fd7c19d5ee3f505f87c06b3a6",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0017/truth.csv",
+      "bytes": 70438,
+      "sha256": "2a8c36fd82e663950a3557d775e31d30c61a4b35acd5d23b1878a84f072ab7af",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0018/telemetry.csv",
+      "bytes": 105416,
+      "sha256": "de49314007f8bd12369c3c3478b39c442ab04192dc6c8a3688127cead6eb2401",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0018/truth.csv",
+      "bytes": 70498,
+      "sha256": "1da622ac139bc505ae85378228f6c1c2e9807fa54b316297def7e5173a6f753b",
+      "category": "raw_ground_truth_traces"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0019/telemetry.csv",
+      "bytes": 105472,
+      "sha256": "f7812402218fc80cbb8f6a97feb5e013a3d3007199d466200c9bef81b85a5a68",
+      "category": "raw_high_frequency_telemetry"
+    },
+    {
+      "path": "campaign/results/m4-franka-filtered-vs-unfiltered-v1/unfiltered-0019/truth.csv",
+      "bytes": 70443,
+      "sha256": "8f2e6ae3940ebd4db7fa92e60a7f958ebb39aa9d22aa19f47c099d222103a053",
+      "category": "raw_ground_truth_traces"
+    }
+  ]
+}
