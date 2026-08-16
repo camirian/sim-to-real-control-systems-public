@@ -16,8 +16,14 @@ evidence packet and a markdown compliance report. The pitch in one line:
 1. One command launches the full loop; seeded runs are reproducible.
 2. The money artifact: a table of N ≥ 20 seeded runs, filtered vs. unfiltered,
    showing quantified improvement (tracking RMS, settling, overshoot, checks passed).
-3. A 2–3 minute recorded demo: noisy run failing checks → filtered run passing →
-   the evidence report.
+3. A 2–4 minute recorded demo showing the preregistered filtered-vs-unfiltered
+   **contrast** and the evidence report.
+   **Corrected after the campaign ran:** this goal originally read "noisy run
+   failing checks → filtered run passing". No filtered run passes the full
+   gauntlet — **0 of 40 runs passed**. The filtered arm passes only the
+   attenuation check (20/20); tracking is 3/20 and settling and overshoot are
+   0/20. The demo must present the measured contrast, never a pass. Script:
+   [`docs/DEMO_PACKAGE.md`](docs/DEMO_PACKAGE.md).
 4. DSP + gauntlet tests green in CI (no Isaac needed in CI).
 
 **Scenario decision (binding):** Franka joint-space tracking. The repo has zero
@@ -30,9 +36,15 @@ Isaac-in-CI.
 
 ## 2. Architecture
 
+> **Runtime pin.** All M4 empirical evidence was produced on Isaac Sim
+> `6.0.1-rc.7+release.42383.32955d8d.gl` with Isaac's own ROS 2 Jazzy
+> environment. The ROS 2 Humble / Isaac Sim 4.5.0 pin referenced elsewhere in
+> this plan applies only to the legacy DevContainer build and the standalone
+> `scripts/` runners — no published result came from it. See AGENTS.md §2.
+
 ```mermaid
 flowchart LR
-    ISAAC["Isaac Sim 4.5.0\nscenes/franka_ros2_bridge_scene.usd\n+ headless runner script"] -- "/joint_states (clean)" --> NOISE["noise_injector node\nseeded, param-driven"]
+    ISAAC["Isaac Sim 6.0.1-rc.7\nscenes/franka_ros2_bridge_scene.usd\n+ headless runner script"] -- "/joint_states (clean)" --> NOISE["noise_injector node\nseeded, param-driven"]
     NOISE -- "/joint_states_noisy" --> FILT["dsp_filter node\ndsp.apply_filter_realtime (causal)"]
     FILT -- "/joint_states_filtered" --> CTRL["waypoint_controller node\njoint-space trajectory"]
     CTRL -- "joint commands" --> ISAAC
@@ -66,7 +78,7 @@ Every PR must cite the REQ IDs it advances; verification method is binding.
 | REQ-S2R-101 | A markdown compliance report renders from each evidence packet. | Golden-file test. |
 | REQ-S2R-102 | Results table: ≥ 20 seeded runs each for filtered and unfiltered, committed with the evidence packets, showing quantified improvement. | Table + packets in repo; numbers regenerate from seeds. |
 | REQ-S2R-200 | CI runs DSP + gauntlet tests on every PR (no Isaac/ROS runtime required in CI). | Green `.github/workflows/` run. |
-| REQ-S2R-300 | README: pinned versions (ROS 2 Humble, Isaac Sim 4.5.0), block diagram, exact repro steps, results table, video link, limitations (sim-only, one scenario). Isaac import style unified across `scripts/` (new `isaacsim` API; `franka_wave.py` currently uses the old `omni.isaac.kit` import). | Doc review against fresh-clone walkthrough. |
+| REQ-S2R-300 | README: pinned versions (empirical runtime Isaac Sim 6.0.1-rc.7 + Isaac's ROS 2 Jazzy; legacy DevContainer path ROS 2 Humble / Isaac Sim 4.5.0), block diagram, exact repro steps, results table, video link, limitations (sim-only, one scenario). Isaac import style unified across `scripts/` (new `isaacsim` API; `franka_wave.py` currently uses the old `omni.isaac.kit` import). | Doc review against fresh-clone walkthrough. |
 
 ## 4. Milestones & feature lanes
 

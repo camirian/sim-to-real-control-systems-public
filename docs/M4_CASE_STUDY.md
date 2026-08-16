@@ -12,8 +12,8 @@ citing anything here.
 | Manifest SHA-256 | `1d227e437317bac11df209d39ac264d7b4ffe9d5f9b5d4bf8c805f266b238052` |
 | Simulator | Isaac Sim `6.0.1-rc.7+release.42383.32955d8d.gl` (release candidate; **GA not evaluated**) |
 | Design | 20 seeds × 2 conditions, paired, preregistered and frozen before any run |
-| Outcome | **40 scheduled, 40 valid, 0 invalid, 0 failed, 0 missing** |
-| Evidence integrity | **120/120 files hash-verified, 0 mismatched** |
+| Outcome | **40 scheduled, 40 valid, 0 invalid, 0 execution failures, 0 missing** |
+| Raw-artifact integrity | **120/120 hashed source files verified, 0 mismatched** |
 
 ---
 
@@ -96,17 +96,24 @@ The freeze is auditable: `git log --follow campaign/manifests/` predates
 
 40 runs, ~24 minutes wall clock (`wall_elapsed_s: 1456.5`).
 
-**40 scheduled · 40 valid · 0 invalid · 0 failed · 0 missing.**
+**40 scheduled · 40 valid · 0 invalid · 0 execution failures · 0 missing.**
 
 "Valid" means *admitted under the preregistered exclusion rules* — no run hit the
 rate tolerance, the sample floor, the reset check, or a harness error. It does
 **not** mean the run passed the acceptance thresholds. That distinction is the
 subject of §6.
 
-Every run emits an immutable JSON evidence packet containing its seed, scenario,
-per-check verdicts, the thresholds it was graded against, and the full
-environment fingerprint. All 120 evidence files re-hash clean: **120 checked,
+Each run directory (`filtered-<seed>/`, `unfiltered-<seed>/`) holds the **raw
+source artifacts**: `raw_evidence.json` plus the hashed `run_meta.json`,
+`telemetry.csv` and `truth.csv`. The **120-file integrity set** is exactly those
+hashed sources — 40 runs × 3 files — and it re-hashes clean: **120 checked,
 120 ok, 0 mismatched, 0 missing.**
+
+Separately, `evidence/run-*.json` holds the **40 regenerated gauntlet packets** —
+graded *output* derived from the raw artifacts, carrying each run's seed,
+scenario, per-check verdicts, the thresholds it was graded against, and the full
+environment fingerprint. These are not part of the 120-file integrity set; they
+are verified by being rebuilt and compared byte-for-byte (§8).
 
 ## 5. Key measured result
 
@@ -209,16 +216,30 @@ pip install -e dsp/ && pip install numpy scipy pytest usd-core
 
 python -m pytest dsp/ gauntlet/ campaign/ -q
 
-# Regenerate the results document from raw evidence and prove it matches.
-python scripts/build_results.py \
+# Read-only verification: rebuild every derived artifact from the raw
+# evidence and compare it byte-for-byte against the committed copies.
+python scripts/build_results.py --check \
   --logs-root campaign/results/m4-franka-filtered-vs-unfiltered-v1 \
   --manifest campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json \
   --out RESULTS.md
-git diff --exit-code RESULTS.md
+
+git status --porcelain   # must be empty — verification modifies nothing
 ```
 
-An empty diff proves every published figure derives from the raw evidence.
-Nothing in `RESULTS.md` is hand-entered.
+Expected output:
+
+```
+valid 40/40  integrity_passed=True
+read-only check: 42/42 artifacts reproduced byte-for-byte
+CHECK PASSED — nothing in the repository was modified.
+```
+
+The 42 artifacts are the 40 regenerated gauntlet packets, `campaign_results.json`
+and `RESULTS.md`. `--check` rebuilds them into a temporary directory, so the
+records being verified cannot be altered by the act of verifying them; it exits
+non-zero on any mismatch. Together with the 120-file raw-artifact hash check,
+this proves every published figure derives from the raw evidence and that nothing
+is hand-entered.
 
 **Path B — re-run the campaign.** Requires an Isaac Sim 6.x host with an NVIDIA
 GPU, ~45 minutes. Full procedure, including the mandatory runtime gate, in
@@ -229,8 +250,9 @@ GPU, ~45 minutes. Full procedure, including the mandatory runtime gate, in
 | Artifact | Path |
 |---|---|
 | Frozen design | `campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json` |
+| **Raw source artifacts** (per run) | `campaign/results/…/{filtered,unfiltered}-<seed>/` — `raw_evidence.json`, `run_meta.json`, `telemetry.csv`, `truth.csv` |
 | Aggregated results | `campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_results.json` |
-| Run counts + integrity | `campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_summary.json` |
+| Run counts + integrity index | `campaign/results/m4-franka-filtered-vs-unfiltered-v1/campaign_summary.json` |
 | 40 evidence packets | `campaign/results/m4-franka-filtered-vs-unfiltered-v1/evidence/` |
 | Narrative results | [`RESULTS.md`](../RESULTS.md) |
 | Runtime validation | [`M4_RUNTIME_VALIDATION.md`](M4_RUNTIME_VALIDATION.md) |

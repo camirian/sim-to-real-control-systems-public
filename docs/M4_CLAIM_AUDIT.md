@@ -15,8 +15,8 @@ Re-derived from primary artifacts during this audit:
 
 | Fact | Value | Source |
 |---|---|---|
-| Run counts | attempted 40, valid 40, invalid 0, failed 0, missing 0 | `campaign_summary.json`, `campaign_results.json.counts` |
-| Evidence integrity | checked 120, ok 120, mismatched 0, missing 0 | `campaign_results.json.integrity` |
+| Run counts | attempted 40, valid 40, invalid 0, **execution** failures 0, missing 0 | `campaign_summary.json`, `campaign_results.json.counts` |
+| Raw-artifact integrity | checked 120, ok 120, mismatched 0, missing 0 — composition: 40 runs × {run_meta.json, telemetry.csv, truth.csv} | `campaign_results.json.integrity`, `campaign_summary.json.integrity_index` |
 | Loop rate | mean 199.99999999899944 Hz, n=40, all within tolerance | `campaign_results.json.rate` |
 | Tracking RMS diff | −0.22884766390016834 rad, CI [−0.24835462992253976, −0.2122944430180847], 20/20 | `paired.tracking_rms_error` |
 | Attenuation diff | +48.11513753981959 dB, CI [45.783948768227255, 50.47822417129975], 20/20 | `paired.filter_attenuation_db` |
@@ -67,7 +67,7 @@ and `README.md` says so 140 lines later.
 
 **Fix:** the lede now describes the system rather than asserting a demo artifact.
 
-### F-4 — MASTER_PLAN.md promises a demo beat that the evidence contradicts — **OPEN**
+### F-4 — MASTER_PLAN.md promised a demo beat that the evidence contradicts — **FIXED**
 
 **Severity: medium.** `MASTER_PLAN.md:19` specifies the demo as:
 
@@ -77,26 +77,31 @@ and `README.md` says so 140 lines later.
 and fail tracking, settling and overshoot. Recording the demo as written in the
 plan of record would produce a false public claim.
 
-**Status:** not fixed here — `MASTER_PLAN.md` is the plan of record and editing it
-is outside this bounded proof-packaging change. **Mitigated:**
-`docs/DEMO_PACKAGE.md` supersedes it for the 2–4 minute cut, Beat 6 states the
-failure explicitly and is marked do-not-cut, and §3 bans the phrasing.
+**Fix:** goal 3 in `MASTER_PLAN.md` now describes the preregistered
+filtered-vs-unfiltered **contrast**, carries an explicit correction note recording
+that 0 of 40 runs passed, and points at `docs/DEMO_PACKAGE.md`. Beat 6 of the demo
+states the failure and is marked do-not-cut; §3 bans the phrasing.
 
-**Recommended human action:** amend `MASTER_PLAN.md:19` to describe the contrast,
-not a pass.
+### F-5 — Governing pins contradicted the corrected front door — **FIXED**
 
-### F-5 — Stale 4.5.0 pins persist outside the front door — **OPEN, accepted**
+**Severity: high.** `AGENTS.md:33` and `MASTER_PLAN.md:35,69` prescribed the old
+4.5.0 / Humble contract as though it governed the empirical campaign.
 
-**Severity: low.** `AGENTS.md:33`, `MASTER_PLAN.md:35,69`, `docs/RUN_ON_EDGEXPERT.md`
-(multiple), and `README.md:178,213,217` still reference Isaac Sim 4.5.0.
+`AGENTS.md` is the binding operating guide and `MASTER_PLAN.md` repeats it, so
+between them they prescribed ROS 2 Humble / Isaac Sim 4.5.0 as the supported
+configuration while the README declared 6.0.1-rc.7 — the front door and the
+mandatory build instructions specified incompatible environments.
 
-These are scoped to the legacy `scripts/` Isaac runners and the EdgeXpert
-runbook — a different subsystem from the campaign — so they are not
-factually wrong in context, but they are inconsistent with the corrected front
-door. Deliberately not changed: fixing them means editing the plan of record and
-an operational runbook, which exceeds this change's scope.
+**Fix:** `AGENTS.md` §2 now splits the pin into two explicitly-scoped entries —
+the **empirical runtime** that governs all M4 evidence (Isaac Sim 6.0.1-rc.7 with
+Isaac's own ROS 2 Jazzy) and the **legacy DevContainer / `scripts/` path** (Humble
+/ 4.5.0), with the statement that no empirical result came from the latter.
+`MASTER_PLAN.md` carries the same scoping note above its architecture diagram, the
+diagram label is corrected, and REQ-S2R-300 names both pins.
 
-**Recommended human action:** a follow-up pass to scope every 4.5.0 mention.
+`docs/RUN_ON_EDGEXPERT.md` still references 4.5.0 throughout; it is an operational
+runbook for the legacy `scripts/` path, which is exactly the scope the corrected
+pins assign to 4.5.0, so it is left as-is and is no longer contradictory.
 
 ### F-6 — Settling-time interval rests on half the pairs — **DISCLOSED**
 
@@ -118,7 +123,7 @@ Reporting only the latter would overstate the filter's benefit ~2×.
 Both are published in the README table, the case study §5, the visual, and demo
 statements S3 and S6.
 
-### F-8 — the documented verification command mutates committed evidence — **OPEN**
+### F-8 — the documented verification command mutated committed evidence — **FIXED**
 
 **Severity: low (process), medium (optics).** Found by executing the Path A
 verification exactly as documented in `docs/REPRODUCE_CAMPAIGN.md`:
@@ -138,19 +143,54 @@ A reader following the documented steps will see 41 modified files in
 tampering and undercuts the immutability framing. The content that matters is
 unaffected — only the timestamp field changes.
 
-**Mitigation in this change:** the mutation was reverted; no evidence file is
-modified on this branch.
+**Fix:** `scripts/build_results.py` gained an explicit `--check` mode. It routes
+every write — all 40 gauntlet packets, `campaign_results.json` and `RESULTS.md` —
+into a temporary directory, reproduces the committed `generated_at` so the
+comparison is a true byte comparison, compares all 42 artifacts byte-for-byte,
+and exits non-zero on any mismatch. The scratch directory is removed on exit.
+Nothing inside the repository is written, so this is read-only by construction
+rather than by cleanup after mutation.
 
-**Recommended human action:** either make `build_results.py` treat evidence as
-read-only when only building results, or document `--timestamp` as required in
-`docs/REPRODUCE_CAMPAIGN.md` Path A.
+All public verification instructions (`README.md`, `docs/M4_CASE_STUDY.md` §8,
+`docs/REPRODUCE_CAMPAIGN.md` A2) now use `--check` and assert
+`git status --porcelain` is empty. The in-place mode is retained for regenerating
+artifacts after a fresh campaign, documented with the `--timestamp` requirement.
+
+**Verified:** on a clean worktree, `--check` reports `42/42 artifacts reproduced
+byte-for-byte`, `CHECK PASSED`, exit 0, with `git status --porcelain` empty.
+Negative test: forcing a wrong `--timestamp` produces 41 MISMATCH lines and
+exit 1, still without modifying the repository.
+
+### F-9 — the 120-file integrity set was described as "evidence files" — **FIXED**
+
+**Severity: medium.** The front door pointed readers at
+`campaign/results/…/evidence/` for "the 40 raw packets" and described the
+integrity check as "120/120 evidence files hash-verified". Both are wrong:
+
+- `evidence/run-*.json` holds **regenerated gauntlet packets** — graded output,
+  not source.
+- The **raw** artifacts live per run in `filtered-<seed>/` and `unfiltered-<seed>/`:
+  `raw_evidence.json` plus `run_meta.json`, `telemetry.csv`, `truth.csv`.
+- The 120-file integrity set is exactly 40 runs × {`run_meta.json`,
+  `telemetry.csv`, `truth.csv`} — verified directly against
+  `campaign_summary.json.integrity_index.files`. It does **not** include the
+  graded packets or `raw_evidence.json`.
+
+Blurring these three sets would let a reader believe the graded output is
+hash-pinned source, which it is not.
+
+**Fix:** `README.md` now carries a three-row path table separating raw source,
+regenerated packets, and aggregates, and states the exact composition of the
+120-file set. `docs/M4_CASE_STUDY.md` §4 and its evidence index make the same
+split; `docs/DEMO_PACKAGE.md` S2 is corrected and the conflation is added to the
+banned-phrasing list.
 
 ## 3. Public claims introduced by this change
 
 Every claim below is a restatement of a verified fact in §1. No new measurement
 was created.
 
-1. The campaign ran 40/40 valid runs with 120/120 hash-verified evidence files.
+1. The campaign ran 40/40 valid runs (0 execution failures) with 120/120 hash-verified raw source artifacts.
 2. Causal in-loop filtering improved tracking RMS error by 0.2288 rad
    (95% CI [−0.2484, −0.2123]), better in 20/20 pairs.
 3. The filter delivered 48.115 dB attenuation at the 25 Hz band
@@ -201,12 +241,19 @@ Confirmed **not** done by this change:
 
 ## 6. Audit verdict
 
-**PASS, with three open findings (F-4, F-5, F-8) recorded and mitigated.**
+**PASS. No open findings.**
 
-Validation run during this audit: `python -m pytest dsp/ gauntlet/ campaign/ -q`
-→ **209 passed**. `scripts/build_results.py` → `RESULTS.md` regenerates
-**byte-identical** (`git diff --exit-code` clean), `valid 40/40
-integrity_passed=True`.
+F-1 through F-5 and F-8, F-9 are fixed; F-6 and F-7 are disclosed by design.
+
+Validation on a clean worktree at the reviewed head:
+
+- `python -m pytest dsp/ gauntlet/ campaign/ -q` → **209 passed**
+- `python scripts/build_results.py --check …` → `valid 40/40
+  integrity_passed=True`, `read-only check: 42/42 artifacts reproduced
+  byte-for-byte`, `CHECK PASSED`, exit 0
+- `git status --porcelain` after verification → **empty**
+- Negative control: `--check --timestamp 1999-01-01T00:00:00Z` → 41 MISMATCH
+  lines, exit 1, repository still unmodified
 
 The public surface now states the strongest defensible version of the M4 result
 and states its most important failure — 0/40 passed — with equal prominence. The

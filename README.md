@@ -17,8 +17,13 @@ articulation. Three ROS 2 nodes, each a pure-Python logic module plus a thin
 
 **What was measured.** A preregistered, paired, filtered-vs-unfiltered campaign:
 20 seeds × 2 conditions, design frozen and hashed before any run executed.
-**40 scheduled · 40 valid · 0 invalid · 0 failed**, with 120/120 evidence files
-hash-verified.
+**40 scheduled · 40 valid · 0 invalid · 0 execution failures**, with 120/120 raw
+source artifacts hash-verified.
+
+> **`0 execution failures` is not a passing grade.** It means every run executed
+> cleanly and was admitted under the preregistered exclusion rules — no harness
+> error, no rate excursion, no short sample. It says nothing about the acceptance
+> thresholds. **0 of 40 runs passed the full gauntlet.**
 
 **What improved.** Causal in-loop filtering beat the unfiltered control arm on
 every metric:
@@ -37,11 +42,33 @@ to manufacture a pass. The measured claim is the filtered-vs-unfiltered
 *contrast* — not certification of the controller.
 
 **Where the evidence is.** [`docs/M4_CASE_STUDY.md`](docs/M4_CASE_STUDY.md) is the
-full narrative; [`RESULTS.md`](RESULTS.md) is the generated results document;
-`campaign/results/…/evidence/` holds the 40 raw packets. Verifying all of it
-needs **no GPU, no ROS and no Isaac Sim** — clone, `pip install -e dsp/`, then
-regenerate `RESULTS.md` from raw evidence with `scripts/build_results.py`. An
-empty `git diff` proves nothing was hand-entered. Steps:
+full narrative and [`RESULTS.md`](RESULTS.md) is the generated results document.
+Under `campaign/results/m4-franka-filtered-vs-unfiltered-v1/`:
+
+| Path | What it holds |
+|---|---|
+| `filtered-<seed>/`, `unfiltered-<seed>/` | **the raw source artifacts** — one directory per run, each with `raw_evidence.json` plus the hashed `run_meta.json`, `telemetry.csv` and `truth.csv` |
+| `evidence/run-*.json` | the **40 regenerated gauntlet packets** — graded output, derived from the raw artifacts above, not source |
+| `campaign_results.json`, `campaign_summary.json` | aggregated paired analysis and the integrity index |
+
+The **120-file integrity set** is the hashed raw source: 40 runs ×
+{`run_meta.json`, `telemetry.csv`, `truth.csv`}. It does not include the
+generated gauntlet packets, which are reproduced and compared separately.
+
+Verifying all of it needs **no GPU, no ROS and no Isaac Sim**:
+
+```bash
+pip install -e dsp/
+python scripts/build_results.py --check \
+  --logs-root campaign/results/m4-franka-filtered-vs-unfiltered-v1 \
+  --manifest campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json \
+  --out RESULTS.md
+```
+
+`--check` is **read-only**: it re-hashes the raw artifacts, re-grades every run,
+rebuilds all 42 derived artifacts into a temporary directory, and compares them
+byte-for-byte against the committed copies. It writes nothing inside the
+repository — `git status --porcelain` stays empty. Steps:
 [`docs/REPRODUCE_CAMPAIGN.md`](docs/REPRODUCE_CAMPAIGN.md).
 
 **What is explicitly NOT claimed.** Simulation only — no physical hardware was

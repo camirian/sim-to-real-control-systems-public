@@ -97,8 +97,8 @@
 
   <!-- validity box -->
   <rect x="580" y="446" width="560" height="46" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.3"/>
-  <text x="598" y="466" font-size="12.5" font-weight="600" fill="#1e293b">40 scheduled · 40 valid · 0 invalid · 0 failed · 0 missing</text>
-  <text x="598" y="483" font-size="11.5" fill="#475569">120/120 evidence files hash-verified · loop rate 199.99999999 Hz, all within ±2%</text>
+  <text x="598" y="466" font-size="12.5" font-weight="600" fill="#1e293b">40 scheduled · 40 valid · 0 invalid · 0 execution failures · 0 missing</text>
+  <text x="598" y="483" font-size="11.5" fill="#475569">120/120 raw source artifacts hash-verified · loop rate 199.99999999 Hz, all within ±2%</text>
 
   <!-- ===== BOTTOM: the honest bit ===== -->
   <line x1="40" y1="518" x2="1140" y2="518" stroke="#e2e8f0" stroke-width="1.5"/>

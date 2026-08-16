@@ -44,8 +44,9 @@ moving in Isaac Sim.
 > paired. Arm order fixed in advance. Exclusion rules written in advance. A failed
 > run stays in the denominator — it's never re-rolled onto a fresh seed.
 >
-> Forty runs scheduled, forty valid, zero invalid, zero failed. All 120 evidence
-> files re-hash clean.
+> Forty runs scheduled, forty valid, zero invalid, zero execution failures — and
+> "zero execution failures" means they ran cleanly, not that they passed. All 120
+> hashed raw source files re-hash clean.
 
 **On screen:** the manifest hash; `git log --follow campaign/manifests/` beside
 `git log campaign/results/`; the integrity block.
@@ -114,10 +115,11 @@ measurement; the pilot-run note.
 | 9 | Results table | `docs/assets/m4_architecture_results.svg` | Still, right half |
 | 10 | Per-check pass/fail | `docs/M4_CASE_STUDY.md` §6 | Doc still |
 | 11 | Claim boundary panel | `docs/assets/m4_architecture_results.svg` | Still, bottom |
-| 12 | Repro command + empty diff | Terminal | Live: `build_results.py` then `git diff --exit-code` |
+| 12 | Read-only repro + clean tree | Terminal | Live: `build_results.py --check` (42/42 byte-for-byte) then `git status --porcelain` empty |
 
-Shot 12 is the strongest single shot in the demo — a regenerated results
-document that byte-matches the committed one. If time forces a cut, cut shot 3
+Shot 12 is the strongest single shot in the demo — 42 derived artifacts rebuilt
+from raw evidence, all byte-matching the committed copies, with the working tree
+still clean afterwards. If time forces a cut, cut shot 3
 before shot 12.
 
 ---
@@ -129,8 +131,8 @@ result.
 
 | # | Statement | Source |
 |---|---|---|
-| S1 | "40 scheduled, 40 valid, 0 invalid, 0 failed, 0 missing." | `campaign_summary.json` |
-| S2 | "120 of 120 evidence files hash-verified, 0 mismatched." | `campaign_results.json` → `integrity` |
+| S1 | "40 scheduled, 40 valid, 0 invalid, 0 execution failures, 0 missing." — never shorten to "0 failed" | `campaign_summary.json` |
+| S2 | "120 of 120 hashed raw source artifacts verified, 0 mismatched" (40 runs × run_meta.json + telemetry.csv + truth.csv). The 40 graded packets are separate and are verified by byte-for-byte rebuild. | `campaign_results.json` → `integrity` |
 | S3 | "Tracking RMS error improved by 0.2288 rad, 95% CI [−0.2484, −0.2123]." | `campaign_results.json` → `paired.tracking_rms_error` |
 | S4 | "Filtered better in 20 of 20 seed pairs." (tracking RMS, attenuation, overshoot, true RMS) | same, `n_filtered_better` |
 | S5 | "48.115 dB attenuation at the 25 Hz band, 95% CI [45.784, 50.478], against a ≥20 dB spec." | `paired.filter_attenuation_db` |
@@ -144,6 +146,10 @@ result.
 **Banned phrasings.** Do not say, in any form:
 
 - "passed the gauntlet" / "all runs passed" / "certified" / "validated for use"
+- bare **"0 failed"** — always "0 execution failures", so it cannot be heard as a
+  passing grade next to "0 of 40 passed"
+- "120 evidence packets verified" — the 120-file integrity set is the *raw source*
+  artifacts; the graded packets are a separate, smaller set
 - "sim-to-real" as an achieved result (it is the repo's *subject*, not a claim)
 - "production ready", "safe", "compliant"
 - "works on Isaac Sim 6" without the `-rc.7` qualifier
