@@ -157,8 +157,54 @@ artifacts after a fresh campaign, documented with the `--timestamp` requirement.
 
 **Verified:** on a clean worktree, `--check` reports `42/42 artifacts reproduced
 byte-for-byte`, `CHECK PASSED`, exit 0, with `git status --porcelain` empty.
-Negative test: forcing a wrong `--timestamp` produces 41 MISMATCH lines and
+Negative test: forcing a wrong `--timestamp` produces 41 mismatch lines and
 exit 1, still without modifying the repository.
+
+### F-10 — `RESULTS.md` §10 still emitted the mutating command — **FIXED**
+
+**Severity: high.** `RESULTS.md` is generated, and its own §10 Reproduction
+section is emitted by `render()`. That text still told readers to run
+`build_results.py` **without** `--check` or `--timestamp` — so the document
+produced by the fix still published the instruction the fix exists to remove,
+leaving 41 modified files for anyone who followed it.
+
+**Fix:** `render()` now emits the `--check` form plus `git status --porcelain`
+and describes the read-only semantics. `RESULTS.md` was regenerated with
+`--timestamp 2026-08-14T21:00:00Z` (the committed value), so the only change is
+the instruction text — **8 insertions, 4 deletions, no number altered and no
+evidence packet touched**.
+
+### F-11 — `--check` passed when raw integrity failed — **FIXED**
+
+**Severity: high (fail-open).** The exit decision considered only byte equality
+between rebuilt and committed derived artifacts. But `verify_integrity()` can
+return `passed=False` while the derived artifacts *faithfully reproduce* that
+failure — so a corrupted evidence tree committed together with its regenerated
+outputs would print `CHECK PASSED` and exit 0. The advertised verifier failed
+open on the exact case it exists to catch.
+
+**Fix:** the raw-integrity verdict is now part of the failure condition.
+
+**Verified** by reproducing the precise scenario: append a byte to a
+hash-covered `truth.csv`, regenerate all derived artifacts so they match the
+corrupted tree, then run `--check`. Result: `integrity_passed=False`,
+`42/42 artifacts reproduced byte-for-byte`, and
+`FAIL raw-artifact integrity: 1 mismatched, 0 missing`, `CHECK FAILED`, exit 1.
+Before the fix this same input exited 0.
+
+### F-12 — extra committed packets were never compared — **FIXED**
+
+**Severity: medium.** The comparison loop iterated over files *rebuilt into the
+scratch directory*, so a stale or extra packet present only in the committed
+`evidence/` directory was never visited. `--check` could report `42/42` and exit
+0 while the committed tree carried an unverified artifact.
+
+**Fix:** the rebuilt and committed filename sets are compared before contents;
+any committed packet not produced by this campaign is reported and fails the run.
+
+**Verified:** planting `run-STALE-9999.json` yields
+`FAIL evidence/run-STALE-9999.json: committed but not produced by this campaign
+— unverified artifact`, `CHECK FAILED`, exit 1.
 
 ### F-9 — the 120-file integrity set was described as "evidence files" — **FIXED**
 
@@ -241,7 +287,10 @@ Confirmed **not** done by this change:
 
 **PASS. No open findings.**
 
-F-1 through F-5 and F-8, F-9 are fixed; F-6 and F-7 are disclosed by design.
+F-1 through F-5 and F-8 through F-12 are fixed; F-6 and F-7 are disclosed by
+design. F-10, F-11 and F-12 were raised by independent review *against the fix
+for F-8* — the read-only verifier itself had a fail-open path and an incomplete
+comparison set, both now closed and covered by negative tests.
 
 Validation on a clean worktree at the reviewed head:
 

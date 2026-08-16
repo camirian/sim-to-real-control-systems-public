@@ -259,9 +259,21 @@ def main() -> int:
             elif rebuilt.read_bytes() != committed.read_bytes():
                 mismatched.append(f"{label}: differs from the committed copy")
 
-        for rebuilt in sorted(out_evidence_dir.glob("*.json")):
-            compare(rebuilt, evidence_dir / rebuilt.name,
-                    f"evidence/{rebuilt.name}")
+        # The committed evidence directory must contain exactly the packets we
+        # rebuilt — no more, no fewer. An extra committed packet (say, a stale
+        # one from a previously scheduled run) is an unverified artifact and
+        # must not pass silently just because every rebuilt file matched.
+        rebuilt_names = {p.name for p in out_evidence_dir.glob("*.json")}
+        committed_names = {p.name for p in evidence_dir.glob("*.json")}
+        for extra in sorted(committed_names - rebuilt_names):
+            mismatched.append(
+                f"evidence/{extra}: committed but not produced by this campaign "
+                f"— unverified artifact"
+            )
+
+        for name in sorted(rebuilt_names):
+            compare(out_evidence_dir / name, evidence_dir / name,
+                    f"evidence/{name}")
         compare(out_results_json, committed_results_json, "campaign_results.json")
         compare(out_md, committed_md, committed_md.name)
 
@@ -269,11 +281,21 @@ def main() -> int:
               f"integrity_passed={integrity['passed']}")
         print(f"read-only check: {checked - len(mismatched)}/{checked} artifacts "
               f"reproduced byte-for-byte")
+
+        # Fail closed on raw-artifact integrity too. The derived artifacts can
+        # faithfully reproduce a recorded integrity FAILURE, so byte-equality
+        # alone is not sufficient evidence that the evidence tree is intact.
+        if not integrity["passed"]:
+            mismatched.append(
+                f"raw-artifact integrity: {len(integrity.get('mismatched', []))} "
+                f"mismatched, {len(integrity.get('missing', []))} missing "
+                f"— recorded hashes do not match the files on disk"
+            )
+
         if mismatched:
             for m in mismatched:
-                print(f"  MISMATCH  {m}")
-            print("CHECK FAILED — the published document and the committed "
-                  "evidence disagree.")
+                print(f"  FAIL  {m}")
+            print("CHECK FAILED — the committed evidence tree is not verified.")
             return 1
         print("CHECK PASSED — nothing in the repository was modified.")
         return 0
@@ -583,15 +605,19 @@ def render(manifest, results, raw, graded, by_cond, paired, secondary) -> str:
     A("```bash")
     A("python -m pytest dsp/ gauntlet/ campaign/ scenes/ -q")
     A("PYTHONPATH=ros2-ws/src/control_loop python -m pytest ros2-ws/src/control_loop/test -q")
-    A(f"python scripts/build_results.py \\")
+    A(f"python scripts/build_results.py --check \\")
     A(f"    --logs-root campaign/results/{m['campaign_id']}-v{m['campaign_version']} \\")
     A(f"    --manifest campaign/manifests/{m['campaign_id']}-v{m['campaign_version']}.json \\")
     A(f"    --out RESULTS.md")
+    A("")
+    A("git status --porcelain   # must be empty")
     A("```")
     A("")
-    A("The last command re-hashes every evidence file, re-grades every run from")
-    A("its raw telemetry, and regenerates this document. Regenerating it must")
-    A("produce no diff.")
+    A("`--check` re-hashes every raw source artifact, re-grades every run from its")
+    A("raw telemetry, rebuilds the graded packets, `campaign_results.json` and this")
+    A("document into a temporary directory, and compares them byte-for-byte against")
+    A("the committed copies. It writes nothing inside the repository and exits")
+    A("non-zero on any mismatch or on a raw-integrity failure.")
     A("")
     A("Everything above is verifiable with no Isaac Sim of any version.")
     A("")

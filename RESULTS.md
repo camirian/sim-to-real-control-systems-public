@@ -231,15 +231,19 @@ Verifying the committed evidence requires NO simulator and NO GPU:
 ```bash
 python -m pytest dsp/ gauntlet/ campaign/ scenes/ -q
 PYTHONPATH=ros2-ws/src/control_loop python -m pytest ros2-ws/src/control_loop/test -q
-python scripts/build_results.py \
+python scripts/build_results.py --check \
     --logs-root campaign/results/m4-franka-filtered-vs-unfiltered-v1 \
     --manifest campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json \
     --out RESULTS.md
+
+git status --porcelain   # must be empty
 ```
 
-The last command re-hashes every evidence file, re-grades every run from
-its raw telemetry, and regenerates this document. Regenerating it must
-produce no diff.
+`--check` re-hashes every raw source artifact, re-grades every run from its
+raw telemetry, rebuilds the graded packets, `campaign_results.json` and this
+document into a temporary directory, and compares them byte-for-byte against
+the committed copies. It writes nothing inside the repository and exits
+non-zero on any mismatch or on a raw-integrity failure.
 
 Everything above is verifiable with no Isaac Sim of any version.
 
