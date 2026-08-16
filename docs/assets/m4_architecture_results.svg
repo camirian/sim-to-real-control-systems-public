@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 720" width="1180" height="720" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+    <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <rect width="1180" height="720" fill="#ffffff"/>
+
+  <!-- ===== Title ===== -->
+  <text x="40" y="46" font-size="25" font-weight="700" fill="#0f172a">M4 — Causal in-loop DSP filtering, measured</text>
+  <text x="40" y="72" font-size="14.5" fill="#475569">Franka joint-space tracking in Isaac Sim <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13">6.0.1-rc.7</tspan> · 20 seeds × 2 conditions, paired · preregistered and frozen before execution</text>
+  <line x1="40" y1="88" x2="1140" y2="88" stroke="#e2e8f0" stroke-width="1.5"/>
+
+  <!-- ===== LEFT: architecture ===== -->
+  <text x="40" y="120" font-size="12" font-weight="700" fill="#64748b" letter-spacing="1.2">CLOSED LOOP</text>
+
+  <!-- Isaac source -->
+  <rect x="40" y="136" width="440" height="52" rx="8" fill="#eef2ff" stroke="#6366f1" stroke-width="1.6"/>
+  <text x="60" y="159" font-size="14.5" font-weight="600" fill="#312e81">Isaac Sim — Franka articulation</text>
+  <text x="60" y="177" font-size="12" fill="#4338ca" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">/joint_states · 200 Hz · clean</text>
+
+  <path d="M120,188 L120,214" stroke="#475569" stroke-width="1.8" marker-end="url(#ar)"/>
+
+  <!-- noise -->
+  <rect x="40" y="216" width="440" height="52" rx="8" fill="#fef2f2" stroke="#ef4444" stroke-width="1.6"/>
+  <text x="60" y="239" font-size="14.5" font-weight="600" fill="#7f1d1d">noise_injector</text>
+  <text x="60" y="257" font-size="12" fill="#b91c1c">AWGN σ=0.1 rad + 25 Hz vibration, amp 0.3 rad · seeded</text>
+
+  <path d="M120,268 L120,294" stroke="#475569" stroke-width="1.8" marker-end="url(#ar)"/>
+
+  <!-- filter -->
+  <rect x="40" y="296" width="440" height="60" rx="8" fill="#ecfdf5" stroke="#10b981" stroke-width="1.8"/>
+  <text x="60" y="319" font-size="14.5" font-weight="600" fill="#065f46">dsp_filter — the variable under test</text>
+  <text x="60" y="337" font-size="12" fill="#047857">4th-order Butterworth IIR · 5 Hz cutoff · CAUSAL only</text>
+  <text x="60" y="351" font-size="11.5" fill="#059669">control arm = explicit passthrough (b=[1], a=[1], flat 0 dB)</text>
+
+  <path d="M120,356 L120,382" stroke="#475569" stroke-width="1.8" marker-end="url(#ar)"/>
+
+  <!-- controller -->
+  <rect x="40" y="384" width="440" height="52" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.6"/>
+  <text x="60" y="407" font-size="14.5" font-weight="600" fill="#1e293b">waypoint_controller</text>
+  <text x="60" y="425" font-size="12" fill="#475569" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">kp = 0.8 → /joint_command</text>
+
+  <!-- feedback loop -->
+  <path d="M480,410 L512,410 L512,162 L480,162" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="5,4" marker-end="url(#arw)"/>
+  <text x="524" y="290" font-size="11.5" fill="#64748b" transform="rotate(90 524 290)" text-anchor="middle">articulation controller</text>
+
+  <!-- zero-phase ban note -->
+  <rect x="40" y="452" width="440" height="40" rx="7" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.3"/>
+  <text x="58" y="469" font-size="11.5" font-weight="600" fill="#92400e">Zero-phase filtfilt is banned in-loop</text>
+  <text x="58" y="484" font-size="11" fill="#a16207">non-causal — would leak future samples into a real-time decision</text>
+
+  <!-- ===== RIGHT: results ===== -->
+  <text x="580" y="120" font-size="12" font-weight="700" fill="#64748b" letter-spacing="1.2">MEASURED RESULT — PAIRED, n = 20</text>
+
+  <!-- result rows -->
+  <g font-size="13">
+    <!-- row 1 -->
+    <text x="580" y="152" fill="#0f172a" font-weight="600">Tracking RMS error</text>
+    <text x="1140" y="152" text-anchor="end" font-size="16" font-weight="700" fill="#047857">−0.2288 rad</text>
+    <text x="580" y="170" fill="#64748b" font-size="11.5">95% CI [−0.2484, −0.2123] · filtered better 20/20</text>
+    <rect x="580" y="178" width="560" height="5" rx="2.5" fill="#e2e8f0"/>
+    <rect x="580" y="178" width="560" height="5" rx="2.5" fill="#10b981"/>
+
+    <!-- row 2 -->
+    <text x="580" y="212" fill="#0f172a" font-weight="600">Filter attenuation @ 25 Hz</text>
+    <text x="1140" y="212" text-anchor="end" font-size="16" font-weight="700" fill="#047857">+48.115 dB</text>
+    <text x="580" y="230" fill="#64748b" font-size="11.5">95% CI [45.784, 50.478] · filtered better 20/20</text>
+    <rect x="580" y="238" width="560" height="5" rx="2.5" fill="#e2e8f0"/>
+    <rect x="580" y="238" width="560" height="5" rx="2.5" fill="#10b981"/>
+
+    <!-- row 3 -->
+    <text x="580" y="272" fill="#0f172a" font-weight="600">Overshoot</text>
+    <text x="1140" y="272" text-anchor="end" font-size="16" font-weight="700" fill="#047857">−162.91 %</text>
+    <text x="580" y="290" fill="#64748b" font-size="11.5">95% CI [−171.27, −156.37] · filtered better 20/20</text>
+    <rect x="580" y="298" width="560" height="5" rx="2.5" fill="#e2e8f0"/>
+    <rect x="580" y="298" width="560" height="5" rx="2.5" fill="#10b981"/>
+
+    <!-- row 4 -->
+    <text x="580" y="332" fill="#0f172a" font-weight="600">Settling time</text>
+    <text x="1140" y="332" text-anchor="end" font-size="16" font-weight="700" fill="#0f766e">−3.436 s</text>
+    <text x="580" y="350" fill="#64748b" font-size="11.5">95% CI [−4.639, −2.127] · better 19/20 · 10/20 pairs never settled</text>
+    <rect x="580" y="358" width="560" height="5" rx="2.5" fill="#e2e8f0"/>
+    <rect x="580" y="358" width="532" height="5" rx="2.5" fill="#5eead4"/>
+
+    <!-- row 5 -->
+    <text x="580" y="392" fill="#0f172a" font-weight="600">True tracking RMS <tspan font-weight="400" font-size="11.5" fill="#64748b">(actual articulation position)</tspan></text>
+    <text x="1140" y="392" text-anchor="end" font-size="16" font-weight="700" fill="#047857">−0.1196 rad</text>
+    <text x="580" y="410" fill="#64748b" font-size="11.5">95% CI [−0.1396, −0.1028] · filtered better 20/20</text>
+    <rect x="580" y="418" width="560" height="5" rx="2.5" fill="#e2e8f0"/>
+    <rect x="580" y="418" width="560" height="5" rx="2.5" fill="#10b981"/>
+  </g>
+
+  <!-- validity box -->
+  <rect x="580" y="446" width="560" height="46" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.3"/>
+  <text x="598" y="466" font-size="12.5" font-weight="600" fill="#1e293b">40 scheduled · 40 valid · 0 invalid · 0 failed · 0 missing</text>
+  <text x="598" y="483" font-size="11.5" fill="#475569">120/120 evidence files hash-verified · loop rate 199.99999999 Hz, all within ±2%</text>
+
+  <!-- ===== BOTTOM: the honest bit ===== -->
+  <line x1="40" y1="518" x2="1140" y2="518" stroke="#e2e8f0" stroke-width="1.5"/>
+
+  <rect x="40" y="536" width="1100" height="80" rx="8" fill="#fef2f2" stroke="#ef4444" stroke-width="1.6"/>
+  <text x="60" y="559" font-size="14" font-weight="700" fill="#7f1d1d">What did NOT pass: 0 of 40 runs passed the certification gauntlet</text>
+  <text x="60" y="580" font-size="12.5" fill="#991b1b">Filtered arm — attenuation 20/20 PASS · tracking RMS 3/20 · settling 0/20 · overshoot 0/20.  Unfiltered arm — 0/20 on all four checks.</text>
+  <text x="60" y="600" font-size="12" fill="#b91c1c">Thresholds were tuned for an open-loop synthetic profile, not this loop. They were deliberately NOT relaxed to produce a pass. The measured claim is the filtered-vs-unfiltered CONTRAST, not certification.</text>
+
+  <!-- claim boundary -->
+  <rect x="40" y="628" width="1100" height="64" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.4"/>
+  <text x="60" y="650" font-size="12" font-weight="700" fill="#334155" letter-spacing="0.6">EXPLICITLY NOT CLAIMED</text>
+  <text x="60" y="669" font-size="12" fill="#475569">Simulation only, no physical hardware · no sim-to-real transfer · no safety, certification, compliance or production-readiness claim</text>
+  <text x="60" y="685" font-size="12" fill="#475569">No generalization beyond one Franka joint-space scenario · Isaac Sim 6.0.1 GA was not evaluated; no GA equivalence is claimed · n=20, intervals are wide, no significance test</text>
+
+  <text x="1140" y="708" text-anchor="end" font-size="10.5" fill="#94a3b8">All figures regenerate from committed evidence via scripts/build_results.py · manifest 1d227e43…238052</text>
+</svg>
