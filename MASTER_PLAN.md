@@ -22,8 +22,9 @@ evidence packet and a markdown compliance report. The pitch in one line:
    failing checks → filtered run passing". No filtered run passes the full
    gauntlet — **0 of 40 runs passed**. The filtered arm passes only the
    attenuation check (20/20); tracking is 3/20 and settling and overshoot are
-   0/20. The demo must present the measured contrast, never a pass. Script:
-   [`docs/DEMO_PACKAGE.md`](docs/DEMO_PACKAGE.md).
+   0/20. The demo must present the measured contrast, never a pass. Outline:
+   [`docs/DEMO_OUTLINE.md`](docs/DEMO_OUTLINE.md); the tightened 2–4 minute
+   public cut is deferred to a follow-up distribution change.
 4. DSP + gauntlet tests green in CI (no Isaac needed in CI).
 
 **Scenario decision (binding):** Franka joint-space tracking. The repo has zero

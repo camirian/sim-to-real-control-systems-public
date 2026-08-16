@@ -44,8 +44,7 @@ phrased as a caveat about threshold provenance, and never stated as a count.
 
 **Fix:** the count is now stated explicitly and prominently in
 `README.md` ("In 60 seconds"), `docs/M4_CASE_STUDY.md` §6 (a dedicated section),
-and the results visual (a red panel). `docs/DEMO_PACKAGE.md` §3 bans the
-phrasings "passed the gauntlet" and "all runs passed".
+and the results visual (a red panel).
 
 ### F-2 — README pinned Isaac Sim 4.5.0 while all evidence came from 6.0.1-rc.7 — **FIXED**
 
@@ -79,8 +78,8 @@ plan of record would produce a false public claim.
 
 **Fix:** goal 3 in `MASTER_PLAN.md` now describes the preregistered
 filtered-vs-unfiltered **contrast**, carries an explicit correction note recording
-that 0 of 40 runs passed, and points at `docs/DEMO_PACKAGE.md`. Beat 6 of the demo
-states the failure and is marked do-not-cut; §3 bans the phrasing.
+that 0 of 40 runs passed, and points at `docs/DEMO_OUTLINE.md`. The demo script
+must present the contrast, never a pass.
 
 ### F-5 — Governing pins contradicted the corrected front door — **FIXED**
 
@@ -182,8 +181,7 @@ hash-pinned source, which it is not.
 **Fix:** `README.md` now carries a three-row path table separating raw source,
 regenerated packets, and aggregates, and states the exact composition of the
 120-file set. `docs/M4_CASE_STUDY.md` §4 and its evidence index make the same
-split; `docs/DEMO_PACKAGE.md` S2 is corrected and the conflation is added to the
-banned-phrasing list.
+split.
 
 ## 3. Public claims introduced by this change
 
@@ -208,7 +206,7 @@ was created.
 ## 4. Non-claims preserved
 
 Carried verbatim from the frozen manifest and `RESULTS.md` §9 into `README.md`,
-`docs/M4_CASE_STUDY.md` §7, the visual, and `docs/DEMO_PACKAGE.md`:
+`docs/M4_CASE_STUDY.md` §7 and the visual:
 
 - Simulation only; no physical hardware was involved.
 - One Franka joint-space scenario; no generalization is claimed.
