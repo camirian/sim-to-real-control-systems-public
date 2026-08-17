@@ -55,24 +55,23 @@ The **120-file integrity set** is the hashed raw source: 40 runs ×
 {`run_meta.json`, `telemetry.csv`, `truth.csv`}. It does not include the
 generated gauntlet packets, which are reproduced and compared separately.
 
-Verifying all of it needs **no GPU, no ROS and no Isaac Sim**:
+Checking that the evidence is intact needs **no GPU, no ROS and no Isaac Sim**:
 
 ```bash
-pip install -e dsp/
-python scripts/build_results.py --check \
-  --logs-root campaign/results/m4-franka-filtered-vs-unfiltered-v1 \
-  --manifest campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json \
-  --out RESULTS.md
+pip install -e dsp/ && pip install numpy scipy pytest
+python -m pytest campaign/ -q
 ```
 
-`--check` is **read-only**: it re-hashes the raw artifacts, re-grades every run,
-rebuilds all 42 derived artifacts into a temporary directory, and compares them
-byte-for-byte against the committed copies. It writes nothing inside the
-repository — `git status --porcelain` stays empty. (`campaign_results.json`
-stores full float64 precision, so byte-exactness of that one file needs the
-recorded numpy 2.3.1; `RESULTS.md` and all 40 graded packets are rounded and
-reproduce on any version. No reported figure changes.) Steps:
-[`docs/REPRODUCE_CAMPAIGN.md`](docs/REPRODUCE_CAMPAIGN.md).
+`campaign/test/test_committed_campaign.py` re-hashes every evidence file against
+the digest recorded in its own packet, re-derives the execution plan from the
+frozen manifest, and asserts every scheduled run is present, cites the frozen
+manifest hash, started from the declared pose, and held the rate contract. A run
+that was deleted, edited, or produced against a different manifest fails it.
+
+`scripts/build_results.py` regenerates [`RESULTS.md`](RESULTS.md) from the raw
+evidence — it is a **generation** command that writes in place, not a read-only
+verifier. Full procedure, including how to confirm the design was frozen before
+the runs: [`docs/REPRODUCE_CAMPAIGN.md`](docs/REPRODUCE_CAMPAIGN.md).
 
 **What is explicitly NOT claimed.** Simulation only — no physical hardware was
 involved. No sim-to-real transfer. No safety, certification, compliance or

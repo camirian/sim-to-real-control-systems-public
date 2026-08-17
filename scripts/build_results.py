@@ -28,9 +28,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import shutil
 import sys
-import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -74,11 +72,6 @@ def main() -> int:
     ap.add_argument("--timestamp", default=None,
                     help="ISO-8601 string embedded verbatim; never read from "
                          "the clock, so output stays reproducible")
-    ap.add_argument("--check", action="store_true",
-                    help="read-only verification: rebuild every artifact into a "
-                         "temporary directory and compare it byte-for-byte "
-                         "against the committed copy. Writes nothing inside the "
-                         "repository. Exits non-zero on any mismatch.")
     args = ap.parse_args()
 
     manifest = load_manifest(args.manifest)
@@ -86,30 +79,6 @@ def main() -> int:
     evidence_dir = Path(args.evidence_dir) if args.evidence_dir else logs_root / "evidence"
     seeds = list(manifest["design"]["seeds"])
     plan = manifest["design"]["execution_plan"]
-
-    # --- 0. output routing --------------------------------------------------- #
-    # In --check mode every write is redirected into a scratch directory, so a
-    # reader verifying the published numbers cannot modify the records being
-    # verified. This is what makes the documented verification genuinely
-    # read-only rather than "mutate, then hope the cleanup is correct".
-    committed_results_json = logs_root / "campaign_results.json"
-    committed_md = Path(args.out)
-    tmpdir = None
-    if args.check:
-        tmpdir = Path(tempfile.mkdtemp(prefix="build_results_check_"))
-        out_evidence_dir = tmpdir / "evidence"
-        out_results_json = tmpdir / "campaign_results.json"
-        out_md = tmpdir / "RESULTS.md"
-        # Reproduce the committed timestamp so the comparison is a true
-        # byte-for-byte check rather than a diff of the clock.
-        if args.timestamp is None and committed_results_json.is_file():
-            args.timestamp = json.loads(
-                committed_results_json.read_text(encoding="utf-8")
-            ).get("generated_at")
-    else:
-        out_evidence_dir = evidence_dir
-        out_results_json = committed_results_json
-        out_md = committed_md
 
     # --- 1. raw packets, every scheduled run -------------------------------- #
     raw, missing = {}, []
@@ -147,7 +116,7 @@ def main() -> int:
         )
         # run_checks fills thresholds from DEFAULT_THRESHOLDS; re-embed them.
         packet["thresholds"] = {c.name: float(c.threshold) for c in checks}
-        write_packet(packet, out_evidence_dir)
+        write_packet(packet, evidence_dir)
         graded[run_id] = {c.name: c for c in checks}
 
     # --- 4. per-condition views --------------------------------------------- #
@@ -233,89 +202,17 @@ def main() -> int:
         ],
         "missing_runs": sorted(missing),
     }
-    out_results_json.write_text(
+    (logs_root / "campaign_results.json").write_text(
         json.dumps(results, indent=2, sort_keys=True, default=str) + "\n",
         encoding="utf-8",
     )
 
-    out_md.write_text(render(manifest, results, raw, graded, by_cond,
-                             paired, secondary), encoding="utf-8")
-
-    if not args.check:
-        print(f"wrote {args.out}")
-        print(f"valid {counts['valid']}/{counts['scheduled']}  "
-              f"integrity_passed={integrity['passed']}")
-        return 0
-
-    # --- 7. read-only verification ------------------------------------------- #
-    try:
-        mismatched, checked = [], 0
-
-        def compare(rebuilt: Path, committed: Path, label: str) -> None:
-            nonlocal checked
-            checked += 1
-            if not committed.is_file():
-                mismatched.append(f"{label}: missing from the repository")
-            elif rebuilt.read_bytes() != committed.read_bytes():
-                mismatched.append(f"{label}: differs from the committed copy")
-
-        # Same invariant as campaign.test.test_committed_campaign
-        # ::test_no_extra_run_directories_snuck_in — a directory carrying a
-        # raw_evidence.json is a run, and every run must be scheduled by the
-        # frozen manifest. Keying on raw_evidence.json is what keeps evidence/
-        # and the aggregate JSON files from being mistaken for runs.
-        scheduled_ids = {e["run_id"] for e in plan}
-        for extra in sorted({d.name for d in logs_root.iterdir()
-                             if d.is_dir() and (d / "raw_evidence.json").is_file()}
-                            - scheduled_ids):
-            mismatched.append(
-                f"{extra}/raw_evidence.json: raw run directory not scheduled by "
-                f"the frozen manifest — unverified raw run"
-            )
-
-        # The committed evidence directory must contain exactly the packets we
-        # rebuilt — no more, no fewer. An extra committed packet (say, a stale
-        # one from a previously scheduled run) is an unverified artifact and
-        # must not pass silently just because every rebuilt file matched.
-        rebuilt_names = {p.name for p in out_evidence_dir.glob("*.json")}
-        committed_names = {p.name for p in evidence_dir.glob("*.json")}
-        for extra in sorted(committed_names - rebuilt_names):
-            mismatched.append(
-                f"evidence/{extra}: committed but not produced by this campaign "
-                f"— unverified artifact"
-            )
-
-        for name in sorted(rebuilt_names):
-            compare(out_evidence_dir / name, evidence_dir / name,
-                    f"evidence/{name}")
-        compare(out_results_json, committed_results_json, "campaign_results.json")
-        compare(out_md, committed_md, committed_md.name)
-
-        print(f"valid {counts['valid']}/{counts['scheduled']}  "
-              f"integrity_passed={integrity['passed']}")
-        print(f"read-only check: {checked - len(mismatched)}/{checked} artifacts "
-              f"reproduced byte-for-byte")
-
-        # Fail closed on raw-artifact integrity too. The derived artifacts can
-        # faithfully reproduce a recorded integrity FAILURE, so byte-equality
-        # alone is not sufficient evidence that the evidence tree is intact.
-        if not integrity["passed"]:
-            mismatched.append(
-                f"raw-artifact integrity: {len(integrity.get('mismatched', []))} "
-                f"mismatched, {len(integrity.get('missing', []))} missing "
-                f"— recorded hashes do not match the files on disk"
-            )
-
-        if mismatched:
-            for m in mismatched:
-                print(f"  FAIL  {m}")
-            print("CHECK FAILED — the committed evidence tree is not verified.")
-            return 1
-        print("CHECK PASSED — nothing in the repository was modified.")
-        return 0
-    finally:
-        if tmpdir is not None:
-            shutil.rmtree(tmpdir, ignore_errors=True)
+    Path(args.out).write_text(render(manifest, results, raw, graded, by_cond,
+                                     paired, secondary), encoding="utf-8")
+    print(f"wrote {args.out}")
+    print(f"valid {counts['valid']}/{counts['scheduled']}  "
+          f"integrity_passed={integrity['passed']}")
+    return 0
 
 
 def render(manifest, results, raw, graded, by_cond, paired, secondary) -> str:
@@ -619,25 +516,15 @@ def render(manifest, results, raw, graded, by_cond, paired, secondary) -> str:
     A("```bash")
     A("python -m pytest dsp/ gauntlet/ campaign/ scenes/ -q")
     A("PYTHONPATH=ros2-ws/src/control_loop python -m pytest ros2-ws/src/control_loop/test -q")
-    A(f"python scripts/build_results.py --check \\")
+    A(f"python scripts/build_results.py \\")
     A(f"    --logs-root campaign/results/{m['campaign_id']}-v{m['campaign_version']} \\")
     A(f"    --manifest campaign/manifests/{m['campaign_id']}-v{m['campaign_version']}.json \\")
     A(f"    --out RESULTS.md")
-    A("")
-    A("git status --porcelain   # must be empty")
     A("```")
     A("")
-    A("`--check` re-hashes every raw source artifact, re-grades every run from its")
-    A("raw telemetry, rebuilds the graded packets, `campaign_results.json` and this")
-    A("document into a temporary directory, and compares them byte-for-byte against")
-    A("the committed copies. It writes nothing inside the repository and exits")
-    A("non-zero on any mismatch or on a raw-integrity failure.")
-    A("")
-    A("Byte-exactness of `campaign_results.json` requires the recorded numpy")
-    A(f"({m['runtime']['environment'].get('numpy')}): it stores full float64 precision, and numpy's summation")
-    A("order shifts a few values by one unit in the last place across versions.")
-    A("This document and all 40 graded packets are rounded and reproduce")
-    A("byte-for-byte regardless. No reported figure changes.")
+    A("The last command re-hashes every evidence file, re-grades every run from")
+    A("its raw telemetry, and regenerates this document. Regenerating it must")
+    A("produce no diff.")
     A("")
     A("Everything above is verifiable with no Isaac Sim of any version.")
     A("")

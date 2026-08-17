@@ -112,8 +112,8 @@ hashed sources — 40 runs × 3 files — and it re-hashes clean: **120 checked,
 Separately, `evidence/run-*.json` holds the **40 regenerated gauntlet packets** —
 graded *output* derived from the raw artifacts, carrying each run's seed,
 scenario, per-check verdicts, the thresholds it was graded against, and the full
-environment fingerprint. These are not part of the 120-file integrity set; they
-are verified by being rebuilt and compared byte-for-byte (§8).
+environment fingerprint. These are derived output, not part of the 120-file
+integrity set.
 
 ## 5. Key measured result
 
@@ -215,31 +215,19 @@ python -m venv .venv && . .venv/bin/activate
 pip install -e dsp/ && pip install numpy scipy pytest usd-core
 
 python -m pytest dsp/ gauntlet/ campaign/ -q
-
-# Read-only verification: rebuild every derived artifact from the raw
-# evidence and compare it byte-for-byte against the committed copies.
-python scripts/build_results.py --check \
-  --logs-root campaign/results/m4-franka-filtered-vs-unfiltered-v1 \
-  --manifest campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json \
-  --out RESULTS.md
-
-git status --porcelain   # must be empty — verification modifies nothing
 ```
 
-Expected output:
+`campaign/test/test_committed_campaign.py` is the one that checks the campaign
+itself: it re-hashes every evidence file against the digest recorded in its own
+packet, re-derives the execution plan from the frozen manifest, and asserts that
+every scheduled run is present, cites the frozen manifest hash, started from the
+declared pose, and held the rate contract. A run that was deleted, edited, or
+produced against a different manifest fails it.
 
-```
-valid 40/40  integrity_passed=True
-read-only check: 42/42 artifacts reproduced byte-for-byte
-CHECK PASSED — nothing in the repository was modified.
-```
-
-The 42 artifacts are the 40 regenerated gauntlet packets, `campaign_results.json`
-and `RESULTS.md`. `--check` rebuilds them into a temporary directory, so the
-records being verified cannot be altered by the act of verifying them; it exits
-non-zero on any mismatch. Together with the 120-file raw-artifact hash check,
-this proves every published figure derives from the raw evidence and that nothing
-is hand-entered.
+`scripts/build_results.py` regenerates `RESULTS.md` from the raw evidence. It is
+a **generation** command and writes in place; see
+[REPRODUCE_CAMPAIGN.md](REPRODUCE_CAMPAIGN.md) §A2 for the exact invocation and
+what a non-empty diff would mean. No number in `RESULTS.md` is hand-entered.
 
 **Path B — re-run the campaign.** Requires an Isaac Sim 6.x host with an NVIDIA
 GPU, ~45 minutes. Full procedure, including the mandatory runtime gate, in

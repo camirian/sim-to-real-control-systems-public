@@ -43,9 +43,7 @@ Every unit of work follows **INTENT → BUILD → EVAL → VERIFY → DOCUMENT �
     it.**
 - Isaac Sim never becomes a CI dependency.
 - Committed evidence packets are immutable records — regenerate under a new run id,
-  never edit. Public verification must therefore be read-only: use
-  `scripts/build_results.py --check`, which rebuilds every artifact into a
-  temporary directory and compares byte-for-byte without touching the repository.
+  never edit.
 
 ## 3. Parallel lanes (sub-agents)
 

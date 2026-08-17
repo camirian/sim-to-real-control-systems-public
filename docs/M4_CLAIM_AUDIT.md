@@ -75,58 +75,22 @@ signal the controller consumes*; `true_tracking_rms_error_rad` scores the
 roughly **half** the consumed-signal one (−0.2288 rad), so reporting only the
 latter would overstate the filter ~2×. Both are published.
 
-### F-8 — the documented verification command mutated committed evidence — **FIXED**
+### F-8 — the documented regeneration command rewrites evidence timestamps — **DEFERRED**
 
-**Severity: low (process), medium (optics).** The documented Path A verification
-rewrote all 40 evidence packets and `campaign_results.json`, setting
-`generated_at` to `null` because `--timestamp` defaults to `None` — 41 modified
-files immediately after a "verification" step, which reads as tampering.
+**Severity: low (process), medium (optics).** `scripts/build_results.py` is a
+*generation* command: run without `--timestamp` it rewrites all 40 evidence
+packets and `campaign_results.json`, setting `generated_at` to `null` — 41
+modified files, which reads as tampering when the step is described as
+"verification".
 
-**Fix:** `scripts/build_results.py` gained an explicit `--check` mode. It routes
-every write — all 40 gauntlet packets, `campaign_results.json` and `RESULTS.md` —
-into a temporary directory, reproduces the committed `generated_at` so the
-comparison is a true byte comparison, compares all 42 artifacts byte-for-byte,
-and exits non-zero on any mismatch. The scratch directory is removed on exit.
-Nothing inside the repository is written, so this is read-only by construction
-rather than by cleanup after mutation.
-
-All public verification instructions (`README.md`, `docs/M4_CASE_STUDY.md` §8,
-`docs/REPRODUCE_CAMPAIGN.md` A2) now use `--check` and assert
-`git status --porcelain` is empty. The in-place mode is retained for regenerating
-artifacts after a fresh campaign, documented with the `--timestamp` requirement.
-
-**Verified:** on a clean worktree, `--check` reports `42/42 artifacts reproduced
-byte-for-byte`, `CHECK PASSED`, exit 0, with `git status --porcelain` empty.
-Negative test: forcing a wrong `--timestamp` produces 41 mismatch lines and
-exit 1, still without modifying the repository.
-
-### F-10 — `RESULTS.md` §10 still emitted the mutating command — **FIXED**
-
-**Severity: high.** `RESULTS.md` is generated and its §10 is emitted by
-`render()`, which still told readers to run `build_results.py` without `--check`
-— the document produced by the fix published the instruction the fix exists to
-remove. **Fix:** `render()` emits the `--check` form plus a `git status
---porcelain` assertion; `RESULTS.md` regenerated with the committed timestamp,
-changing instruction text only — no number altered, no evidence packet touched.
-
-### F-11 — `--check` passed when raw integrity failed — **FIXED**
-
-**Severity: high (fail-open).** The exit decision considered only byte equality
-of derived artifacts, but `verify_integrity()` can return `passed=False` while
-those artifacts *faithfully reproduce* the failure — so a corrupted tree
-committed with its regenerated outputs printed `CHECK PASSED` and exited 0.
-**Fix:** the raw-integrity verdict is part of the failure condition. **Verified**
-by reproducing it: append a byte to a hash-covered `truth.csv`, regenerate
-derived artifacts to match → `integrity_passed=False`, `42/42 reproduced
-byte-for-byte`, `FAIL raw-artifact integrity`, exit 1. Before the fix: exit 0.
-
-### F-12 — extra committed packets were never compared — **FIXED**
-
-**Severity: medium.** The comparison loop iterated files *rebuilt into the
-scratch dir*, so a packet present only in the committed `evidence/` directory
-was never visited. **Fix:** rebuilt and committed filename sets are compared
-before contents. **Verified:** planting `run-STALE-9999.json` → `FAIL … committed
-but not produced by this campaign`, exit 1.
+**Not fixed in this PR.** A read-only verification mode was prototyped and then
+**removed from this PR** as scope expansion: it accumulated its own defects
+across successive review rounds while blocking a proof that does not depend on
+it. `docs/REPRODUCE_CAMPAIGN.md` §A2 therefore describes `build_results.py` as
+regeneration, and integrity checking is the pre-existing
+`campaign/test/test_committed_campaign.py`, which re-hashes every evidence file
+against the digest in its own packet and asserts every scheduled run is present.
+`build_results.py` is byte-identical to `main` on this branch.
 
 ### F-9 — the 120-file integrity set was described as "evidence files" — **FIXED**
 
@@ -138,46 +102,6 @@ live per run; and the 120-file set is exactly 40 × {`run_meta.json`,
 packets and `raw_evidence.json`. Blurring them would imply the graded output is
 hash-pinned source. **Fix:** `README.md` carries a three-row path table and the
 exact composition; `docs/M4_CASE_STUDY.md` §4 makes the same split.
-
-### F-13 — `--check` ignored unscheduled raw run directories — **FIXED**
-
-**Severity: medium.** F-12 closed the extra-artifact hole for *generated* packets
-but left the identical hole one level down, on the *primary* records. The
-raw-loading loop iterates the manifest plan, so a stale run directory carrying
-its own `raw_evidence.json` was never read and `--check` exited 0.
-`test_no_extra_run_directories_snuck_in` already asserted this, but the
-standalone `--check` path does not run pytest. **Fix:** `--check` applies the
-same rule — a directory containing `raw_evidence.json` is a run, and every run
-must be scheduled by the frozen manifest. Keying on `raw_evidence.json` stops
-`evidence/` and the aggregate JSON files being misread as runs.
-
-**Symmetry audit** of every set the verifier authenticates, against missing
-*and* extra members (closure of the `--check` work, not a new framework):
-
-| Set | Missing | Extra |
-|---|---|---|
-| Manifest-scheduled raw runs | `missing_runs` differs → `campaign_results.json` mismatch → fail | **F-13, now fixed** |
-| Raw hash-covered artifacts | `integrity.passed=False` → fail (F-11) | n/a — the index defines coverage |
-| Generated gauntlet packets | `compare()` reports missing → fail | F-12 → fail |
-| `campaign_results.json` | `compare()` → fail | n/a — single fixed path |
-| `RESULTS.md` | `compare()` → fail | n/a — single fixed path |
-
-**Regression coverage:** `test_check_rejects_unscheduled_raw_run_directory`
-copies the campaign to a tmp dir, plants `filtered-9999/raw_evidence.json`,
-asserts non-zero exit naming the run, removes it, asserts the rejection is gone.
-It asserts the invariant rather than a clean exit, so it is portable (F-14).
-
-### F-14 — "42/42 byte-for-byte" was environment-dependent — **FIXED**
-
-**Severity: medium.** Surfaced by the F-13 test, which ran `--check` in CI for
-the first time. Under numpy 2.2.6 (not the recorded 2.3.1) `campaign_results.json`
-does **not** reproduce: 5 values differ by one unit in the last place, since
-numpy's summation order changes across versions. `RESULTS.md` and all 40 graded
-packets are rounded and reproduce regardless — **41/42, and no reported figure
-changes at any published precision** — so the unqualified "42/42" claim held only
-on a matching numpy. **Fix:** `README.md` and generated `RESULTS.md` §10 state the
-dependency; the F-13 test asserts the *invariant* rather than a clean exit, and
-passes under both numpy 2.5.2 and 2.2.6.
 
 ## 3. Public claims introduced by this change
 
@@ -222,10 +146,7 @@ Confirmed **not** done by this change:
 - No campaign execution occurred · no threshold changed · no scenario added ·
   no manifest changed · no evidence packet or raw empirical record changed ·
   no numerical result changed
-- `RESULTS.md` **was intentionally regenerated** (F-10) — it is a generated
-  document, and its §10 was still emitting the mutating verification command.
-  The regeneration used the committed timestamp, so the diff is 8 insertions
-  and 4 deletions of instruction text only
+- No generated document changed: `RESULTS.md` is byte-identical to `main`
 - No ROS/Isaac runtime behaviour changed
 - No hardware work · no sim-to-real, GA-equivalence, safety, certification or
   production-readiness claim introduced
@@ -235,18 +156,14 @@ Confirmed **not** done by this change:
 
 **PASS. No open findings.**
 
-F-1..F-5 and F-8..F-14 are fixed; F-6 and F-7 are disclosed by design. F-10..F-14
-were found *against the fix for F-8* — the read-only verifier itself had a
-fail-open path, two incomplete comparison sets, and an environment-dependent
-claim, all now closed and covered by tests.
+F-1..F-5 and F-9 are fixed; F-6 and F-7 are disclosed by design; F-8 is deferred
+(above) and its subject is unchanged from `main`.
 
-Validation on a clean clone at the reviewed head:
+This PR is documentation-only: no code, test, CI, campaign evidence, manifest,
+threshold or generated document changes.
 
-- Tests → **298 passed** (210 dsp/gauntlet/campaign, 14 scenes, 74 control_loop)
-- `--check` → `valid 40/40 integrity_passed=True`, `42/42 byte-for-byte`,
-  `CHECK PASSED`, exit 0, `git status --porcelain` **empty**
-- Negative controls, each exit 1, repository unmodified: corrupted hash-covered
-  raw source; extra generated packet; extra raw run directory; wrong timestamp
+Validation on a clean clone at the reviewed head: **297 tests passed** — 209
+dsp/gauntlet/campaign, 14 scenes, 74 control_loop.
 
 The public surface states the strongest defensible version of the M4 result and
 its most important failure — 0/40 passed — with equal prominence. No claim

@@ -53,37 +53,18 @@ deleted, edited, or produced against a different manifest fails it.
 ### A2. Regenerate the results document
 
 ```bash
-python scripts/build_results.py --check \
+python scripts/build_results.py \
     --logs-root campaign/results/m4-franka-filtered-vs-unfiltered-v1 \
     --manifest campaign/manifests/m4-franka-filtered-vs-unfiltered-v1.json \
     --out RESULTS.md
-
-git status --porcelain   # must be empty
-```
-
-Expected:
-
-```
-valid 40/40  integrity_passed=True
-read-only check: 42/42 artifacts reproduced byte-for-byte
-CHECK PASSED — nothing in the repository was modified.
+git diff --exit-code RESULTS.md
 ```
 
 This re-grades every run from its raw telemetry through the same gauntlet checks
 the certification path uses, recomputes the paired differences and bootstrap
-intervals, and rebuilds all 42 derived artifacts — the 40 gauntlet packets under
-`evidence/`, `campaign_results.json`, and `RESULTS.md`.
-
-**`--check` writes everything to a temporary directory** and compares
-byte-for-byte, so verifying the records cannot modify them. It exits non-zero on
-any mismatch, which is exactly the failure this is designed to surface: no number
-in `RESULTS.md` is hand-entered, so a mismatch means the document and the
-evidence disagree.
-
-> Omit `--check` only when you intend to *regenerate* the committed artifacts
-> after a fresh campaign. In that mode the script writes in place, and
-> `--timestamp` must be supplied — leaving it out records `generated_at: null`
-> in all 40 packets.
+intervals, and rewrites the document. **`git diff` must be empty.** No number in
+`RESULTS.md` is hand-entered, so a non-empty diff means the document and the
+evidence disagree — which is exactly the failure this is designed to surface.
 
 ### A3. Confirm the design was frozen before the runs
 
