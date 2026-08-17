@@ -30,7 +30,17 @@ Every unit of work follows **INTENT → BUILD → EVAL → VERIFY → DOCUMENT �
   and reproducible; evidence packets embed the seed and versions.
 - The causal filter path (`apply_filter_realtime`) is the only one allowed in-loop;
   zero-phase filtering is for offline analysis only.
-- Pin versions (ROS 2 Humble, Isaac Sim 4.5.0) — never "latest".
+- Pin versions — never "latest". Two pins coexist and must not be conflated:
+  - **Empirical runtime — governs all M4 evidence.** Isaac Sim
+    `6.0.1-rc.7+release.42383.32955d8d.gl`, with the ROS 2 Jazzy environment
+    supplied by Isaac itself (no system ROS 2 on the campaign host). Every
+    campaign run and every published number came from this build. It is a
+    *release candidate*; Isaac Sim 6.0.1 GA is a distinct, later release that
+    this project has not evaluated and claims no equivalence to.
+  - **Legacy DevContainer / `scripts/` path.** ROS 2 Humble, Isaac Sim 4.5.0.
+    Still valid for building `ros2-ws/` and the standalone Isaac runner scripts
+    under `scripts/`. **No empirical result in this repository was produced on
+    it.**
 - Isaac Sim never becomes a CI dependency.
 - Committed evidence packets are immutable records — regenerate under a new run id,
   never edit.

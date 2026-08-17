@@ -1,10 +1,89 @@
 # Sim-to-Real Control Systems
 
-**Sim-to-real with receipts.** One recorded closed-loop demo with
-certification-style evidence: a Franka arm in Isaac Sim tracks a joint-space
-trajectory, injected sensor noise is cleaned in-loop by this repo's DSP filter,
-and every run is auto-graded by a seeded "certification gauntlet" that emits a
-JSON evidence packet and a markdown compliance report.
+**Control-systems engineering with receipts.** A Franka arm in Isaac Sim tracks a
+joint-space trajectory while seeded sensor noise is injected into the feedback
+path and cleaned in-loop by this repo's causal DSP filter. Every run is
+auto-graded by a seeded "certification gauntlet" that emits an immutable JSON
+evidence packet and a markdown compliance report.
+
+---
+
+## In 60 seconds
+
+**What was built.** A closed control loop — Isaac Sim → `/joint_states` @ 200 Hz →
+noise injector → causal DSP filter → waypoint controller → `/joint_command` →
+articulation. Three ROS 2 nodes, each a pure-Python logic module plus a thin
+`rclpy` wrapper, so the logic is testable with no ROS and no simulator.
+
+**What was measured.** A preregistered, paired, filtered-vs-unfiltered campaign:
+20 seeds × 2 conditions, design frozen and hashed before any run executed.
+**40 scheduled · 40 valid · 0 invalid · 0 execution failures**, with 120/120 raw
+source artifacts hash-verified.
+
+> **`0 execution failures` is not a passing grade.** It means every run executed
+> cleanly and was admitted under the preregistered exclusion rules — no harness
+> error, no rate excursion, no short sample. It says nothing about the acceptance
+> thresholds. **0 of 40 runs passed the full gauntlet.**
+
+**What improved.** Causal in-loop filtering beat the unfiltered control arm on
+every metric:
+
+| Metric (paired, n=20) | Mean difference | 95% CI | Filtered better |
+|---|---:|---|---:|
+| Tracking RMS error | **−0.2288 rad** | [−0.2484, −0.2123] | 20/20 |
+| Filter attenuation @ 25 Hz | **+48.115 dB** | [45.784, 50.478] | 20/20 |
+| True articulation-position RMS | **−0.1196 rad** | [−0.1396, −0.1028] | 20/20 |
+
+**What did *not* pass.** **0 of 40 runs passed the certification gauntlet.** The
+filter passed its attenuation check 20/20, but the controller missed its
+tracking, settling and overshoot thresholds. Those thresholds were tuned for an
+open-loop synthetic profile, not this loop, and were deliberately **not** relaxed
+to manufacture a pass. The measured claim is the filtered-vs-unfiltered
+*contrast* — not certification of the controller.
+
+**Where the evidence is.** [`docs/M4_CASE_STUDY.md`](docs/M4_CASE_STUDY.md) is the
+full narrative and [`RESULTS.md`](RESULTS.md) is the generated results document.
+Under `campaign/results/m4-franka-filtered-vs-unfiltered-v1/`:
+
+| Path | What it holds |
+|---|---|
+| `filtered-<seed>/`, `unfiltered-<seed>/` | **the raw source artifacts** — one directory per run, each with `raw_evidence.json` plus the hashed `run_meta.json`, `telemetry.csv` and `truth.csv` |
+| `evidence/run-*.json` | the **40 regenerated gauntlet packets** — graded output, derived from the raw artifacts above, not source |
+| `campaign_results.json`, `campaign_summary.json` | aggregated paired analysis and the integrity index |
+
+The **120-file integrity set** is the hashed raw source: 40 runs ×
+{`run_meta.json`, `telemetry.csv`, `truth.csv`}. It does not include the
+generated gauntlet packets.
+
+Checking that the evidence is intact needs **no GPU, no ROS and no Isaac Sim**:
+
+```bash
+pip install -e dsp/ && pip install numpy scipy pytest
+python -m pytest campaign/ -q
+```
+
+`campaign/test/test_committed_campaign.py` re-hashes every evidence file against
+the digest recorded in its own packet, re-derives the execution plan from the
+frozen manifest, and asserts every scheduled run is present, cites the frozen
+manifest hash, started from the declared pose, and held the rate contract. A run
+that was deleted, edited, or produced against a different manifest fails it.
+
+`scripts/build_results.py` regenerates [`RESULTS.md`](RESULTS.md) from the raw
+evidence — it is a **generation** command that writes in place, not a read-only
+verifier. Full procedure, including how to confirm the design was frozen before
+the runs: [`docs/REPRODUCE_CAMPAIGN.md`](docs/REPRODUCE_CAMPAIGN.md).
+
+**What is explicitly NOT claimed.** Simulation only — no physical hardware was
+involved. No sim-to-real transfer. No safety, certification, compliance or
+production-readiness claim. No generalization beyond one Franka joint-space
+scenario. All results were observed on Isaac Sim
+`6.0.1-rc.7+release.42383.32955d8d.gl`, a **release candidate**; 6.0.1 GA is a
+distinct, later release that this project has **not** evaluated, and no GA
+equivalence is claimed.
+
+![M4 architecture and results](docs/assets/m4_architecture_results.svg)
+
+---
 
 Plan of record: [MASTER_PLAN.md](MASTER_PLAN.md) (intent, requirements,
 milestones). Engineering loop and agent lanes: [AGENTS.md](AGENTS.md).
@@ -13,11 +92,17 @@ milestones). Engineering loop and agent lanes: [AGENTS.md](AGENTS.md).
 
 Versions are pinned by rule (AGENTS.md §2) — never "latest".
 
-| Component | Version |
-|-----------|---------|
-| ROS 2 | Humble |
-| NVIDIA Isaac Sim | 4.5.0 |
-| Python (DSP, no ROS/Isaac needed) | 3.10+ with `numpy`, `scipy` |
+| Component | Version | Applies to |
+|-----------|---------|------------|
+| NVIDIA Isaac Sim | **`6.0.1-rc.7+release.42383.32955d8d.gl`** | **every empirical result in this repo** (release candidate; GA not evaluated) |
+| ROS 2 | Jazzy, supplied by Isaac Sim's own runtime | the campaign host (no system ROS 2 installed) |
+| ROS 2 | Humble | the `ros2-ws/` DevContainer build path only |
+| Python (DSP/gauntlet, no ROS or Isaac needed) | 3.10+ with `numpy`, `scipy` | evidence verification on any machine |
+
+> **Historical note.** This project was originally pinned to Isaac Sim 4.5.0.
+> That pin blocked the campaign and was retired; all runtime validation and all
+> 40 campaign runs were executed on the 6.0.1 release candidate above. See
+> [`docs/M4_BASELINE.md`](docs/M4_BASELINE.md).
 
 ## The scenario (binding decision)
 
@@ -37,7 +122,7 @@ photorealism, Isaac-in-CI.
 
 ```mermaid
 flowchart LR
-    ISAAC["Isaac Sim 4.5.0\nscenes/franka_ros2_bridge_scene.usd\n+ headless runner script"] -- "/joint_states (clean)" --> NOISE["noise_injector node\nseeded, param-driven"]
+    ISAAC["Isaac Sim 6.0.1-rc.7\nscenes/franka_ros2_bridge_scene.usd\n+ headless runner script"] -- "/joint_states (clean)" --> NOISE["noise_injector node\nseeded, param-driven"]
     NOISE -- "/joint_states_noisy" --> FILT["dsp_filter node\ndsp.apply_filter_realtime (causal)"]
     FILT -- "/joint_states_filtered" --> CTRL["waypoint_controller node\njoint-space trajectory"]
     CTRL -- "joint commands" --> ISAAC
