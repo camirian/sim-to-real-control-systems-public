@@ -53,7 +53,7 @@ Under `campaign/results/m4-franka-filtered-vs-unfiltered-v1/`:
 
 The **120-file integrity set** is the hashed raw source: 40 runs ×
 {`run_meta.json`, `telemetry.csv`, `truth.csv`}. It does not include the
-generated gauntlet packets, which are reproduced and compared separately.
+generated gauntlet packets.
 
 Checking that the evidence is intact needs **no GPU, no ROS and no Isaac Sim**:
 

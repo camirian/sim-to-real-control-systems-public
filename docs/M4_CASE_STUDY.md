@@ -201,8 +201,7 @@ evidence packets.
 - **PhysX ran on CPU** (`gpu_dynamics: false`) — observed and recorded, not
   chosen. GPU-vs-CPU PhysX behaviour was not benchmarked.
 - **Fresh runs are not bit-reproducible.** PhysX and ROS transport are not
-  bit-deterministic. Derived analysis *is* bit-reproducible from committed
-  evidence.
+  bit-deterministic.
 
 ## 8. Reproducibility path
 
