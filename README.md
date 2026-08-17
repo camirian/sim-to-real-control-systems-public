@@ -68,7 +68,10 @@ python scripts/build_results.py --check \
 `--check` is **read-only**: it re-hashes the raw artifacts, re-grades every run,
 rebuilds all 42 derived artifacts into a temporary directory, and compares them
 byte-for-byte against the committed copies. It writes nothing inside the
-repository — `git status --porcelain` stays empty. Steps:
+repository — `git status --porcelain` stays empty. (`campaign_results.json`
+stores full float64 precision, so byte-exactness of that one file needs the
+recorded numpy 2.3.1; `RESULTS.md` and all 40 graded packets are rounded and
+reproduce on any version. No reported figure changes.) Steps:
 [`docs/REPRODUCE_CAMPAIGN.md`](docs/REPRODUCE_CAMPAIGN.md).
 
 **What is explicitly NOT claimed.** Simulation only — no physical hardware was

@@ -245,6 +245,12 @@ document into a temporary directory, and compares them byte-for-byte against
 the committed copies. It writes nothing inside the repository and exits
 non-zero on any mismatch or on a raw-integrity failure.
 
+Byte-exactness of `campaign_results.json` requires the recorded numpy
+(2.3.1): it stores full float64 precision, and numpy's summation
+order shifts a few values by one unit in the last place across versions.
+This document and all 40 graded packets are rounded and reproduce
+byte-for-byte regardless. No reported figure changes.
+
 Everything above is verifiable with no Isaac Sim of any version.
 
 Reproducing the campaign itself additionally requires an Isaac Sim host.

@@ -1,9 +1,8 @@
 # M4 claim-boundary and public-surface audit
 
 **Date:** 2026-08-16 · **Baseline:** `main` @ `f03c748`, plus the public-proof
-changes on `docs/m4-public-proof`. **Method:** every public-facing claim traced
-to a primary artifact under `campaign/`, re-derived from the committed JSON
-rather than copied from prose.
+changes on `docs/m4-public-proof`. **Method:** every public-facing claim traced to a
+primary artifact under `campaign/`, re-derived from the committed JSON.
 
 ## 1. Verified facts
 
@@ -14,27 +13,21 @@ rather than copied from prose.
 | Loop rate | mean 199.99999999899944 Hz, n=40, all within tolerance | `campaign_results.json.rate` |
 | Tracking RMS diff | −0.22884766390016834 rad, CI [−0.24835462992253976, −0.2122944430180847], 20/20 | `paired.tracking_rms_error` |
 | Attenuation diff | +48.11513753981959 dB, CI [45.783948768227255, 50.47822417129975], 20/20 | `paired.filter_attenuation_db` |
-| Overshoot diff | −162.9113539936193 %, CI [−171.27, −156.37], 20/20 | `paired.overshoot_pct` |
-| Settling diff | −3.4355 s, CI [−4.6395, −2.1265], 19/20; **10/20 pairs non-finite** | `paired.settling_time_s` |
+| Overshoot / settling diff | −162.9113539936193 % (20/20); −3.4355 s (19/20, **10/20 pairs non-finite**) | `paired.overshoot_pct`, `paired.settling_time_s` |
 | True-position RMS diff | −0.11963329154837872 rad, CI [−0.13959854697590873, −0.10283181224689561], 20/20 | `secondary.true_tracking_rms_error_rad` |
 | **Gauntlet verdict** | **0 of 40 runs `overall_passed: true`** | all 40 evidence packets |
-| Filtered per-check | attenuation 20/20 pass · tracking RMS 3/20 · settling 0/20 · overshoot 0/20 | evidence packets |
-| Unfiltered per-check | 0/20 pass on all four checks | evidence packets |
-| Simulator | `6.0.1-rc.7+release.42383.32955d8d.gl` | manifest `environment` |
-| Manifest hash | `1d227e437317bac11df209d39ac264d7b4ffe9d5f9b5d4bf8c805f266b238052` | `campaign_summary.json` |
+| Per-check | filtered: attenuation 20/20 · tracking 3/20 · settling 0/20 · overshoot 0/20. unfiltered: 0/20 on all four | evidence packets |
+| Simulator / manifest hash | `6.0.1-rc.7+release.42383.32955d8d.gl` · `1d227e43…238052` | manifest, `campaign_summary.json` |
 
 ## 2. Findings
 
 ### F-1 — "40/40 valid" is readily misread as "40/40 passed" — **FIXED**
 
-**Severity: high.** The largest misreading risk on the public surface. `valid`
-means *admitted under the preregistered exclusion rules* and says nothing about
-acceptance thresholds; next to "certification gauntlet" a reader infers the runs
-passed. **They did not — 0 of 40 passed.** Previously disclosed only as a prose
-caveat in `RESULTS.md` §8, never as a count.
-
-**Fix:** stated explicitly in `README.md` ("In 60 seconds"),
-`docs/M4_CASE_STUDY.md` §6, and the results visual.
+**Severity: high.** `valid` means *admitted under the preregistered exclusion
+rules* and says nothing about thresholds; next to "certification gauntlet" a
+reader infers the runs passed. **They did not — 0 of 40 passed.** Previously
+disclosed only as prose in `RESULTS.md` §8, never as a count. **Fix:** stated
+explicitly in `README.md`, `docs/M4_CASE_STUDY.md` §6 and the visual.
 
 ### F-2 — README pinned Isaac Sim 4.5.0 while all evidence came from 6.0.1-rc.7 — **FIXED**
 
@@ -46,37 +39,33 @@ scopes each version to what it applies to; the diagram label is corrected.
 ### F-3 — README lede implied a recorded demo exists — **FIXED**
 
 **Severity: medium.** The lede read "One recorded closed-loop demo…" while no
-video is published here. **Fix:** it now describes the system, not an artifact.
+video is published here. **Fix:** it describes the system, not an artifact.
 
 ### F-4 — MASTER_PLAN.md promised a demo beat that the evidence contradicts — **FIXED**
 
-**Severity: medium.** `MASTER_PLAN.md` goal 3 specified "noisy run failing
-checks → filtered run passing". **No filtered run passes** — recording it as
-written would produce a false public claim. **Fix:** goal 3 now describes the
-preregistered contrast, notes that 0 of 40 passed, and points at
-`docs/DEMO_OUTLINE.md`.
+**Severity: medium.** `MASTER_PLAN.md` goal 3 specified "noisy run failing checks
+→ filtered run passing". **No filtered run passes** — recording it as written
+would produce a false public claim. **Fix:** goal 3 now describes the
+preregistered contrast, notes 0 of 40 passed, and points at `DEMO_OUTLINE.md`.
 
 ### F-5 — Governing pins contradicted the corrected front door — **FIXED**
 
-**Severity: high.** `AGENTS.md` is the binding operating guide and
-`MASTER_PLAN.md` repeats it; together they prescribed ROS 2 Humble / Isaac Sim
-4.5.0 as the supported configuration while the README declared 6.0.1-rc.7 — the
-front door and the mandatory build instructions specified incompatible
-environments.
-
-**Fix:** `AGENTS.md` §2 splits the pin into two explicitly-scoped entries — the
-**empirical runtime** governing all M4 evidence (6.0.1-rc.7 + Isaac's ROS 2
-Jazzy) and the **legacy DevContainer / `scripts/` path** (Humble / 4.5.0), which
-produced no published result. `MASTER_PLAN.md` carries the same note and
-REQ-S2R-300 names both. `docs/RUN_ON_EDGEXPERT.md` keeps 4.5.0 — it is the
-runbook for exactly that legacy path, so it is no longer contradictory.
+**Severity: high.** `AGENTS.md` (binding) and `MASTER_PLAN.md` prescribed ROS 2
+Humble / Isaac Sim 4.5.0 as the supported configuration while the README declared
+6.0.1-rc.7 — front door and mandatory build instructions specified incompatible
+environments. **Fix:** `AGENTS.md` §2 splits the pin into the **empirical
+runtime** governing all M4 evidence (6.0.1-rc.7 + Isaac's ROS 2 Jazzy) and the
+**legacy DevContainer / `scripts/` path** (Humble / 4.5.0), which produced no
+published result. `MASTER_PLAN.md` carries the same note; REQ-S2R-300 names both.
+`docs/RUN_ON_EDGEXPERT.md` keeps 4.5.0 — it is the runbook for exactly that
+legacy path, so it is no longer contradictory.
 
 ### F-6 — Settling-time interval rests on half the pairs — **DISCLOSED**
 
 **Severity: low.** 10 of 20 settling pairs are non-finite (never settled),
 excluded from the interval but retained in the win fraction, so the CI rests on
 10 pairs. Disclosed in `docs/M4_CASE_STUDY.md` §5 and the visual; the README
-60-second table omits settling rather than show the weakest number uncaveated.
+table omits settling rather than show the weakest number uncaveated.
 
 ### F-7 — Two different "tracking error" metrics — **DISCLOSED**
 
@@ -84,17 +73,14 @@ excluded from the interval but retained in the win fraction, so the CI rests on
 signal the controller consumes*; `true_tracking_rms_error_rad` scores the
 *articulation's actual position*. The true-metric improvement (−0.1196 rad) is
 roughly **half** the consumed-signal one (−0.2288 rad), so reporting only the
-latter would overstate the filter ~2×. Both are published in the README table,
-case study §5 and the visual.
+latter would overstate the filter ~2×. Both are published.
 
 ### F-8 — the documented verification command mutated committed evidence — **FIXED**
 
-**Severity: low (process), medium (optics).** Executing the documented Path A
-verification regenerated `RESULTS.md` byte-identically, but the same invocation
+**Severity: low (process), medium (optics).** The documented Path A verification
 rewrote all 40 evidence packets and `campaign_results.json`, setting
-`generated_at` to `null` because `--timestamp` defaults to `None`. A reader
-following the documented steps saw 41 modified files immediately after a
-"verification" step — which reads as evidence tampering.
+`generated_at` to `null` because `--timestamp` defaults to `None` — 41 modified
+files immediately after a "verification" step, which reads as tampering.
 
 **Fix:** `scripts/build_results.py` gained an explicit `--check` mode. It routes
 every write — all 40 gauntlet packets, `campaign_results.json` and `RESULTS.md` —
@@ -119,68 +105,51 @@ exit 1, still without modifying the repository.
 **Severity: high.** `RESULTS.md` is generated and its §10 is emitted by
 `render()`, which still told readers to run `build_results.py` without `--check`
 — the document produced by the fix published the instruction the fix exists to
-remove.
-
-**Fix:** `render()` emits the `--check` form plus a `git status --porcelain`
-assertion. `RESULTS.md` regenerated with the committed timestamp
-`2026-08-14T21:00:00Z`: **8 insertions, 4 deletions of instruction text, no
-number altered, no evidence packet touched**.
+remove. **Fix:** `render()` emits the `--check` form plus a `git status
+--porcelain` assertion; `RESULTS.md` regenerated with the committed timestamp,
+changing instruction text only — no number altered, no evidence packet touched.
 
 ### F-11 — `--check` passed when raw integrity failed — **FIXED**
 
 **Severity: high (fail-open).** The exit decision considered only byte equality
 of derived artifacts, but `verify_integrity()` can return `passed=False` while
 those artifacts *faithfully reproduce* the failure — so a corrupted tree
-committed with its regenerated outputs printed `CHECK PASSED` and exited 0. The
-verifier failed open on the exact case it exists to catch.
-
-**Fix:** the raw-integrity verdict is part of the failure condition.
-
-**Verified** by reproducing it: append a byte to a hash-covered `truth.csv`,
-regenerate derived artifacts to match, run `--check` → `integrity_passed=False`,
-`42/42 artifacts reproduced byte-for-byte`, `FAIL raw-artifact integrity: 1
-mismatched`, exit 1. Before the fix this input exited 0.
+committed with its regenerated outputs printed `CHECK PASSED` and exited 0.
+**Fix:** the raw-integrity verdict is part of the failure condition. **Verified**
+by reproducing it: append a byte to a hash-covered `truth.csv`, regenerate
+derived artifacts to match → `integrity_passed=False`, `42/42 reproduced
+byte-for-byte`, `FAIL raw-artifact integrity`, exit 1. Before the fix: exit 0.
 
 ### F-12 — extra committed packets were never compared — **FIXED**
 
 **Severity: medium.** The comparison loop iterated files *rebuilt into the
 scratch dir*, so a packet present only in the committed `evidence/` directory
-was never visited; `--check` could report `42/42` and exit 0 with an unverified
-artifact in the tree.
-
-**Fix:** rebuilt and committed filename sets are compared before contents.
-**Verified:** planting `run-STALE-9999.json` → `FAIL … committed but not
-produced by this campaign`, exit 1.
+was never visited. **Fix:** rebuilt and committed filename sets are compared
+before contents. **Verified:** planting `run-STALE-9999.json` → `FAIL … committed
+but not produced by this campaign`, exit 1.
 
 ### F-9 — the 120-file integrity set was described as "evidence files" — **FIXED**
 
 **Severity: medium.** The front door pointed at `evidence/` for "the 40 raw
 packets" and called the integrity check "120/120 evidence files". Both wrong:
 `evidence/run-*.json` is **regenerated graded output**; the **raw** artifacts
-live per run (`raw_evidence.json`, `run_meta.json`, `telemetry.csv`,
-`truth.csv`); and the 120-file set is exactly 40 × {`run_meta.json`,
-`telemetry.csv`, `truth.csv`} per
-`campaign_summary.json.integrity_index.files` — excluding both the graded
-packets and `raw_evidence.json`. Blurring the three sets would imply the graded
-output is hash-pinned source, which it is not.
-
-**Fix:** `README.md` carries a three-row path table and states the exact
-composition of the 120-file set; `docs/M4_CASE_STUDY.md` §4 and its evidence
-index make the same split.
+live per run; and the 120-file set is exactly 40 × {`run_meta.json`,
+`telemetry.csv`, `truth.csv`} per `integrity_index.files` — excluding the graded
+packets and `raw_evidence.json`. Blurring them would imply the graded output is
+hash-pinned source. **Fix:** `README.md` carries a three-row path table and the
+exact composition; `docs/M4_CASE_STUDY.md` §4 makes the same split.
 
 ### F-13 — `--check` ignored unscheduled raw run directories — **FIXED**
 
-**Severity: medium.** F-12 closed the extra-artifact hole for *generated*
-packets but left the identical hole one level down, on the *primary* records.
-The raw-loading loop iterates the manifest plan (`for entry in plan`), so a
-stale `filtered-*`/`unfiltered-*` directory carrying its own `raw_evidence.json`
-was never read and `--check` exited 0. `test_no_extra_run_directories_snuck_in`
-already asserted this, but the standalone `--check` path does not run pytest.
-
-**Fix:** `--check` applies the same rule — a directory containing
-`raw_evidence.json` is a run, and every run must be scheduled by the frozen
-manifest. Keying on `raw_evidence.json` is what stops `evidence/` and the
-aggregate JSON files being misread as runs.
+**Severity: medium.** F-12 closed the extra-artifact hole for *generated* packets
+but left the identical hole one level down, on the *primary* records. The
+raw-loading loop iterates the manifest plan, so a stale run directory carrying
+its own `raw_evidence.json` was never read and `--check` exited 0.
+`test_no_extra_run_directories_snuck_in` already asserted this, but the
+standalone `--check` path does not run pytest. **Fix:** `--check` applies the
+same rule — a directory containing `raw_evidence.json` is a run, and every run
+must be scheduled by the frozen manifest. Keying on `raw_evidence.json` stops
+`evidence/` and the aggregate JSON files being misread as runs.
 
 **Symmetry audit** of every set the verifier authenticates, against missing
 *and* extra members (closure of the `--check` work, not a new framework):
@@ -194,13 +163,25 @@ aggregate JSON files being misread as runs.
 | `RESULTS.md` | `compare()` → fail | n/a — single fixed path |
 
 **Regression coverage:** `test_check_rejects_unscheduled_raw_run_directory`
-copies the campaign to a tmp dir, asserts `--check` exits 0, plants
-`filtered-9999/raw_evidence.json`, asserts non-zero exit naming the run, removes
-it, asserts exit 0 again.
+copies the campaign to a tmp dir, plants `filtered-9999/raw_evidence.json`,
+asserts non-zero exit naming the run, removes it, asserts the rejection is gone.
+It asserts the invariant rather than a clean exit, so it is portable (F-14).
+
+### F-14 — "42/42 byte-for-byte" was environment-dependent — **FIXED**
+
+**Severity: medium.** Surfaced by the F-13 test, which ran `--check` in CI for
+the first time. Under numpy 2.2.6 (not the recorded 2.3.1) `campaign_results.json`
+does **not** reproduce: 5 values differ by one unit in the last place, since
+numpy's summation order changes across versions. `RESULTS.md` and all 40 graded
+packets are rounded and reproduce regardless — **41/42, and no reported figure
+changes at any published precision** — so the unqualified "42/42" claim held only
+on a matching numpy. **Fix:** `README.md` and generated `RESULTS.md` §10 state the
+dependency; the F-13 test asserts the *invariant* rather than a clean exit, and
+passes under both numpy 2.5.2 and 2.2.6.
 
 ## 3. Public claims introduced by this change
 
-Each is a restatement of a verified fact in §1 — no new measurement was created.
+Each restates a verified fact in §1 — no new measurement was created.
 
 1. 40/40 valid runs (0 execution failures); 120/120 hash-verified raw source
    artifacts; loop rate ~200 Hz within the frozen ±2% tolerance.
@@ -215,7 +196,7 @@ Each is a restatement of a verified fact in §1 — no new measurement was creat
 ## 4. Non-claims preserved
 
 Carried verbatim from the frozen manifest and `RESULTS.md` §9 into `README.md`,
-`docs/M4_CASE_STUDY.md` §7 and the visual:
+`docs/M4_CASE_STUDY.md` §7 and the visual —
 
 - Simulation only; no physical hardware was involved.
 - One Franka joint-space scenario; no generalization is claimed.
@@ -225,7 +206,7 @@ Carried verbatim from the frozen manifest and `RESULTS.md` §9 into `README.md`,
 - No production-readiness claim.
 - No claim that these results transfer to any physical Franka or any other robot.
 
-Additionally preserved and reinforced:
+Additionally preserved:
 
 - **No GA equivalence.** All results are scoped to the `6.0.1-rc.7` release
   candidate. Isaac Sim 6.0.1 GA was not evaluated.
@@ -248,27 +229,25 @@ Confirmed **not** done by this change:
 - No ROS/Isaac runtime behaviour changed
 - No hardware work · no sim-to-real, GA-equivalence, safety, certification or
   production-readiness claim introduced
-- No VRTV condition executed · no seeded incorrect diagram merged
-- Nothing published externally
+- No seeded incorrect diagram merged · nothing published externally
 
 ## 6. Audit verdict
 
 **PASS. No open findings.**
 
-F-1..F-5 and F-8..F-13 are fixed; F-6 and F-7 are disclosed by design. F-10..F-13
-were raised by independent review *against the fix for F-8* — the read-only
-verifier itself had a fail-open path and two incomplete comparison sets, all now
-closed and covered by negative tests.
+F-1..F-5 and F-8..F-14 are fixed; F-6 and F-7 are disclosed by design. F-10..F-14
+were found *against the fix for F-8* — the read-only verifier itself had a
+fail-open path, two incomplete comparison sets, and an environment-dependent
+claim, all now closed and covered by tests.
 
 Validation on a clean clone at the reviewed head:
 
-- Tests → **210 passed** (dsp/gauntlet/campaign), 14 scenes, 74 control_loop
-- `build_results.py --check …` → `valid 40/40 integrity_passed=True`,
-  `42/42 artifacts reproduced byte-for-byte`, `CHECK PASSED`, exit 0
-- `git status --porcelain` after verification → **empty**
+- Tests → **298 passed** (210 dsp/gauntlet/campaign, 14 scenes, 74 control_loop)
+- `--check` → `valid 40/40 integrity_passed=True`, `42/42 byte-for-byte`,
+  `CHECK PASSED`, exit 0, `git status --porcelain` **empty**
 - Negative controls, each exit 1, repository unmodified: corrupted hash-covered
   raw source; extra generated packet; extra raw run directory; wrong timestamp
 
 The public surface states the strongest defensible version of the M4 result and
-its most important failure — 0/40 passed — with equal prominence. The claim
-boundary is intact and no claim exceeds its evidence.
+its most important failure — 0/40 passed — with equal prominence. No claim
+exceeds its evidence.
