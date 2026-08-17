@@ -194,3 +194,37 @@ class TestRunContract:
         for run_id, p in packets.items():
             if p["status"] != STATUS_VALID:
                 assert p["failure_reason"], run_id
+
+
+class TestPublicCheckEnforcesTheSameInvariant:
+    """The README's standalone `--check` path must fail closed on an
+    unscheduled raw run, not rely on this suite being run alongside it."""
+
+    def _run(self, logs, mpath):
+        import subprocess
+        import sys
+        return subprocess.run(
+            [sys.executable, str(REPO / "scripts" / "build_results.py"), "--check",
+             "--logs-root", str(logs), "--manifest", str(mpath),
+             "--out", str(REPO / "RESULTS.md")],
+            capture_output=True, text=True)
+
+    def test_check_rejects_unscheduled_raw_run_directory(self, campaign, tmp_path):
+        import shutil
+        manifest, logs, _ = campaign
+        mpath = MANIFEST_DIR / f"{logs.name}.json"
+        work = tmp_path / logs.name
+        shutil.copytree(logs, work)
+
+        assert self._run(work, mpath).returncode == 0
+
+        stale = work / "filtered-9999"
+        stale.mkdir()
+        shutil.copy(work / manifest["design"]["execution_plan"][0]["run_id"]
+                    / "raw_evidence.json", stale / "raw_evidence.json")
+        bad = self._run(work, mpath)
+        assert bad.returncode != 0
+        assert "filtered-9999" in bad.stdout
+
+        shutil.rmtree(stale)
+        assert self._run(work, mpath).returncode == 0

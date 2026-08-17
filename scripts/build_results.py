@@ -259,6 +259,20 @@ def main() -> int:
             elif rebuilt.read_bytes() != committed.read_bytes():
                 mismatched.append(f"{label}: differs from the committed copy")
 
+        # Same invariant as campaign.test.test_committed_campaign
+        # ::test_no_extra_run_directories_snuck_in — a directory carrying a
+        # raw_evidence.json is a run, and every run must be scheduled by the
+        # frozen manifest. Keying on raw_evidence.json is what keeps evidence/
+        # and the aggregate JSON files from being mistaken for runs.
+        scheduled_ids = {e["run_id"] for e in plan}
+        for extra in sorted({d.name for d in logs_root.iterdir()
+                             if d.is_dir() and (d / "raw_evidence.json").is_file()}
+                            - scheduled_ids):
+            mismatched.append(
+                f"{extra}/raw_evidence.json: raw run directory not scheduled by "
+                f"the frozen manifest — unverified raw run"
+            )
+
         # The committed evidence directory must contain exactly the packets we
         # rebuilt — no more, no fewer. An extra committed packet (say, a stale
         # one from a previously scheduled run) is an unverified artifact and
