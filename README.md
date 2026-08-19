@@ -8,6 +8,20 @@ evidence packet and a markdown compliance report.
 
 ---
 
+## ▶ Watch the case study (3:44)
+
+[![Sim-to-Real Control Systems — Closed-Loop DSP Telemetry Filtering in NVIDIA Isaac Sim](https://img.youtube.com/vi/f5oMNBi78a8/maxresdefault.jpg)](https://www.youtube.com/watch?v=f5oMNBi78a8)
+
+**[Sim-to-Real Control Systems — Closed-Loop DSP Telemetry Filtering in NVIDIA Isaac Sim](https://www.youtube.com/watch?v=f5oMNBi78a8)**
+
+The whole project in under four minutes: the question, the two runtime defects
+that would have produced *convincing but invalid* numbers, the preregistered
+40-run campaign — and the result the video refuses to bury, that **0 of 40 runs
+passed the full acceptance gauntlet**. Every figure on screen is rendered
+directly from the committed telemetry in this repository.
+
+---
+
 ## In 60 seconds
 
 **What was built.** A closed control loop — Isaac Sim → `/joint_states` @ 200 Hz →
@@ -179,9 +193,10 @@ Honest state of the repo today:
     into the filtered-vs-unfiltered "money table" (REQ-S2R-102).
   - CI runs the DSP + control_loop-logic + gauntlet + campaign tests on every
     PR with no ROS/Isaac dependency (REQ-S2R-200).
-- **Remaining M4 work:** the recorded demo. The script and shot list are in
-  **[docs/DEMO_OUTLINE.md](docs/DEMO_OUTLINE.md)**; no video is published from
-  this repository.
+- **M4 recorded and published.** The case study is live:
+  **[Closed-Loop DSP Telemetry Filtering in NVIDIA Isaac Sim](https://www.youtube.com/watch?v=f5oMNBi78a8)**
+  (3:44). Its quantitative frames are generated from the committed campaign
+  evidence; the narrative spine is **[docs/DEMO_OUTLINE.md](docs/DEMO_OUTLINE.md)**.
 - **Loop closed scene-side (was the blocking gap):**
   `scenes/franka_ros2_bridge_scene.usd` published `/joint_states` but nothing
   subscribed to `/joint_command`, so the controller could not drive the arm.
@@ -267,6 +282,21 @@ advances. Milestones: M1 foundations → M2 closed loop → M3 gauntlet + CI →
 M4 record & ship.
 
 ## Public demos
+
+**Case study (start here):**
+[Sim-to-Real Control Systems — Closed-Loop DSP Telemetry Filtering in NVIDIA Isaac Sim](https://www.youtube.com/watch?v=f5oMNBi78a8) · 3:44
+
+| Chapter | |
+|---|---|
+| 0:00 | The question: noise versus phase lag in a closed loop |
+| 0:43 | Defect 1 — the static contract passed while the runtime published zero messages |
+| 1:07 | Defect 2 — 30 Hz sampling aliased the 25 Hz disturbance onto the 5 Hz cutoff |
+| 1:36 | Correcting the sampling boundary to 200 Hz — and changing nothing else |
+| 1:50 | Preregistration: 20 seeds × 2 conditions, hashed before run 1 |
+| 2:15 | The measured filtered-vs-unfiltered contrast, from committed telemetry |
+| 2:48 | 40/40 valid · **0/40 passed the full gauntlet** |
+
+Supporting clips:
 
 - Isaac Sim robot motion: https://youtu.be/E2jNcWM_f08
 - Isaac Sim to ROS 2 data stream: https://youtu.be/MfsuIWZ5_eg
