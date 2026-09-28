@@ -58,11 +58,17 @@ The Python node installs with its `.py` extension (see
 
 ## Isaac Sim Scripts
 
-Run Isaac Sim scripts only inside an Isaac Sim Python environment.
+Run these legacy standalone Isaac Sim 4.5.0 scripts from the Isaac Sim root
+with its bundled Python environment (`<isaac-root>/python.sh`), not ordinary
+system `python3`. They do not reproduce the M4 campaign, whose validated runtime
+is Isaac Sim `6.0.1-rc.7+release.42383.32955d8d.gl` with Isaac's ROS 2 Jazzy
+environment. Use [`docs/REPRODUCE_CAMPAIGN.md`](docs/REPRODUCE_CAMPAIGN.md) for
+M4 campaign verification and reproduction steps.
 
 ```bash
-python3 scripts/simple_scene.py
-python3 scripts/franka_wave.py
+cd <isaac-root>
+./python.sh /path/to/repo/scripts/simple_scene.py
+./python.sh /path/to/repo/scripts/franka_wave.py
 ```
 
 ## Notes
