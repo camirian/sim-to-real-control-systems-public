@@ -58,7 +58,11 @@ The Python node installs with its `.py` extension (see
 
 ## Isaac Sim Scripts
 
-Run Isaac Sim scripts only inside an Isaac Sim Python environment.
+The standalone examples below are legacy Isaac Sim 4.5.0 scripts. They do not
+reproduce the M4 campaign, whose validated runtime is Isaac Sim
+`6.0.1-rc.7+release.42383.32955d8d.gl` with Isaac's ROS 2 Jazzy environment.
+Use [`docs/REPRODUCE_CAMPAIGN.md`](docs/REPRODUCE_CAMPAIGN.md) for M4 campaign
+verification and reproduction steps.
 
 ```bash
 python3 scripts/simple_scene.py

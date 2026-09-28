@@ -3,6 +3,16 @@
 > Created 2026-07-18. Companion doc: [AGENTS.md](AGENTS.md) — the engineering loop,
 > agent lanes, and SDLC rules that execute this plan.
 
+> **Status and reading note (2026-09-27).** The repository's current M4 claims,
+> results, runtime pin, and reproduction steps are recorded in the
+> [README](README.md), [M4 case study](docs/M4_CASE_STUDY.md), and
+> [campaign reproduction guide](docs/REPRODUCE_CAMPAIGN.md). Section 4 below
+> preserves the original milestone sequence as planning history. The
+> requirements and verification methods in §3 remain binding; §5 and §6 retain
+> the environment split and risk rules. Completed components are not rebuild
+> instructions. The committed campaign result remains **0 of 40 runs passing
+> the full acceptance gauntlet**.
+
 ## 1. Intent & goals
 
 **Intent:** the Physical-AI proof point — ONE recorded closed-loop demo with
@@ -18,13 +28,12 @@ evidence packet and a markdown compliance report. The pitch in one line:
    showing quantified improvement (tracking RMS, settling, overshoot, checks passed).
 3. A 2–4 minute recorded demo showing the preregistered filtered-vs-unfiltered
    **contrast** and the evidence report.
-   **Corrected after the campaign ran:** this goal originally read "noisy run
-   failing checks → filtered run passing". No filtered run passes the full
+   **Corrected after the campaign ran:** no filtered run passes the full
    gauntlet — **0 of 40 runs passed**. The filtered arm passes only the
    attenuation check (20/20); tracking is 3/20 and settling and overshoot are
-   0/20. The demo must present the measured contrast, never a pass. Outline:
-   [`docs/DEMO_OUTLINE.md`](docs/DEMO_OUTLINE.md); the tightened 2–4 minute
-   public cut is deferred to a follow-up distribution change.
+   0/20. The published 3:44 case-study video linked from the
+   [README](README.md) presents this measured contrast and result; it does not
+   present a passing run. Outline: [`docs/DEMO_OUTLINE.md`](docs/DEMO_OUTLINE.md).
 4. DSP + gauntlet tests green in CI (no Isaac needed in CI).
 
 **Scenario decision (binding):** Franka joint-space tracking. The repo has zero
@@ -56,12 +65,15 @@ flowchart LR
     GAUNT --> EVID["evidence/run-&lt;id&gt;.json\n+ markdown compliance report"]
 ```
 
-Components live in: `dsp/` (existing library — FIR/IIR design, causal + zero-phase
-apply, deterministic noisy-telemetry synthesizer, 4 passing tests),
-`ros2-ws/src/control_loop/` (new package: the three nodes + launch),
-`scripts/` (Isaac runners), `gauntlet/` (new: ported from the archived
-`sim-to-real-benchmarking` repo — clone it read-only, copy the evidence-packet
-generator in).
+Current repository components are: `dsp/` (installable FIR/IIR library, causal
+and zero-phase filtering, seeded telemetry synthesis);
+`ros2-ws/src/control_loop/` (the three ROS 2 nodes, launch file, and logic
+tests); `scripts/` (legacy standalone runners plus the Isaac Sim 6.0.1 M4
+runtime validator and campaign runner); `gauntlet/` (seeded checks, evidence
+packets, and report renderer); and `campaign/` (frozen run manifest, committed
+evidence verification, and paired results aggregation). The gauntlet and
+campaign code are present in this repository; the original porting task below
+is historical plan context, not a remaining instruction to copy code.
 
 ## 3. Requirements
 
@@ -79,9 +91,9 @@ Every PR must cite the REQ IDs it advances; verification method is binding.
 | REQ-S2R-101 | A markdown compliance report renders from each evidence packet. | Golden-file test. |
 | REQ-S2R-102 | Results table: ≥ 20 seeded runs each for filtered and unfiltered, committed with the evidence packets, showing quantified improvement. | Table + packets in repo; numbers regenerate from seeds. |
 | REQ-S2R-200 | CI runs DSP + gauntlet tests on every PR (no Isaac/ROS runtime required in CI). | Green `.github/workflows/` run. |
-| REQ-S2R-300 | README: pinned versions (empirical runtime Isaac Sim 6.0.1-rc.7 + Isaac's ROS 2 Jazzy; legacy DevContainer path ROS 2 Humble / Isaac Sim 4.5.0), block diagram, exact repro steps, results table, video link, limitations (sim-only, one scenario). Isaac import style unified across `scripts/` (new `isaacsim` API; `franka_wave.py` currently uses the old `omni.isaac.kit` import). | Doc review against fresh-clone walkthrough. |
+| REQ-S2R-300 | README: pinned versions (empirical runtime Isaac Sim 6.0.1-rc.7 + Isaac's ROS 2 Jazzy; legacy DevContainer path ROS 2 Humble / Isaac Sim 4.5.0), block diagram, exact repro steps, results table, video link, limitations (sim-only, one scenario). Isaac import style uses the `isaacsim` API. | Doc review against fresh-clone walkthrough. |
 
-## 4. Milestones & feature lanes
+## 4. Original milestone sequence (planning history)
 
 **M1 — Foundations** (FOCUS Week 5) → REQ-001, 300(partial)
 - Lane A: package `dsp/`; kill sys.path hack.

@@ -219,9 +219,9 @@ Honest state of the repo today:
 | Path | Contents | Runs where |
 |------|----------|-----------|
 | `dsp/` | Filter design, causal/zero-phase apply, seeded telemetry synthesizer, tests, plots | Anywhere (plain Python) |
-| `scripts/` | Isaac Sim runner scripts (Franka wave, scene setup, headless runner) | EdgeXpert / local Isaac Sim 4.5.0 box only |
-| `scenes/` | `franka_ros2_bridge_scene.usd` with OmniGraph ROS 2 joint-state publisher | EdgeXpert only |
-| `ros2-ws/` | ROS 2 Humble workspace: `src/control_loop/` (the closed-loop nodes + launch) plus legacy pub/sub examples | ROS 2 Humble environment |
+| `scripts/` | Legacy standalone Isaac runners (`simple_scene.py`, `franka_wave.py`, `run_franka_headless.py`) plus the M4 campaign runner and runtime validator | Legacy runners: Isaac Sim 4.5.0; M4 campaign: Isaac Sim 6.0.1-rc.7 + Isaac's ROS 2 Jazzy |
+| `scenes/` | `franka_ros2_bridge_scene.usd` with OmniGraph ROS 2 joint-state publisher | M4 validated on Isaac Sim 6.0.1-rc.7; legacy EdgeXpert runbook targets 4.5.0 |
+| `ros2-ws/` | ROS 2 workspace: `src/control_loop/` (the closed-loop nodes + launch) plus legacy pub/sub examples | Humble DevContainer build path; M4 runtime used Isaac's Jazzy environment |
 | `notebooks/` | Exploratory DSP / kinematics notebooks | Anywhere (Jupyter) |
 | `media/` | Screenshots and supporting images | — |
 | `gauntlet/` | Certification gauntlet: seeded checks, immutable JSON evidence packets, compliance report | Anywhere (plain Python) |
@@ -236,15 +236,7 @@ Honest state of the repo today:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r dsp/requirements.txt
-pytest dsp/
-```
-
-Once REQ-S2R-001 (M1 Lane A) merges, the supported install becomes the
-package itself:
-
-```bash
-pip install -e dsp/
+pip install -e "dsp/[viz,test]"
 pytest dsp/
 ```
 
@@ -252,15 +244,18 @@ Plot generation (Bode + time-domain comparisons) is described in
 [QUICKSTART.md](QUICKSTART.md); design rationale lives in
 [dsp/FILTER_DESIGN_WALKTHROUGH.md](dsp/FILTER_DESIGN_WALKTHROUGH.md).
 
-### Isaac Sim scripts (local Isaac box only)
+### Legacy standalone Isaac Sim scripts (Isaac Sim 4.5.0)
 
-Require a local Isaac Sim 4.5.0 install (the EdgeXpert in this project's
-setup); they cannot run in CI or cloud environments.
+These older standalone examples use the legacy Isaac Sim 4.5.0 environment and
+do not reproduce the M4 campaign. The validated campaign runtime is Isaac Sim
+`6.0.1-rc.7+release.42383.32955d8d.gl` with Isaac's ROS 2 Jazzy environment;
+follow [`docs/REPRODUCE_CAMPAIGN.md`](docs/REPRODUCE_CAMPAIGN.md) to verify or
+re-run that campaign.
 
 ```bash
 cd ~/isaac-sim   # your Isaac Sim 4.5.0 root
 ./python.sh /path/to/repo/scripts/franka_wave.py
-./python.sh /path/to/repo/scripts/run_franka_headless.py --steps 600   # after M1 Lane B merges
+./python.sh /path/to/repo/scripts/run_franka_headless.py --steps 600
 ```
 
 ### ROS 2 workspace (ROS 2 Humble environment)
